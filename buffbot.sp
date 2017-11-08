@@ -68,7 +68,7 @@ public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 		event.GetInt("team"),
 		event.GetInt("oldteam"),
 		playername);
-	carnage_points[event.GetInt("userid") % sizeof(carnage_points)] = GetConVarInt(sm_buffbot_carnage_initial));
+	carnage_points[event.GetInt("userid") % sizeof(carnage_points)] = GetConVarInt(sm_buffbot_carnage_initial);
 }
 
 void add_score(int userid, int score)
@@ -98,6 +98,12 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	if (!strcmp(msg, "!roulette"))
 	{
 		int target = GetClientOfUserId(event.GetInt("userid"));
+		int slot = event.GetInt("userid") % sizeof(carnage_points);
+		if (carnage_points[slot] < GetConVarInt(sm_buffbot_carnage_required))
+		{
+			PrintToChat(target, "You'll have to wreak more havoc before you can do that, sorry.");
+			return;
+		}
 		//Give a random effect to self, more of which are beneficial than not
 		//There's a small chance of death (since this is Russian Roulette after all).
 		int sel;
@@ -135,10 +141,30 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 				}
 				case 9: //1% chance of death
 				{
-					//TODO: Kill the person
 					//Super-secret super buff: if you would get the death effect
 					//but you had ten times the required carnage points, grant a
 					//Mannpower pickup instead of killing the player.
+					if (carnage_points[slot] >= 10 * GetConVarInt(sm_buffbot_carnage_required))
+					{
+						TFCond runes[] = {
+							TFCond_RuneStrength,
+							TFCond_RuneHaste,
+							TFCond_RuneRegen,
+							TFCond_RuneResist,
+							TFCond_RuneWarlock,
+							TFCond_RunePrecision,
+							TFCond_RuneAgility,
+							TFCond_KingRune,
+						};
+						TFCond rune = runes[RoundToFloor(sizeof(runes)*GetURandomFloat())];
+						TF2_AddCondition(target, rune, TFCondDuration_Infinite, 0);
+						PrintToChatAll("%s now carries something special...", targetname);
+					}
+					else
+					{
+						//TODO: Kill the person
+					}
+					carnage_points[slot] = 0;
 					return;
 				}
 			}
@@ -146,12 +172,20 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 
 		TF2_AddCondition(target, condition, 30.0, 0);
 		PrintToServer("Applied effect %d", condition);
+		carnage_points[slot] = 0;
 	}
 	if (!strcmp(msg, "!gift"))
 	{
 		//Pick a random target OTHER THAN the one who said it
 		//Give a random effect, guaranteed beneficial
 		int self = GetClientOfUserId(event.GetInt("userid"));
+		int slot = event.GetInt("userid") % sizeof(carnage_points);
+		if (carnage_points[slot] < GetConVarInt(sm_buffbot_carnage_required))
+		{
+			PrintToChat(self, "You'll have to wreak more havoc before you can do that, sorry.");
+			return;
+		}
+		carnage_points[slot] = 0;
 		int myteam = GetClientTeam(self);
 		int client_weight[100]; //Assumes MaxClients never exceeds 99. Dynamic arrays don't seem to work as documented.
 		if (MaxClients >= sizeof(client_weight)) {PrintToServer("oops, >99 clients"); return;}
