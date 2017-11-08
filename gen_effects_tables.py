@@ -10,6 +10,9 @@ effects = {
 		"TFCond_BulletImmune": "%s is bulletprooooooof!",
 		"TFCond_BlastImmune": "%s is bombprooooooof!",
 		"TFCond_FireImmune": "%s is inflammable... I mean non-flammable!",
+		"TFCond_Stealthed": "Oops... %s seems to have vanished.",
+		"TFCond_DefenseBuffed": "%s erects a personal-sized banner and toots a little bugle.",
+		"TFCond_SpeedBuffAlly": "Get in, get the job done, and get out. Got it, %s?",
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
 		# Sadly, these can be abused by dropping them, which eliminates
 		# the time limit :(
@@ -28,6 +31,9 @@ effects = {
 		"TFCond_Jarated": "%s just got covered in Jarate. Eww.",
 		"TFCond_Milked": "%s just got covered in something that's almost, but not entirely, unlike milk.",
 		"TFCond_MarkedForDeathSilent": "%s needs to die. Go! Arrange that for me!",
+		"TFCond_HalloweenGhostMode": "%s is pining for the fjords...",
+		"TFCond_HalloweenKartCage": "%s has been naughty and is now imprisoned.", # Will probably result in death. Thirty seconds unable to move is gonna suck.
+		"TFCond_Plague": "A rat bites %s and inflicts a non-contagious form of the Bubonic Plague.",
 		# TFCond_RestrictToMelee, //TODO: If this gets triggered, also force selection of melee weapon
 	}, "weird": {
 		"TFCond_DisguisedAsDispenser": "Something weird just happened to %s.",
