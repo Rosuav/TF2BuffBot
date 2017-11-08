@@ -17,6 +17,8 @@ ConVar sm_buffbot_carnage_per_solo_kill = null; //(2) Carnage points gained for 
 ConVar sm_buffbot_carnage_per_kill = null; //(2) Carnage points gained for each kill
 ConVar sm_buffbot_carnage_per_assist = null; //(1) Carnage points gained for each assist
 ConVar sm_buffbot_carnage_per_death = null; //(3) Carnage points gained when you die
+ConVar sm_buffbot_carnage_per_building = null; //(1) Carnage points gained when you destroy a non-gun building (assists ignored here)
+ConVar sm_buffbot_carnage_per_sentry = null; //(2) Carnage points gained when you destroy a sentry gun
 ConVar sm_buffbot_carnage_required = null; //(10) Carnage points required to use !roulette or !gift
 //When you grant a !gift, players (other than yourself) will have this many chances each.
 ConVar sm_buffbot_gift_chance_friendly_human = null; //(20) Chance that each friendly human has of receiving a !gift
@@ -36,6 +38,7 @@ public void OnPluginStart()
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("player_team", InitializePlayer);
 	HookEvent("player_death", PlayerDied);
+	HookEvent("object_destroyed", BuildingBlownUp);
 	//The actual code to create convars convars is built by the Python script,
 	//and yes, I'm aware that I now have two problems.
 	CreateConVars();
@@ -98,6 +101,15 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		add_score(event.GetInt("assister"), GetConVarInt(sm_buffbot_carnage_per_assist));
 	}
 	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_death));
+}
+
+public void BuildingBlownUp(Event event, const char[] name, bool dontBroadcast)
+{
+	PrintToServer("Object blown up!");
+	if (event.GetInt("objecttype") == 2) //TFObject_Sentry
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_sentry));
+	else
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_building));
 }
 
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
