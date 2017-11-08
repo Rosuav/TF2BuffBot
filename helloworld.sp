@@ -11,5 +11,11 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	RegAdminCmd("sm_critboost", Command_CritBoost, 0);
+}
+
+public Action Command_CritBoost(int client, int args)
+{
 	PrintToServer("Hello world!");
+	return Plugin_Handled;
 }
