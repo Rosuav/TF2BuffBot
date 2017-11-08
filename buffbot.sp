@@ -21,6 +21,8 @@ ConVar sm_buffbot_carnage_per_building = null; //(1) Carnage points gained when 
 ConVar sm_buffbot_carnage_per_sentry = null; //(2) Carnage points gained when you destroy a sentry gun
 ConVar sm_buffbot_carnage_per_ubercharge = null; //(1) Carnage points gained by a medic who deploys Uber
 ConVar sm_buffbot_carnage_per_upgrade = null; //(0) Carnage points gained by an engineer who upgrades a building
+//No carnage points are granted for achieving map goals (capturing the flag, taking a control point, moving the
+//payload, etc). Such actions may help you win, but they don't create death and destruction.
 ConVar sm_buffbot_carnage_required = null; //(10) Carnage points required to use !roulette or !gift
 //When you grant a !gift, players (other than yourself) will have this many chances each.
 ConVar sm_buffbot_gift_chance_friendly_human = null; //(20) Chance that each friendly human has of receiving a !gift
