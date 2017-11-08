@@ -24,6 +24,7 @@ public Action Command_CritBoost(int client, int args)
 	if (target == -1) return Plugin_Handled;
 
 	//Demo: Add one condition permanently, and one temporarily
+	//Other ideas: Pick one of the Rune powerups at random
 	TF2_AddCondition(target, TFCond_CritOnDamage, TFCondDuration_Infinite, 0);
 	TF2_AddCondition(target, TFCond_UberchargedOnTakeDamage, 5.0, 0);
 
