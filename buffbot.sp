@@ -8,7 +8,7 @@ public Plugin myinfo =
 	author = "Chris Angelico",
 	description = "Experimental bot that can buff players",
 	version = "0.1",
-	url = "http://www.rosuav.com/",
+	url = "https://github.com/Rosuav/TF2BuffBot",
 };
 
 //Before you can use !roulette or !gift, you must fill your (invisible) carnage counter.
@@ -58,12 +58,11 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	//if (event.GetBool("teamonly")) return; //Ignore team chat (not working)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
-	//PrintToServer("User %d said: %s", event.GetInt("userid"), msg);
 	if (!strcmp(msg, "!roulette"))
 	{
 		int target = GetClientOfUserId(event.GetInt("userid"));
 		//Give a random effect to self, more of which are beneficial than not
-		//TODO: Have a small chance of death (since this is Russian Roulette after all)
+		//There's a small chance of death (since this is Russian Roulette after all).
 		int sel;
 		TFCond condition;
 		char targetname[MAX_NAME_LENGTH];
@@ -98,8 +97,13 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 					PrintToChatAll(weird_desc[sel], targetname);
 				}
 				case 9: //1% chance of death
+				{
 					//TODO: Kill the person
+					//Super-secret super buff: if you would get the death effect
+					//but you had ten times the required carnage points, grant a
+					//Mannpower pickup instead of killing the player.
 					return;
+				}
 			}
 		}
 
@@ -108,7 +112,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	}
 	if (!strcmp(msg, "!gift"))
 	{
-		//TODO: Pick a random target OTHER THAN the one who said it
+		//Pick a random target OTHER THAN the one who said it
 		//Give a random effect, guaranteed beneficial
 		int self = GetClientOfUserId(event.GetInt("userid"));
 		int myteam = GetClientTeam(self);
@@ -140,6 +144,11 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		else client_weight[i] = 0;
 		if (!tot_weight)
 		{
+			//This can happen if all eligible players are currently dead, as a
+			//dead player won't be given a buff. And that situation can happen
+			//fairly easily if the weighting cvars are set restrictively (eg
+			//preventing all bots from getting buffs). The price is that your
+			//carnage points get wasted.
 			PrintToChatAll("%s offered a gift, but nobody took it :(", selfname);
 			return;
 		}
