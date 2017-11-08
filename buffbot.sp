@@ -13,6 +13,7 @@ public Plugin myinfo =
 
 //Before you can use !roulette or !gift, you must fill your (invisible) carnage counter.
 ConVar sm_buffbot_carnage_initial = null; //(0) Carnage points a player has on first joining
+ConVar sm_buffbot_carnage_per_solo_kill = null; //(2) Carnage points gained for each unassisted kill
 ConVar sm_buffbot_carnage_per_kill = null; //(2) Carnage points gained for each kill
 ConVar sm_buffbot_carnage_per_assist = null; //(1) Carnage points gained for each assist
 ConVar sm_buffbot_carnage_per_death = null; //(3) Carnage points gained when you die
@@ -74,8 +75,8 @@ public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 void add_score(int userid, int score)
 {
 	if (userid < 0 || score <= 0) return;
-	PrintToServer("Score: uid %d gains %d points", userid, score);
-	carnage_points[userid % sizeof(carnage_points)] += score;
+	int new_score = carnage_points[userid % sizeof(carnage_points)] += score;
+	PrintToServer("Score: uid %d +%d now %d points", userid, score, new_score);
 }
 
 public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
@@ -85,8 +86,17 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	char playername[MAX_NAME_LENGTH]; GetClientName(player, playername, sizeof(playername));
 	PrintToServer("That's a kill! %s died (uid %d) by %d, assist %d",
 		playername, event.GetInt("userid"), event.GetInt("attacker"), event.GetInt("assister"));
-	add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_kill));
-	add_score(event.GetInt("assister"), GetConVarInt(sm_buffbot_carnage_per_assist));
+	if (event.GetInt("assister") == -1)
+	{
+		//Solo kill - might be given more points than an assisted one
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_solo_kill));
+	}
+	else
+	{
+		//Assisted kill - award points to both attacker and assister
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_kill));
+		add_score(event.GetInt("assister"), GetConVarInt(sm_buffbot_carnage_per_assist));
+	}
 	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_death));
 }
 
