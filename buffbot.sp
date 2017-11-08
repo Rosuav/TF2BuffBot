@@ -3,9 +3,9 @@
 
 public Plugin myinfo =
 {
-	name = "Hello World",
+	name = "Buff Bot",
 	author = "Chris Angelico",
-	description = "Basic test plugin",
+	description = "Experimental bot that can buff players",
 	version = "0.1",
 	url = "http://www.rosuav.com/",
 };

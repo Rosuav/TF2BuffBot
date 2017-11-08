@@ -1,5 +1,5 @@
-helloworld.smx: helloworld.sp
-	~/tf2server/steamcmd_linux/tf2/tf/addons/sourcemod/scripting/spcomp helloworld.sp
+buffbot.smx: buffbot.sp
+	~/tf2server/steamcmd_linux/tf2/tf/addons/sourcemod/scripting/spcomp buffbot.sp
 
-install: helloworld.smx
-	cp helloworld.smx ~/tf2server/steamcmd_linux/tf2/tf/addons/sourcemod/plugins
+install: buffbot.smx
+	cp buffbot.smx ~/tf2server/steamcmd_linux/tf2/tf/addons/sourcemod/plugins
