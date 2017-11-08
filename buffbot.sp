@@ -68,6 +68,14 @@ public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 		event.GetInt("team"),
 		event.GetInt("oldteam"),
 		playername);
+	carnage_points[event.GetInt("userid") % sizeof(carnage_points)] = GetConVarInt(sm_buffbot_carnage_initial));
+}
+
+void add_score(int userid, int score)
+{
+	if (userid < 0 || score <= 0) return;
+	PrintToServer("Score: uid %d gains %d points", userid, score);
+	carnage_points[userid % sizeof(carnage_points)] += score;
 }
 
 public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
@@ -77,6 +85,9 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	char playername[MAX_NAME_LENGTH]; GetClientName(player, playername, sizeof(playername));
 	PrintToServer("That's a kill! %s died (uid %d) by %d, assist %d",
 		playername, event.GetInt("userid"), event.GetInt("attacker"), event.GetInt("assister"));
+	add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_kill));
+	add_score(event.GetInt("assister"), GetConVarInt(sm_buffbot_carnage_per_assist));
+	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_death));
 }
 
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
