@@ -10,10 +10,26 @@ public Plugin myinfo =
 	url = "http://www.rosuav.com/",
 };
 
+//Before you can use !roulette or !gift, you must fill your (invisible) carnage counter.
+ConVar sm_buffbot_carnage_initial = null; //(0) Carnage points a player has on first joining
+ConVar sm_buffbot_carnage_per_kill = null; //(2) Carnage points gained for each kill
+ConVar sm_buffbot_carnage_per_assist = null; //(1) Carnage points gained for each assist
+ConVar sm_buffbot_carnage_per_death = null; //(3) Carnage points gained when you die
+ConVar sm_buffbot_carnage_required = null; //(10) Carnage points required to use !roulette or !gift
+//When you grant a !gift, players (other than yourself) will have this many chances each.
+ConVar sm_buffbot_gift_chance_friendly_human = null; //(10) Chance that each friendly human has of receiving a !gift
+ConVar sm_buffbot_gift_chance_friendly_bot = null; //(2) Chance that each friendly bot has of receiving a !gift
+ConVar sm_buffbot_gift_chance_enemy_human = null; //(5) Chance that each enemy human has of receiving a !gift
+ConVar sm_buffbot_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot has of receiving a !gift
+
+
 public void OnPluginStart()
 {
 	RegAdminCmd("sm_critboost", Command_CritBoost, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
+	//The actual code to create convars convars is built by the Python script,
+	//and yes, I'm aware that I now have two problems.
+	#include <convars>
 }
 
 public Action Command_CritBoost(int client, int args)
