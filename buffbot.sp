@@ -1,5 +1,6 @@
 #include <sourcemod>
 #include <tf2_stocks>
+#include "randeffects"
 
 public Plugin myinfo =
 {
@@ -21,7 +22,7 @@ ConVar sm_buffbot_gift_chance_friendly_human = null; //(10) Chance that each fri
 ConVar sm_buffbot_gift_chance_friendly_bot = null; //(2) Chance that each friendly bot has of receiving a !gift
 ConVar sm_buffbot_gift_chance_enemy_human = null; //(5) Chance that each enemy human has of receiving a !gift
 ConVar sm_buffbot_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot has of receiving a !gift
-
+#include "convars"
 
 public void OnPluginStart()
 {
@@ -29,7 +30,7 @@ public void OnPluginStart()
 	HookEvent("player_say", Event_PlayerChat);
 	//The actual code to create convars convars is built by the Python script,
 	//and yes, I'm aware that I now have two problems.
-	#include <convars>
+	CreateConVars();
 }
 
 public Action Command_CritBoost(int client, int args)
@@ -58,7 +59,6 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
 	//PrintToServer("User %d said: %s", event.GetInt("userid"), msg);
-	#include <randeffects>
 	if (!strcmp(msg, "!roulette"))
 	{
 		int target = GetClientOfUserId(event.GetInt("userid"));

@@ -35,8 +35,8 @@ effects = {
 }
 data = ""
 for name, options in effects.items():
-	ids = "\tTFCond %s[] = {\n" % name + "".join("\t\t%s,\n" % x for x in options) + "}\n"
-	descs = "\tchar %s_desc[][] = {\n" % name + "".join("\t\t%s,\n" % json.dumps(x) for x in options.values()) + "}\n"
+	ids = "TFCond %s[] = {\n" % name + "".join("\t%s,\n" % x for x in options) + "}\n"
+	descs = "char %s_desc[][] = {\n" % name + "".join("\t%s,\n" % json.dumps(x) for x in options.values()) + "}\n"
 	data += ids + descs + "\n"
 
 # TODO: Possibly compare data against what's on disk and update only if necessary
@@ -44,7 +44,9 @@ with open("randeffects.inc", "w") as f: f.write(data)
 
 import re
 with open("buffbot.sp") as source, open("convars.inc", "w") as cv:
+	print("void CreateConVars() {", file=cv)
 	for line in source:
 		m = re.match(r"^ConVar (sm_buffbot_[a-z_]+) = null; //\(([0-9]+)\) (.*)", line)
 		if not m: continue
 		print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\");".format(*m.groups()), file=cv)
+	print("}", file=cv)
