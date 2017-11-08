@@ -11,11 +11,20 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	RegAdminCmd("sm_critboost", Command_CritBoost, 0);
+	RegAdminCmd("sm_critboost", Command_CritBoost, ADMFLAG_SLAY);
 }
 
 public Action Command_CritBoost(int client, int args)
 {
-	PrintToServer("Hello world!");
+	char player[32];
+	/* Try and find a matching player */
+	GetCmdArg(1, player, sizeof(player));
+	int target = FindTarget(client, player);
+	if (target == -1) return Plugin_Handled;
+
+	char name[MAX_NAME_LENGTH];
+	GetClientName(target, name, sizeof(name));
+	ReplyToCommand(client, "[SM] You crit-boosted %s [%d]!", name, target);
+
 	return Plugin_Handled;
 }
