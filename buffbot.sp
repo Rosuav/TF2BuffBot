@@ -75,6 +75,7 @@ public Action Command_CritBoost(int client, int args)
 
 public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 {
+	if (!event.GetInt("team")) return; //Player is leaving the game
 	char playername[MAX_NAME_LENGTH]; event.GetString("name", playername, sizeof(playername));
 	PrintToServer("Player initialized: uid %d team %d was %d name %s",
 		event.GetInt("userid"),
