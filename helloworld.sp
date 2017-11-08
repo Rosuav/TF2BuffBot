@@ -1,4 +1,5 @@
 #include <sourcemod>
+#include <tf2_stocks>
 
 public Plugin myinfo =
 {
@@ -21,6 +22,10 @@ public Action Command_CritBoost(int client, int args)
 	GetCmdArg(1, player, sizeof(player));
 	int target = FindTarget(client, player);
 	if (target == -1) return Plugin_Handled;
+
+	//Demo: Add one condition permanently, and one temporarily
+	TF2_AddCondition(target, TFCond_CritOnDamage, TFCondDuration_Infinite, 0);
+	TF2_AddCondition(target, TFCond_UberchargedOnTakeDamage, 5.0, 0);
 
 	char name[MAX_NAME_LENGTH];
 	GetClientName(target, name, sizeof(name));
