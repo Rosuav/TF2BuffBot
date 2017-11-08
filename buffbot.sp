@@ -58,13 +58,13 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			{
 				sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
 				condition = benefits[sel];
-				PrintToServer(benefits_desc[sel], targetname);
+				PrintToChatAll(benefits_desc[sel], targetname);
 			}
 			case 6, 7, 8: //30% chance of detriment
 			{
 				sel = RoundToFloor(sizeof(detriments)*GetURandomFloat());
 				condition = detriments[sel];
-				PrintToServer(detriments_desc[sel], targetname);
+				PrintToChatAll(detriments_desc[sel], targetname);
 			}
 			case 9: switch (RoundToFloor(10 * GetURandomFloat()))
 			{
@@ -73,13 +73,13 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 					//Duplicate of the above
 					sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
 					condition = benefits[sel];
-					PrintToServer(benefits_desc[sel], targetname);
+					PrintToChatAll(benefits_desc[sel], targetname);
 				}
 				case 6, 7, 8: //3% chance of a weird effect
 				{
 					sel = RoundToFloor(sizeof(weird)*GetURandomFloat());
 					condition = weird[sel];
-					PrintToServer(weird_desc[sel], targetname);
+					PrintToChatAll(weird_desc[sel], targetname);
 				}
 				case 9: //1% chance of death
 					//TODO: Kill the person
