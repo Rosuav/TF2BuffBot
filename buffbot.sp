@@ -24,10 +24,17 @@ ConVar sm_buffbot_gift_chance_enemy_human = null; //(10) Chance that each enemy 
 ConVar sm_buffbot_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot has of receiving a !gift
 #include "convars"
 
+//Rolling array of carnage points per user id. If a user connects, then this many other
+//users connect and disconnect, there will be a collision, and they'll share the slot. I
+//rather doubt that this will happen often, but it might with bots - I don't know.
+int carnage_points[16384];
+
 public void OnPluginStart()
 {
 	RegAdminCmd("sm_critboost", Command_CritBoost, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
+	HookEvent("player_team", InitializePlayer);
+	HookEvent("player_death", PlayerDied);
 	//The actual code to create convars convars is built by the Python script,
 	//and yes, I'm aware that I now have two problems.
 	CreateConVars();
@@ -51,6 +58,25 @@ public Action Command_CritBoost(int client, int args)
 	ReplyToCommand(client, "[SM] You crit-boosted %s [%d]!", name, target);
 
 	return Plugin_Handled;
+}
+
+public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
+{
+	char playername[MAX_NAME_LENGTH]; event.GetString("name", playername, sizeof(playername));
+	PrintToServer("Player initialized: uid %d team %d was %d name %s",
+		event.GetInt("userid"),
+		event.GetInt("team"),
+		event.GetInt("oldteam"),
+		playername);
+}
+
+public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
+{
+	//Is this the best (only?) way to get the name of the person who just died?
+	int player = GetClientOfUserId(event.GetInt("userid"));
+	char playername[MAX_NAME_LENGTH]; GetClientName(player, playername, sizeof(playername));
+	PrintToServer("That's a kill! %s died (uid %d) by %d, assist %d",
+		playername, event.GetInt("userid"), event.GetInt("attacker"), event.GetInt("assister"));
 }
 
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
