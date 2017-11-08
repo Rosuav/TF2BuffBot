@@ -19,6 +19,8 @@ ConVar sm_buffbot_carnage_per_assist = null; //(1) Carnage points gained for eac
 ConVar sm_buffbot_carnage_per_death = null; //(3) Carnage points gained when you die
 ConVar sm_buffbot_carnage_per_building = null; //(1) Carnage points gained when you destroy a non-gun building (assists ignored here)
 ConVar sm_buffbot_carnage_per_sentry = null; //(2) Carnage points gained when you destroy a sentry gun
+ConVar sm_buffbot_carnage_per_ubercharge = null; //(1) Carnage points gained by a medic who deploys Uber
+ConVar sm_buffbot_carnage_per_upgrade = null; //(0) Carnage points gained by an engineer who upgrades a building
 ConVar sm_buffbot_carnage_required = null; //(10) Carnage points required to use !roulette or !gift
 //When you grant a !gift, players (other than yourself) will have this many chances each.
 ConVar sm_buffbot_gift_chance_friendly_human = null; //(20) Chance that each friendly human has of receiving a !gift
@@ -29,7 +31,10 @@ ConVar sm_buffbot_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
 //users connect and disconnect, there will be a collision, and they'll share the slot. I
-//rather doubt that this will happen often, but it might with bots - I don't know.
+//rather doubt that this will happen often, but it might with bots - I don't know. Given
+//that bots all get kicked once there are no humans online, there'd have to be a strong
+//level of activity all the time for this to wrap and collide (wrapping itself is going
+//to be rare, and on its own isn't a problem).
 int carnage_points[16384];
 
 public void OnPluginStart()
@@ -39,6 +44,8 @@ public void OnPluginStart()
 	HookEvent("player_team", InitializePlayer);
 	HookEvent("player_death", PlayerDied);
 	HookEvent("object_destroyed", BuildingBlownUp);
+	HookEvent("player_chargedeployed", Ubered);
+	HookEvent("player_upgradedobject", Upgraded);
 	//The actual code to create convars convars is built by the Python script,
 	//and yes, I'm aware that I now have two problems.
 	CreateConVars();
@@ -110,6 +117,17 @@ public void BuildingBlownUp(Event event, const char[] name, bool dontBroadcast)
 		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_sentry));
 	else
 		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_building));
+}
+
+public void Ubered(Event event, const char[] name, bool dontBroadcast)
+{
+	PrintToServer("Ubercharge deployed!");
+	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_ubercharge));
+}
+public void Upgraded(Event event, const char[] name, bool dontBroadcast)
+{
+	if (GetConVarInt(sm_buffbot_carnage_per_upgrade)) PrintToServer("Object upgraded!");
+	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_upgrade));
 }
 
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
