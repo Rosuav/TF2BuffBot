@@ -209,7 +209,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 					//Super-secret super buff: if you would get the death effect
 					//but you had ten times the required carnage points, grant a
 					//Mannpower pickup instead of killing the player.
-					if (carnage_points[slot] >= 10 * GetConVarInt(sm_buffbot_carnage_required))
+					if (carnage_points[slot] > 10 * GetConVarInt(sm_buffbot_carnage_required))
 					{
 						TFCond runes[] = {
 							TFCond_RuneStrength,
