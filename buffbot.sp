@@ -227,7 +227,10 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 					}
 					else
 					{
-						//TODO: Kill the person
+						//Kill the person. Slap! Bam!
+						//TODO: Remove any invulnerabilities first, just in case.
+						PrintToChatAll("%s begs for something amazing...");
+						SlapPlayer(target, 1000); //1000hp of damage should kill anyone.
 					}
 					carnage_points[slot] = 0;
 					return;
