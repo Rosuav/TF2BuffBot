@@ -97,6 +97,21 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	//Is this the best (only?) way to get the name of the person who just died?
 	int player = GetClientOfUserId(event.GetInt("userid"));
 	char playername[MAX_NAME_LENGTH]; GetClientName(player, playername, sizeof(playername));
+	if (event.GetInt("userid") == event.GetInt("attacker"))
+	{
+		//You killed yourself. Good job.
+		//This happens if you use the 'kill' or 'explode' commands, or if
+		//you blow yourself up with rockets or similar - but only if nobody
+		//else dealt you damage. If an enemy hurts you and THEN you kill
+		//yourself, the enemy gets the credit (as a "finished off", but that
+		//doesn't affect our calculations here). So if you destroy yourself,
+		//award no points. And to maximize the humiliation, we'll announce
+		//this to everyone in chat. Muahahaha.
+		//(I've never seen the victim be the *assister*. If that can happen,
+		//it should be checked for here too.)
+		PrintToChatAll("%s is awarded no points for self-destruction. May God have mercy on your soul.", playername);
+		return;
+	}
 	PrintToServer("That's a kill! %s died (uid %d) by %d, assist %d",
 		playername, event.GetInt("userid"), event.GetInt("attacker"), event.GetInt("assister"));
 	if (event.GetInt("assister") == -1)
@@ -115,7 +130,14 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 
 public void BuildingBlownUp(Event event, const char[] name, bool dontBroadcast)
 {
-	PrintToServer("Object blown up!");
+	if (event.GetInt("userid") == event.GetInt("attacker"))
+	{
+		//You blew up your own building. Not sure if this can happen, but if it
+		//does, make sure we award no points. (But there's no need to humiliate.)
+		return;
+	}
+	PrintToServer("Object blown up! uid %d destroyed %d's building.",
+		event.GetInt("attacker"), event.GetInt("userid"));
 	if (event.GetInt("objecttype") == 2) //TFObject_Sentry
 		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_sentry));
 	else
