@@ -12,7 +12,7 @@ public Plugin myinfo =
 };
 
 //Before you can use !roulette or !gift, you must fill your (invisible) carnage counter.
-ConVar sm_buffbot_carnage_initial = null; //(0) Carnage points a player has on first joining
+ConVar sm_buffbot_carnage_initial = null; //(0) Carnage points a player has on first joining or changing team
 ConVar sm_buffbot_carnage_per_solo_kill = null; //(2) Carnage points gained for each unassisted kill
 ConVar sm_buffbot_carnage_per_kill = null; //(2) Carnage points gained for each kill
 ConVar sm_buffbot_carnage_per_assist = null; //(1) Carnage points gained for each assist
