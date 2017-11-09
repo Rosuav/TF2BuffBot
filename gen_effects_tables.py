@@ -40,14 +40,16 @@ effects = {
 		"TFCond_DisguisedAsDispenser": "Something weird just happened to %s.",
 	}
 }
-data = ""
-for name, options in effects.items():
-	ids = "TFCond %s[] = {\n" % name + "".join("\t%s,\n" % x for x in options) + "}\n"
-	descs = "char %s_desc[][] = {\n" % name + "".join("\t%s,\n" % json.dumps(x) for x in options.values()) + "}\n"
-	data += ids + descs + "\n"
-
-# TODO: Possibly compare data against what's on disk and update only if necessary
-with open("randeffects.inc", "w") as f: f.write(data)
+with open("randeffects.inc", "w") as f:
+	for name, options in effects.items():
+		print("TFCond %s[] = {" % name, file=f)
+		for cond in options:
+			print("\t%s," % cond, file=f)
+		print("}", file=f)
+		print("char %s_desc[][] = {" % name, file=f)
+		for desc in options.values(): # Will iterate in the same order as options above
+			print("\t%s," % json.dumps(desc), file=f)
+		print("}\n", file=f)
 
 import re
 with open("buffbot.sp") as source, open("convars.inc", "w") as cv:
