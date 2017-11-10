@@ -1,3 +1,5 @@
+default: install
+
 all: buffbot.smx botcontrol.smx
 
 buffbot.smx: buffbot.sp randeffects.inc
