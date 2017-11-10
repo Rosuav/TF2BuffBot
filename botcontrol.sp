@@ -39,7 +39,6 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
-	PrintToChat(client, "Incoming text: %s", msg);
 	char arg[64] = "cmd_";
 	int pos = 0;
 	int target = -1;
@@ -90,4 +89,15 @@ public void cmd_speak(int client, int target)
 	GetClientName(target, targname, sizeof(targname));
 	PrintToChat(client, "%s orders %s to speak!", name, targname);
 	FakeClientCommandEx(target, "say Woof!");
+}
+
+//Order a bot to drop powerups and/or the flag
+public void cmd_drop(int client, int target)
+{
+	char name[MAX_NAME_LENGTH];
+	GetClientName(client, name, sizeof(name));
+	char targname[MAX_NAME_LENGTH];
+	GetClientName(target, targname, sizeof(targname));
+	PrintToChatAll("%s orders %s to drop it!", name, targname);
+	FakeClientCommandEx(target, "dropitem");
 }
