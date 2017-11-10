@@ -106,3 +106,30 @@ public void cmd_drop(int client, int target)
 	PrintToChatAll("%s orders %s to drop it!", name, targname);
 	FakeClientCommandEx(target, "dropitem");
 }
+
+//MVM! Ready up!
+//Doesn't seem to work.
+public void cmd_ready(int client, int target)
+{
+	char name[MAX_NAME_LENGTH];
+	GetClientName(client, name, sizeof(name));
+	char targname[MAX_NAME_LENGTH];
+	GetClientName(target, targname, sizeof(targname));
+	PrintToChatAll("%s declares that %s is ready!", name, targname);
+	FakeClientCommandEx(target, "player_ready_toggle");
+}
+
+//Order a bot to build his teleporter exit (engineers only, obviously)
+//Doesn't seem to work.
+public void cmd_telehere(int client, int target)
+{
+	char name[MAX_NAME_LENGTH];
+	GetClientName(client, name, sizeof(name));
+	char targname[MAX_NAME_LENGTH];
+	GetClientName(target, targname, sizeof(targname));
+	PrintToChatAll("%s orders %s to build a tele exit", name, targname);
+	FakeClientCommandEx(target, "build 4");
+}
+
+//Would love to be able to add a "heel" command, which would cause the
+//bot to attempt to move to the player's location for the next, say, 10 secs.
