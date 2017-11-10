@@ -82,9 +82,12 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	Call_Finish();
 }
 
-public void cmd_demo(int client, int target)
+public void cmd_speak(int client, int target)
 {
 	char name[MAX_NAME_LENGTH];
-	GetClientName(target, name, sizeof(name));
-	PrintToChat(client, "You order %s to do nothing.", name);
+	GetClientName(client, name, sizeof(name));
+	char targname[MAX_NAME_LENGTH];
+	GetClientName(target, targname, sizeof(targname));
+	PrintToChat(client, "%s orders %s to speak!", name, targname);
+	FakeClientCommandEx(target, "say Woof!");
 }
