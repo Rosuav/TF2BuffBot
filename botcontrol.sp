@@ -75,6 +75,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		PrintToChat(client, "Must nominate a (bot) target");
 		return;
 	}
+	//TODO: Verify that the target is (a) a bot, and (b) on the same team as the client
 	Call_StartFunction(INVALID_HANDLE, action);
 	Call_PushCell(client);
 	Call_PushCell(target);
