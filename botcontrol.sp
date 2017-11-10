@@ -43,6 +43,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	int pos = 0;
 	int target = -1;
 	new Function:action = INVALID_FUNCTION;
+	int team = GetClientTeam(client);
 	for (int i = 0;; ++i)
 	{
 		//NOTE: Subscripting a string yields a substring starting at that
@@ -55,12 +56,17 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		//will be one of a small set of known strings).
 		new Function:callme = GetFunctionByName(INVALID_HANDLE, arg);
 		if (callme != INVALID_FUNCTION) action = callme;
-		int target_list[1]; char targname[8]; bool is_ml;
-		if (ProcessTargetString(arg[4], client, target_list, 1,
-			COMMAND_FILTER_NO_IMMUNITY, targname, sizeof(targname), is_ml) > 0)
+		int target_list[MAXPLAYERS]; char targname[8]; bool is_ml;
+		int targets = ProcessTargetString(arg[4], client, target_list, MAXPLAYERS,
+			COMMAND_FILTER_NO_IMMUNITY, targname, sizeof(targname), is_ml);
+		for (int t = 0; t < targets; ++t) //targets could be <= 0, in which case we skip this loop
 		{
-			target = target_list[0];
+			//Theoretically this should check for botness??
+			if (IsClientConnected(target_list[t]) && IsClientInGame(target_list[t]) && IsFakeClient(target_list[t]))
+				if (GetClientTeam(target_list[t]) == team) //No fair ordering opposing bots around!
+					target = target_list[t];
 		}
+		//Once len is -1, we're done with args.
 		if (len == -1) break;
 		pos += len;
 	}
@@ -71,10 +77,9 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	}
 	if (target == -1)
 	{
-		PrintToChat(client, "Must nominate a (bot) target");
+		PrintToChat(client, "Must target a bot on your own team");
 		return;
 	}
-	//TODO: Verify that the target is (a) a bot, and (b) on the same team as the client
 	Call_StartFunction(INVALID_HANDLE, action);
 	Call_PushCell(client);
 	Call_PushCell(target);
