@@ -13,6 +13,7 @@ effects = {
 		"TFCond_Stealthed": "Oops... %s seems to have vanished.",
 		"TFCond_DefenseBuffed": "%s erects a personal-sized banner and toots a little bugle.",
 		"TFCond_SpeedBuffAlly": "Get in, get the job done, and get out. Got it, %s?",
+		"TFCond_RegenBuffed": "%s turns into a Time Lord and starts regenerating...",
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
 		# Sadly, these can be abused by dropping them, which eliminates
 		# the time limit :(

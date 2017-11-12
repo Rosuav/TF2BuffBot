@@ -238,8 +238,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			}
 		}
 
-		TF2_AddCondition(target, condition, 30.0, 0);
-		PrintToServer("Applied effect %d", condition);
+		apply_effect(target, condition);
 		carnage_points[slot] = 0;
 	}
 	if (!strcmp(msg, "!gift"))
@@ -305,11 +304,41 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 					PrintToChatAll("%s offered a random gift, which was gleefully accepted by %s!", selfname, targetname);
 				sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
 				PrintToChatAll(benefits_desc[sel], targetname);
-				TF2_AddCondition(i, benefits[sel], 30.0, 0);
-				PrintToServer("Applied effect %d to %s", benefits[sel], targetname);
+				apply_effect(i, benefits[sel]);
 				break;
 			}
 			sel -= client_weight[i];
 		}
 	}
+}
+
+int ticking_down[MAXPLAYERS + 1]; //Any effect that's managed by a timer will tick down in this.
+Action regenerate(Handle timer, any target)
+{
+	//When you die, you stop regenerating.
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
+	//PrintToServer("Regenerating %d", target);
+	TF2_RegeneratePlayer(target);
+	//After thirty regens (approx 30 seconds, but maybe +/- a second or so),
+	//we stop regenerating.
+	if (--ticking_down[target] <= 0) return Plugin_Stop;
+	return Plugin_Handled;
+}
+
+void apply_effect(int target, TFCond condition)
+{
+	//Special-case some effects (well, currently one effect) that we handle
+	//ourselves with a timer, rather than pushing through AddCondition.
+	//Since all of these (all one of these) use the same ticking_down array,
+	//applying a second such effect during another's duration will extend
+	//the first one, but then BOTH timers will be decrementing the clock.
+	if (condition == TFCond_RegenBuffed)
+	{
+		ticking_down[target] = 30;
+		CreateTimer(1.0, regenerate, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		PrintToServer("Applied effect Regeneration to %d", target);
+		return;
+	}
+	TF2_AddCondition(target, condition, 30.0, 0);
+	PrintToServer("Applied effect %d to %d", condition, target);
 }
