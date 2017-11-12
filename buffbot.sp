@@ -299,7 +299,10 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			{
 				char targetname[MAX_NAME_LENGTH];
 				GetClientName(i, targetname, sizeof(targetname));
-				PrintToChatAll("%s offered a random gift, which was gratefully accepted by %s!", selfname, targetname);
+				if (GetClientTeam(i) == myteam)
+					PrintToChatAll("%s offered a random gift, which was gratefully accepted by %s!", selfname, targetname);
+				else
+					PrintToChatAll("%s offered a random gift, which was gleefully accepted by %s!", selfname, targetname);
 				sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
 				PrintToChatAll(benefits_desc[sel], targetname);
 				TF2_AddCondition(i, benefits[sel], 30.0, 0);
