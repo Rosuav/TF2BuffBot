@@ -354,6 +354,13 @@ void apply_effect(int target, TFCond condition)
 		Debug("Applied effect Regeneration to %d", target);
 		return;
 	}
+	else if (condition == TFCond_Plague)
+	{
+		//Start a bleed effect as well as applying the Plague condition.
+		//The condition causes a "squelch" sound and stuff; the bleed
+		//causes hitpoint loss.
+		TF2_MakeBleed(target, target, duration + 0.0);
+	}
 	TF2_AddCondition(target, condition, duration + 0.0, 0);
 	Debug("Applied effect %d to %d", condition, target);
 }
