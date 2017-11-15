@@ -133,6 +133,8 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		//points... as a consolation prize.
 		PrintToChatAll("%s needs to learn to spy check. Well done assisting in your own death.", playername);
 	}
+	//TODO: It's possible to assist in a kill on your own teammate (same way as the above).
+	//Would be nice to give a cool message for that too.
 	Debug("That's a kill! %s died (uid %d) by %d, assist %d",
 		playername, event.GetInt("userid"), event.GetInt("attacker"), event.GetInt("assister"));
 	if (event.GetInt("assister") == -1)
