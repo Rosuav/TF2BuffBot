@@ -150,6 +150,7 @@ public void cmd_medic(int client, int target)
 	GetClientName(target, targname, sizeof(targname));
 	PrintToChatAll("%s tells %s to go medic!", name, targname);
 	TF2_SetPlayerClass(target, TFClass_Medic, false, true);
+	TF2_RespawnPlayer(target);
 }
 
 //Order a bot to become a soldier. TODO: Make a generic one: "!oi BotName go ClassName"
@@ -161,6 +162,7 @@ public void cmd_soldier(int client, int target)
 	GetClientName(target, targname, sizeof(targname));
 	PrintToChatAll("%s tells %s to go soldier!", name, targname);
 	TF2_SetPlayerClass(target, TFClass_Soldier, false, true);
+	TF2_RespawnPlayer(target);
 }
 
 //MVM! Ready up!
