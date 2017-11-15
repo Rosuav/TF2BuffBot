@@ -1,5 +1,9 @@
 #include <sourcemod>
 #include <tf2_stocks>
+
+#pragma newdecls required
+#pragma semicolon 1
+
 #include "randeffects"
 
 public Plugin myinfo =

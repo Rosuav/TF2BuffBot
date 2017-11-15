@@ -46,11 +46,11 @@ with open("randeffects.inc", "w") as f:
 		print("TFCond %s[] = {" % name, file=f)
 		for cond in options:
 			print("\t%s," % cond, file=f)
-		print("}", file=f)
+		print("};", file=f)
 		print("char %s_desc[][] = {" % name, file=f)
 		for desc in options.values(): # Will iterate in the same order as options above
 			print("\t%s," % json.dumps(desc), file=f)
-		print("}\n", file=f)
+		print("};\n", file=f)
 
 import re
 with open("buffbot.sp") as source, open("convars.inc", "w") as cv:
