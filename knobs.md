@@ -2,7 +2,8 @@ Tweakables in the Buff Bot
 ==========================
 
 There's a lot you can mess around with. Most of it is in cvars for conveninence
-and run-time tweakability.
+and run-time tweakability. Everything has sane defaults, so it's perfectly
+reasonable to take the buff bot for a spin without changing any of these.
 
 * sm_buffbot_carnage_initial: 0 normally, but you can have players start with
   some carnage points. Setting this to the same as sm_buffbot_carnage_required
