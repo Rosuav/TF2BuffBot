@@ -78,8 +78,8 @@ human or not. (Don't worry, we don't make you do a CAPTCHA.)
 On servers with huge bot counts (eg two humans and thirty bots), the human
 scores may need to be increased; on servers where bots just pad out the numbers
 when there are imbalanced humans, the human/bot discrepancy could be reduced.
-Keeping the friendly/enemy ratio at about two to one is recommended, but can
-be adjusted.
+Keeping the friendly/enemy ratio at about two to one is recommended; it should
+be approximately the same as the good/bad ratio on the roulette wheel.
 
 Further tweakables that are not easy to make into cvars:
 
