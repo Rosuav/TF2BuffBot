@@ -96,7 +96,7 @@ public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 
 void add_score(int userid, int score)
 {
-	if (userid < 0 || score <= 0) return;
+	if (userid <= 0 || score <= 0) return;
 	int new_score = carnage_points[userid % sizeof(carnage_points)] += score;
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
 }
