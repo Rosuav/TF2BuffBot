@@ -1,6 +1,9 @@
 #include <sourcemod>
 #include <tf2_stocks>
 
+#pragma newdecls required
+#pragma semicolon 1
+
 public Plugin myinfo =
 {
 	name = "Bot Control",
@@ -42,7 +45,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	char arg[64] = "cmd_";
 	int pos = 0;
 	int target = -1;
-	new Function:action = INVALID_FUNCTION;
+	Function action = INVALID_FUNCTION;
 	int team = GetClientTeam(client);
 	for (int i = 0;; ++i)
 	{
@@ -54,7 +57,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		if (!i && strcmp(arg[4], "!oi")) return; //First word must be "!oi"
 		//We need to get a target (which must name a bot) and a command (which
 		//will be one of a small set of known strings).
-		new Function:callme = GetFunctionByName(INVALID_HANDLE, arg);
+		Function callme = GetFunctionByName(INVALID_HANDLE, arg);
 		if (callme != INVALID_FUNCTION) action = callme;
 		int target_list[MAXPLAYERS]; char targname[8]; bool is_ml;
 		int targets = ProcessTargetString(arg[4], client, target_list, MAXPLAYERS,
