@@ -185,67 +185,55 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		TFCond condition;
 		char targetname[MAX_NAME_LENGTH];
 		GetClientName(target, targetname, sizeof(targetname));
-		switch (RoundToFloor(10 * GetURandomFloat()))
+		int category = RoundToFloor(100 * GetURandomFloat());
+		if (category < 66) //66% chance of benefit
 		{
-			case 0, 1, 2, 3, 4, 5: //60% chance + 6% chance below = two times in three
+			sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
+			condition = benefits[sel];
+			PrintToChatAll(benefits_desc[sel], targetname);
+		}
+		else if (category < 96) //30% chance of detriment
+		{
+			sel = RoundToFloor(sizeof(detriments)*GetURandomFloat());
+			condition = detriments[sel];
+			PrintToChatAll(detriments_desc[sel], targetname);
+		}
+		else if (category < 99) //3% chance of a weird effect
+		{
+			sel = RoundToFloor(sizeof(weird)*GetURandomFloat());
+			condition = weird[sel];
+			PrintToChatAll(weird_desc[sel], targetname);
+		}
+		else //1% chance of death
+		{
+			//Super-secret super buff: if you would get the death effect
+			//but you had ten times the required carnage points, grant a
+			//Mannpower pickup instead of killing the player.
+			if (carnage_points[slot] > 10 * GetConVarInt(sm_buffbot_carnage_required))
 			{
-				sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
-				condition = benefits[sel];
-				PrintToChatAll(benefits_desc[sel], targetname);
+				TFCond runes[] = {
+					TFCond_RuneStrength,
+					TFCond_RuneHaste,
+					TFCond_RuneRegen,
+					TFCond_RuneResist,
+					TFCond_RuneWarlock,
+					TFCond_RunePrecision,
+					TFCond_RuneAgility,
+					TFCond_KingRune,
+				};
+				TFCond rune = runes[RoundToFloor(sizeof(runes)*GetURandomFloat())];
+				TF2_AddCondition(target, rune, TFCondDuration_Infinite, 0);
+				PrintToChatAll("%s now carries something special...", targetname);
 			}
-			case 6, 7, 8: //30% chance of detriment
+			else
 			{
-				sel = RoundToFloor(sizeof(detriments)*GetURandomFloat());
-				condition = detriments[sel];
-				PrintToChatAll(detriments_desc[sel], targetname);
+				//Kill the person. Slap! Bam!
+				//TODO: Remove any invulnerabilities first, just in case.
+				PrintToChatAll("%s begs for something amazing...", targetname);
+				SlapPlayer(target, 1000); //1000hp of damage should kill anyone.
 			}
-			case 9: switch (RoundToFloor(10 * GetURandomFloat()))
-			{
-				case 0, 1, 2, 3, 4, 5: //The other 6% chance for the above
-				{
-					//Duplicate of the above
-					sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
-					condition = benefits[sel];
-					PrintToChatAll(benefits_desc[sel], targetname);
-				}
-				case 6, 7, 8: //3% chance of a weird effect
-				{
-					sel = RoundToFloor(sizeof(weird)*GetURandomFloat());
-					condition = weird[sel];
-					PrintToChatAll(weird_desc[sel], targetname);
-				}
-				case 9: //1% chance of death
-				{
-					//Super-secret super buff: if you would get the death effect
-					//but you had ten times the required carnage points, grant a
-					//Mannpower pickup instead of killing the player.
-					if (carnage_points[slot] > 10 * GetConVarInt(sm_buffbot_carnage_required))
-					{
-						TFCond runes[] = {
-							TFCond_RuneStrength,
-							TFCond_RuneHaste,
-							TFCond_RuneRegen,
-							TFCond_RuneResist,
-							TFCond_RuneWarlock,
-							TFCond_RunePrecision,
-							TFCond_RuneAgility,
-							TFCond_KingRune,
-						};
-						TFCond rune = runes[RoundToFloor(sizeof(runes)*GetURandomFloat())];
-						TF2_AddCondition(target, rune, TFCondDuration_Infinite, 0);
-						PrintToChatAll("%s now carries something special...", targetname);
-					}
-					else
-					{
-						//Kill the person. Slap! Bam!
-						//TODO: Remove any invulnerabilities first, just in case.
-						PrintToChatAll("%s begs for something amazing...", targetname);
-						SlapPlayer(target, 1000); //1000hp of damage should kill anyone.
-					}
-					carnage_points[slot] = 0;
-					return;
-				}
-			}
+			carnage_points[slot] = 0;
+			return;
 		}
 
 		apply_effect(target, condition);
