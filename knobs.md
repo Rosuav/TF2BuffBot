@@ -55,6 +55,14 @@ points (unless you don't have enough). Having triple the required points does
 not allow you to give three gifts, so just pop it whenever you think it'll be
 useful.
 
+When you spin the roulette wheel, you could get something good or something
+bad. Within each category, a selection of effects will be picked from with
+uniform probability, but the categories themselves are tweakable:
+
+* sm_buffbot_roulette_chance_good: 66 by default - chance of something good.
+* sm_buffbot_roulette_chance_bad: 30 by default - chance of something bad.
+* sm_buffbot_roulette_chance_weird: 3 by default - chance of something odd.
+
 Gift-giving has its own set of knobs. Instead of having some chance of a good
 result and some chance of bad, the gift is guaranteed to be good, but might go
 to your opponents. Every player who's alive and in the game is given a certain
@@ -72,10 +80,6 @@ scores may need to be increased; on servers where bots just pad out the numbers
 when there are imbalanced humans, the human/bot discrepancy could be reduced.
 Keeping the friendly/enemy ratio at about two to one is recommended, but can
 be adjusted.
-
-Further knobs that are not currently cvars, but could become so in the future:
-
-* Probability of getting good/bad/weird buff
 
 Further tweakables that are not easy to make into cvars:
 

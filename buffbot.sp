@@ -34,6 +34,11 @@ ConVar sm_buffbot_carnage_per_upgrade = null; //(0) Carnage points gained by an 
 //payload, etc). Such actions may help you win, but they don't create death and destruction.
 ConVar sm_buffbot_carnage_required = null; //(10) Carnage points required to use !roulette or !gift
 ConVar sm_buffbot_buff_duration = null; //(30) Length of time that each buff/debuff lasts
+//When you spin the !roulette wheel, you have these odds of getting different buff categories.
+//There will always be exactly one chance that you will die, so scale these numbers accordingly.
+ConVar sm_buffbot_roulette_chance_good = null; //(66) Chance that a roulette spin will give a beneficial effect
+ConVar sm_buffbot_roulette_chance_bad = null; //(30) Chance that a roulette spin will give a detrimental effect
+ConVar sm_buffbot_roulette_chance_weird = null; //(3) Chance that a roulette spin will give a weird effect
 //When you grant a !gift, players (other than yourself) will have this many chances each.
 ConVar sm_buffbot_gift_chance_friendly_human = null; //(20) Chance that each friendly human has of receiving a !gift
 ConVar sm_buffbot_gift_chance_friendly_bot = null; //(2) Chance that each friendly bot has of receiving a !gift
@@ -185,26 +190,29 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		TFCond condition;
 		char targetname[MAX_NAME_LENGTH];
 		GetClientName(target, targetname, sizeof(targetname));
-		int category = RoundToFloor(100 * GetURandomFloat());
-		if (category < 66) //66% chance of benefit
+		int prob_good = GetConVarInt(sm_buffbot_roulette_chance_good);
+		int prob_bad = GetConVarInt(sm_buffbot_roulette_chance_bad);
+		int prob_weird = GetConVarInt(sm_buffbot_roulette_chance_weird);
+		int category = RoundToFloor((prob_good + prob_bad + prob_weird + 1) * GetURandomFloat());
+		if ((category -= prob_good) < 0)
 		{
 			sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
 			condition = benefits[sel];
 			PrintToChatAll(benefits_desc[sel], targetname);
 		}
-		else if (category < 96) //30% chance of detriment
+		else if ((category -= prob_bad) < 0)
 		{
 			sel = RoundToFloor(sizeof(detriments)*GetURandomFloat());
 			condition = detriments[sel];
 			PrintToChatAll(detriments_desc[sel], targetname);
 		}
-		else if (category < 99) //3% chance of a weird effect
+		else if ((category -= prob_weird) < 0)
 		{
 			sel = RoundToFloor(sizeof(weird)*GetURandomFloat());
 			condition = weird[sel];
 			PrintToChatAll(weird_desc[sel], targetname);
 		}
-		else //1% chance of death
+		else //One chance of death, always.
 		{
 			//Super-secret super buff: if you would get the death effect
 			//but you had ten times the required carnage points, grant a
