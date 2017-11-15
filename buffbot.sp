@@ -16,7 +16,7 @@ public Plugin myinfo =
 	name = "Buff Bot",
 	author = "Chris Angelico",
 	description = "Experimental bot that can buff players",
-	version = "0.1",
+	version = "0.9",
 	url = "https://github.com/Rosuav/TF2BuffBot",
 };
 
