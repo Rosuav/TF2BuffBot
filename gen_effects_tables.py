@@ -35,7 +35,7 @@ effects = {
 		"TFCond_HalloweenGhostMode": "%s is pining for the fjords...",
 		# Will probably result in death. Thirty seconds unable to move is gonna suck.
 		# "TFCond_HalloweenKartCage": "%s has been naughty and is now imprisoned.", # Doesn't seem to work properly
-		"TFCond_Plague": "A rat bites %s and inflicts a non-contagious form of the Bubonic Plague.",
+		# "TFCond_Plague": "A rat bites %s and inflicts a non-contagious form of the Bubonic Plague.", # Doesn't seem to work
 		# TFCond_RestrictToMelee, //TODO: If this gets triggered, also force selection of melee weapon
 	}, "weird": {
 		"TFCond_DisguisedAsDispenser": "Something weird just happened to %s.",
