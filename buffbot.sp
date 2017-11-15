@@ -4,6 +4,11 @@
 #pragma newdecls required
 #pragma semicolon 1
 
+//By default, calling Debug() does nothing.
+public void Debug(const char[] fmt, any ...) { }
+//For a full log of carnage score changes, enable this:
+//#define Debug PrintToServer
+
 #include "randeffects"
 
 public Plugin myinfo =
@@ -81,7 +86,7 @@ public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 {
 	if (!event.GetInt("team")) return; //Player is leaving the game
 	char playername[MAX_NAME_LENGTH]; event.GetString("name", playername, sizeof(playername));
-	PrintToServer("Player initialized: uid %d team %d was %d name %s",
+	Debug("Player initialized: uid %d team %d was %d name %s",
 		event.GetInt("userid"),
 		event.GetInt("team"),
 		event.GetInt("oldteam"),
@@ -93,7 +98,7 @@ void add_score(int userid, int score)
 {
 	if (userid < 0 || score <= 0) return;
 	int new_score = carnage_points[userid % sizeof(carnage_points)] += score;
-	PrintToServer("Score: uid %d +%d now %d points", userid, score, new_score);
+	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
 }
 
 public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
@@ -116,7 +121,7 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		PrintToChatAll("%s is awarded no points for self-destruction. May God have mercy on your soul.", playername);
 		return;
 	}
-	PrintToServer("That's a kill! %s died (uid %d) by %d, assist %d",
+	Debug("That's a kill! %s died (uid %d) by %d, assist %d",
 		playername, event.GetInt("userid"), event.GetInt("attacker"), event.GetInt("assister"));
 	if (event.GetInt("assister") == -1)
 	{
@@ -140,7 +145,7 @@ public void BuildingBlownUp(Event event, const char[] name, bool dontBroadcast)
 		//does, make sure we award no points. (But there's no need to humiliate.)
 		return;
 	}
-	PrintToServer("Object blown up! uid %d destroyed %d's building.",
+	Debug("Object blown up! uid %d destroyed %d's building.",
 		event.GetInt("attacker"), event.GetInt("userid"));
 	if (event.GetInt("objecttype") == 2) //TFObject_Sentry
 		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_sentry));
@@ -150,12 +155,12 @@ public void BuildingBlownUp(Event event, const char[] name, bool dontBroadcast)
 
 public void Ubered(Event event, const char[] name, bool dontBroadcast)
 {
-	PrintToServer("Ubercharge deployed!");
+	Debug("Ubercharge deployed!");
 	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_ubercharge));
 }
 public void Upgraded(Event event, const char[] name, bool dontBroadcast)
 {
-	if (GetConVarInt(sm_buffbot_carnage_per_upgrade)) PrintToServer("Object upgraded!");
+	if (GetConVarInt(sm_buffbot_carnage_per_upgrade)) Debug("Object upgraded!");
 	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_upgrade));
 }
 
@@ -294,7 +299,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			PrintToChatAll("%s offered a gift, but nobody took it :(", selfname);
 			return;
 		}
-		PrintToServer("Total gift chance pool: %d", tot_weight);
+		Debug("Total gift chance pool: %d", tot_weight);
 		int sel = RoundToFloor(GetURandomFloat() * tot_weight);
 		for (int i = 1; i <= MaxClients; ++i)
 		{
@@ -321,7 +326,7 @@ Action regenerate(Handle timer, any target)
 {
 	//When you die, you stop regenerating.
 	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
-	//PrintToServer("Regenerating %d", target);
+	//Debug("Regenerating %d", target);
 	TF2_RegeneratePlayer(target);
 	//After thirty regens (approx 30 seconds, but maybe +/- a second or so),
 	//we stop regenerating.
@@ -340,9 +345,9 @@ void apply_effect(int target, TFCond condition)
 	{
 		ticking_down[target] = 30;
 		CreateTimer(1.0, regenerate, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
-		PrintToServer("Applied effect Regeneration to %d", target);
+		Debug("Applied effect Regeneration to %d", target);
 		return;
 	}
 	TF2_AddCondition(target, condition, 30.0, 0);
-	PrintToServer("Applied effect %d to %d", condition, target);
+	Debug("Applied effect %d to %d", condition, target);
 }
