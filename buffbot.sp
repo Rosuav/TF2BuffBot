@@ -33,12 +33,12 @@ ConVar sm_buffbot_carnage_per_upgrade = null; //(0) Carnage points gained by an 
 //No carnage points are granted for achieving map goals (capturing the flag, taking a control point, moving the
 //payload, etc). Such actions may help you win, but they don't create death and destruction.
 ConVar sm_buffbot_carnage_required = null; //(10) Carnage points required to use !roulette or !gift
+ConVar sm_buffbot_buff_duration = null; //(30) Length of time that each buff/debuff lasts
 //When you grant a !gift, players (other than yourself) will have this many chances each.
 ConVar sm_buffbot_gift_chance_friendly_human = null; //(20) Chance that each friendly human has of receiving a !gift
 ConVar sm_buffbot_gift_chance_friendly_bot = null; //(2) Chance that each friendly bot has of receiving a !gift
 ConVar sm_buffbot_gift_chance_enemy_human = null; //(10) Chance that each enemy human has of receiving a !gift
 ConVar sm_buffbot_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot has of receiving a !gift
-ConVar sm_buffbot_buff_duration = null; //(30) Length of time that each buff/debuff lasts
 #include "convars"
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
