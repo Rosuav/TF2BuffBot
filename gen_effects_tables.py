@@ -32,12 +32,12 @@ effects = {
 		"TFCond_Jarated": "%s just got covered in Jarate. Eww.",
 		"TFCond_Milked": "%s just got covered in something that's almost, but not entirely, unlike milk.",
 		"TFCond_MarkedForDeathSilent": "%s needs to die. Go! Arrange that for me!",
-		"TFCond_HalloweenGhostMode": "%s is pining for the fjords...",
 		# Will probably result in death. Thirty seconds unable to move is gonna suck.
 		# "TFCond_HalloweenKartCage": "%s has been naughty and is now imprisoned.", # Doesn't seem to work properly
 		# "TFCond_Plague": "A rat bites %s and inflicts a non-contagious form of the Bubonic Plague.", # Doesn't seem to work
 		# TFCond_RestrictToMelee, //TODO: If this gets triggered, also force selection of melee weapon
 	}, "weird": {
+		"TFCond_HalloweenGhostMode": "%s is pining for the fjords...",
 		"TFCond_DisguisedAsDispenser": "Something weird just happened to %s.",
 	}
 }
