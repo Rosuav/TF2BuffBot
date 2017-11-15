@@ -122,10 +122,16 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		//doesn't affect our calculations here). So if you destroy yourself,
 		//award no points. And to maximize the humiliation, we'll announce
 		//this to everyone in chat. Muahahaha.
-		//(I've never seen the victim be the *assister*. If that can happen,
-		//it should be checked for here too.)
 		PrintToChatAll("%s is awarded no points for self-destruction. May God have mercy on your soul.", playername);
 		return;
+	}
+	if (event.GetInt("userid") == event.GetInt("assister"))
+	{
+		//You helped someone kill you. Impressive!
+		//The only way I've found to trigger this is for you to heal an
+		//enemy Spy while he kills you. Congrats. We'll let you have the
+		//points... as a consolation prize.
+		PrintToChatAll("%s needs to learn to spy check. Well done assisting in your own death.", playername);
 	}
 	Debug("That's a kill! %s died (uid %d) by %d, assist %d",
 		playername, event.GetInt("userid"), event.GetInt("attacker"), event.GetInt("assister"));
