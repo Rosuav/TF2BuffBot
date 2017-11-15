@@ -35,6 +35,9 @@ No carnage points are granted for achieving map goals (capturing the flag,
 taking a control point, moving the payload, etc). Such actions may help you
 win, but they don't create death and destruction. Get out there killing stuff!
 
+See [knobs](knobs) for a full list of tweakable knobs and some advice on how
+they affect gameplay.
+
 Bot Control
 -----------
 
