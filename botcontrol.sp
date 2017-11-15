@@ -16,7 +16,13 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	//RegAdminCmd("sm_oi", Command_Oi, 0); //Is this the right way to add a non-administrative command? Doesn't seem to work properly anyway.
+	HookEvent("player_spawn", Event_PlayerSpawn);
 	HookEvent("player_say", Event_PlayerChat);
+}
+public void OnConfigsExecuted() 
+{
+	//Stop the bots from constantly suiciding to change class (and never being satisfied)
+	SetConVarInt(FindConVar("tf_bot_reevaluate_class_in_spawnroom"), 0);
 }
 
 public Action Command_Oi(int client, int args)
@@ -35,6 +41,31 @@ public Action Command_Oi(int client, int args)
 	ReplyToCommand(client, "[SM] You order %s to %s.", name, command);
 
 	return Plugin_Handled;
+}
+
+public void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
+{
+	//If we're spawning a bot that has no class, give it one. (Maybe.)
+	//This SEEMS to prevent the "stuck in respawn" state that bots end up in.
+	int team = GetEventInt(event, "team");
+	int cls = GetEventInt(event, "class");
+	if (team || cls) return; //Already picked team or class? Keep it. Except Spy.
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (IsClientConnected(client) && IsClientInGame(client) && IsFakeClient(client))
+	{
+		char cliname[MAX_NAME_LENGTH];
+		GetClientName(client, cliname, sizeof(cliname));
+		//PrintToServer("## assigning %s (%d) to a damage class on team %d ## %s ##", cliname, client, team, name);
+		TFClassType damage_classes[] = {
+			TFClass_Soldier,
+			TFClass_DemoMan,
+			TFClass_Heavy,
+			TFClass_Pyro,
+		};
+		TF2_SetPlayerClass(client, damage_classes[RoundToFloor(sizeof(damage_classes) * GetURandomFloat())], false, true);
+		return;
+	}
+	return;
 }
 
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
@@ -108,6 +139,28 @@ public void cmd_drop(int client, int target)
 	GetClientName(target, targname, sizeof(targname));
 	PrintToChatAll("%s orders %s to drop it!", name, targname);
 	FakeClientCommandEx(target, "dropitem");
+}
+
+//Order a bot to become a medic
+public void cmd_medic(int client, int target)
+{
+	char name[MAX_NAME_LENGTH];
+	GetClientName(client, name, sizeof(name));
+	char targname[MAX_NAME_LENGTH];
+	GetClientName(target, targname, sizeof(targname));
+	PrintToChatAll("%s tells %s to go medic!", name, targname);
+	TF2_SetPlayerClass(target, TFClass_Medic, false, true);
+}
+
+//Order a bot to become a soldier. TODO: Make a generic one: "!oi BotName go ClassName"
+public void cmd_soldier(int client, int target)
+{
+	char name[MAX_NAME_LENGTH];
+	GetClientName(client, name, sizeof(name));
+	char targname[MAX_NAME_LENGTH];
+	GetClientName(target, targname, sizeof(targname));
+	PrintToChatAll("%s tells %s to go soldier!", name, targname);
+	TF2_SetPlayerClass(target, TFClass_Soldier, false, true);
 }
 
 //MVM! Ready up!
