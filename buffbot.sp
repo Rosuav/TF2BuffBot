@@ -38,6 +38,7 @@ ConVar sm_buffbot_gift_chance_friendly_human = null; //(20) Chance that each fri
 ConVar sm_buffbot_gift_chance_friendly_bot = null; //(2) Chance that each friendly bot has of receiving a !gift
 ConVar sm_buffbot_gift_chance_enemy_human = null; //(10) Chance that each enemy human has of receiving a !gift
 ConVar sm_buffbot_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot has of receiving a !gift
+ConVar sm_buffbot_buff_duration = null; //(30) Length of time that each buff/debuff lasts
 #include "convars"
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
@@ -336,6 +337,7 @@ Action regenerate(Handle timer, any target)
 
 void apply_effect(int target, TFCond condition)
 {
+	int duration = GetConVarInt(sm_buffbot_buff_duration);
 	//Special-case some effects (well, currently one effect) that we handle
 	//ourselves with a timer, rather than pushing through AddCondition.
 	//Since all of these (all one of these) use the same ticking_down array,
@@ -343,11 +345,11 @@ void apply_effect(int target, TFCond condition)
 	//the first one, but then BOTH timers will be decrementing the clock.
 	if (condition == TFCond_RegenBuffed)
 	{
-		ticking_down[target] = 30;
+		ticking_down[target] = duration;
 		CreateTimer(1.0, regenerate, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		Debug("Applied effect Regeneration to %d", target);
 		return;
 	}
-	TF2_AddCondition(target, condition, 30.0, 0);
+	TF2_AddCondition(target, condition, duration + 0.0, 0);
 	Debug("Applied effect %d to %d", condition, target);
 }

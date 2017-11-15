@@ -44,6 +44,10 @@ and run-time tweakability.
   hearts' content, making the entire carnage system immaterial, and negating
   several of the deleterious effects (doesn't mean much to be marked for death
   if you have ubercharge, for example).
+* sm_buffbot_buff_duration: 30 seconds by default. Whatever buff or debuff you
+  get, it lasts this long. Effects can be terminated prematurely, notably by
+  touching a resupply locker; some effects have their own cutoffs too (eg
+  invisibility, which ends immediately upon attacking).
 
 Note that using !roulette or !gift will always consume ALL of your carnage
 points (unless you don't have enough). Having triple the required points does
@@ -70,7 +74,6 @@ be adjusted.
 
 Further knobs that are not currently cvars, but could become so in the future:
 
-* Buff duration. Currently thirty seconds across the board.
 * Probability of getting good/bad/weird buff
 
 Further tweakables that are not easy to make into cvars:
