@@ -28,7 +28,7 @@ ConVar sm_buffbot_carnage_per_assist = null; //(1) Carnage points gained for eac
 ConVar sm_buffbot_carnage_per_death = null; //(3) Carnage points gained when you die
 ConVar sm_buffbot_carnage_per_building = null; //(1) Carnage points gained when you destroy a non-gun building (assists ignored here)
 ConVar sm_buffbot_carnage_per_sentry = null; //(2) Carnage points gained when you destroy a sentry gun
-ConVar sm_buffbot_carnage_per_ubercharge = null; //(1) Carnage points gained by a medic who deploys Uber
+ConVar sm_buffbot_carnage_per_ubercharge = null; //(0) Carnage points gained by a medic who deploys Uber
 ConVar sm_buffbot_carnage_per_upgrade = null; //(0) Carnage points gained by an engineer who upgrades a building
 //No carnage points are granted for achieving map goals (capturing the flag, taking a control point, moving the
 //payload, etc). Such actions may help you win, but they don't create death and destruction.
