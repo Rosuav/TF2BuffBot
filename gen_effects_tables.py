@@ -15,19 +15,7 @@ effects = {
 		"TFCond_SpeedBuffAlly": "Get in, get the job done, and get out. Got it, %s?",
 		"TFCond_RegenBuffed": "%s turns into a Time Lord and starts regenerating...",
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
-		# Sadly, these can be abused by dropping them, which eliminates
-		# the time limit :(
-		# TFCond_RuneStrength,
-		# TFCond_RuneHaste,
-		# TFCond_RuneRegen,
-		# TFCond_RuneResist,
-		# TFCond_RuneVampire,
-		# TFCond_RuneWarlock,
-		# TFCond_RunePrecision,
-		# TFCond_RuneAgility,
-		# TFCond_KingRune,
-		# TFCond_PlagueRune,
-		# TFCond_SupernovaRune,
+
 	}, "detriments": {
 		"TFCond_Jarated": "%s just got covered in Jarate. Eww.",
 		"TFCond_Milked": "%s just got covered in something that's almost, but not entirely, unlike milk.",
