@@ -44,6 +44,9 @@ ConVar sm_buffbot_gift_chance_friendly_human = null; //(20) Chance that each fri
 ConVar sm_buffbot_gift_chance_friendly_bot = null; //(2) Chance that each friendly bot has of receiving a !gift
 ConVar sm_buffbot_gift_chance_enemy_human = null; //(10) Chance that each enemy human has of receiving a !gift
 ConVar sm_buffbot_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot has of receiving a !gift
+//Debug assistants. Not generally useful for server admins who aren't also coding the buff bot itself.
+ConVar sm_buffbot_debug_force_category = null; //(0) Debug - force roulette to give good (1), bad (2), weird (3), or death (4)
+ConVar sm_buffbot_debug_force_effect = null; //(0) Debug - force roulette/gift to give the Nth effect in that category (ignored if out of bounds)
 #include "convars"
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
@@ -194,7 +197,6 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		}
 		//Give a random effect to self, more of which are beneficial than not
 		//There's a small chance of death (since this is Russian Roulette after all).
-		int sel;
 		TFCond condition;
 		char targetname[MAX_NAME_LENGTH];
 		GetClientName(target, targetname, sizeof(targetname));
@@ -202,21 +204,32 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int prob_bad = GetConVarInt(sm_buffbot_roulette_chance_bad);
 		int prob_weird = GetConVarInt(sm_buffbot_roulette_chance_weird);
 		int category = RoundToFloor((prob_good + prob_bad + prob_weird + 1) * GetURandomFloat());
+		int sel = GetConVarInt(sm_buffbot_debug_force_effect);
+		switch (GetConVarInt(sm_buffbot_debug_force_category))
+		{
+			case 1: category = 0; //Force to Good
+			case 2: category = prob_good; //Force to Bad
+			case 3: category = prob_good + prob_bad; //Force to Weird
+			case 4: category = prob_good + prob_bad + prob_weird; //Force to death
+		}
 		if ((category -= prob_good) < 0)
 		{
-			sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
+			if (sel > 0 && sel <= sizeof(benefits)) --sel; //Forced selection (1-based)
+			else sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
 			condition = benefits[sel];
 			PrintToChatAll(benefits_desc[sel], targetname);
 		}
 		else if ((category -= prob_bad) < 0)
 		{
-			sel = RoundToFloor(sizeof(detriments)*GetURandomFloat());
+			if (sel > 0 && sel <= sizeof(detriments)) --sel; //Forced selection (1-based)
+			else sel = RoundToFloor(sizeof(detriments)*GetURandomFloat());
 			condition = detriments[sel];
 			PrintToChatAll(detriments_desc[sel], targetname);
 		}
 		else if ((category -= prob_weird) < 0)
 		{
-			sel = RoundToFloor(sizeof(weird)*GetURandomFloat());
+			if (sel > 0 && sel <= sizeof(weird)) --sel; //Forced selection (1-based)
+			else sel = RoundToFloor(sizeof(weird)*GetURandomFloat());
 			condition = weird[sel];
 			PrintToChatAll(weird_desc[sel], targetname);
 		}
