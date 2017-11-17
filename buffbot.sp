@@ -36,9 +36,9 @@ ConVar sm_buffbot_carnage_required = null; //(10) Carnage points required to use
 ConVar sm_buffbot_buff_duration = null; //(30) Length of time that each buff/debuff lasts
 //When you spin the !roulette wheel, you have these odds of getting different buff categories.
 //There will always be exactly one chance that you will die, so scale these numbers accordingly.
-ConVar sm_buffbot_roulette_chance_good = null; //(66) Chance that a roulette spin will give a beneficial effect
+ConVar sm_buffbot_roulette_chance_good = null; //(64) Chance that a roulette spin will give a beneficial effect
 ConVar sm_buffbot_roulette_chance_bad = null; //(30) Chance that a roulette spin will give a detrimental effect
-ConVar sm_buffbot_roulette_chance_weird = null; //(3) Chance that a roulette spin will give a weird effect
+ConVar sm_buffbot_roulette_chance_weird = null; //(5) Chance that a roulette spin will give a weird effect
 //When you grant a !gift, players (other than yourself) will have this many chances each.
 ConVar sm_buffbot_gift_chance_friendly_human = null; //(20) Chance that each friendly human has of receiving a !gift
 ConVar sm_buffbot_gift_chance_friendly_bot = null; //(2) Chance that each friendly bot has of receiving a !gift
