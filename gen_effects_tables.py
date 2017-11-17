@@ -15,6 +15,7 @@ effects = {
 		"TFCond_SpeedBuffAlly": "Get in, get the job done, and get out. Got it, %s?",
 		"TFCond_RegenBuffed": "%s turns into a Time Lord and starts regenerating...",
 		"view_as<TFCond>(-1)": "%s becomes as light as a feather!",
+		"TFCond_DisguisedAsDispenser": "%s can run, but... well, actually, can hide too.",
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
 
 	}, "detriments": {
@@ -29,7 +30,6 @@ effects = {
 		"view_as<TFCond>(-4)": "Blood clouds %s's vision...",
 	}, "weird": {
 		"TFCond_HalloweenGhostMode": "%s is pining for the fjords...",
-		"TFCond_DisguisedAsDispenser": "Something weird just happened to %s.",
 		"view_as<TFCond>(-3)": "Chaotic gravity waves surround %s.",
 		"view_as<TFCond>(-5)": "%s goes into a blind rage!!!",
 	}
