@@ -38,6 +38,9 @@ win, but they don't create death and destruction. Get out there killing stuff!
 See [knobs](knobs.md) for a full list of tweakable knobs and some advice on how
 they affect gameplay.
 
+Known bugs: Some effects don't reset on death, some do reset when you touch a
+resupply locker, and there's not a lot of consistency.
+
 Bot Control
 -----------
 
