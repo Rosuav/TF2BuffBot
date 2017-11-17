@@ -59,6 +59,7 @@ ConVar sm_buffbot_gravity_modifier = null; //(3) Ratio used for gravity effects 
 //to be rare, and on its own isn't a problem).
 int carnage_points[16384];
 
+int BeamSprite, HaloSprite;
 public void OnPluginStart()
 {
 	RegAdminCmd("sm_critboost", Command_CritBoost, ADMFLAG_SLAY);
@@ -71,6 +72,15 @@ public void OnPluginStart()
 	//The actual code to create convars convars is built by the Python script,
 	//and yes, I'm aware that I now have two problems.
 	CreateConVars();
+	//Load up some sprites from funcommands. This is GPL'd, so the following section
+	//of code is also GPL'd.
+	char buffer[PLATFORM_MAX_PATH];
+	Handle gameConfig = LoadGameConfigFile("funcommands.games");
+	GameConfGetKeyValue(gameConfig, "SpriteBeam", buffer, sizeof(buffer));
+	BeamSprite = PrecacheModel(buffer);
+	GameConfGetKeyValue(gameConfig, "SpriteHalo", buffer, sizeof(buffer));
+	HaloSprite = PrecacheModel(buffer);
+	//End GPL code. (The rest of this file is even more freely usable.)
 }
 
 public Action Command_CritBoost(int client, int args)
@@ -410,6 +420,18 @@ Action weird_gravity(Handle timer, any target)
 	return Plugin_Handled;
 }
 
+Action beacon(Handle timer, int target)
+{
+	ignore(timer);
+	if (!TF2_IsPlayerInCondition(target, TFCond_MarkedForDeathSilent)) return Plugin_Stop;
+	float vec[3];
+	GetClientAbsOrigin(target, vec);
+	vec[2] += 10;
+	TE_SetupBeamRingPoint(vec, 10.0, 375.0, BeamSprite, HaloSprite, 0, 15, 0.5, 5.0, 0.0, {255, 255, 0, 255}, 10, 0);
+	TE_SendToAll();
+	return Plugin_Handled;
+}
+
 void apply_effect(int target, TFCond condition)
 {
 	int duration = GetConVarInt(sm_buffbot_buff_duration);
@@ -450,12 +472,19 @@ void apply_effect(int target, TFCond condition)
 		Debug("Applied effect Weird Gravity to %d", target);
 		return;
 	}
+	//Some effects need additional code.
 	else if (condition == TFCond_Plague)
 	{
 		//Start a bleed effect as well as applying the Plague condition.
 		//The condition causes a "squelch" sound and stuff; the bleed
 		//causes hitpoint loss.
 		TF2_MakeBleed(target, target, duration + 0.0);
+	}
+	else if (condition == TFCond_MarkedForDeathSilent)
+	{
+		//Make the death mark less silent. No tickdown - it looks for
+		//the MFD condition's removal.
+		CreateTimer(0.25, beacon, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 	}
 	TF2_AddCondition(target, condition, duration + 0.0, 0);
 	Debug("Applied effect %d to %d", condition, target);
@@ -464,5 +493,4 @@ void apply_effect(int target, TFCond condition)
 
 /* More ideas:
 Blind Rage: Ubercharge, 100% crits, and freedom of movement (cf Quick-Fix)... plus blindness
-Put a beacon on a player who gets marked for death
 */
