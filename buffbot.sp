@@ -373,6 +373,8 @@ Action reset_gravity(Handle timer, any target)
 
 Action weird_gravity(Handle timer, any target)
 {
+	//If you're dead, reset to normal.
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return reset_gravity(timer, target);
 	char targetname[MAX_NAME_LENGTH];
 	GetClientName(target, targetname, sizeof(targetname));
 	float max_gravity_factor = GetConVarFloat(sm_buffbot_gravity_modifier);
