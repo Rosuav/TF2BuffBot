@@ -14,6 +14,7 @@ effects = {
 		"TFCond_DefenseBuffed": "%s erects a personal-sized banner and toots a little bugle.",
 		"TFCond_SpeedBuffAlly": "Get in, get the job done, and get out. Got it, %s?",
 		"TFCond_RegenBuffed": "%s turns into a Time Lord and starts regenerating...",
+		"view_as<TFCond>(-1)": "%s becomes as light as a feather!",
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
 
 	}, "detriments": {
@@ -24,6 +25,7 @@ effects = {
 		# "TFCond_HalloweenKartCage": "%s has been naughty and is now imprisoned.", # Doesn't seem to work properly
 		"TFCond_Plague": "A rat bites %s and inflicts a non-contagious form of the Bubonic Plague.",
 		# TFCond_RestrictToMelee, //TODO: If this gets triggered, also force selection of melee weapon
+		"view_as<TFCond>(-2)": "%s becomes as heavy as... well, a Heavy?",
 	}, "weird": {
 		"TFCond_HalloweenGhostMode": "%s is pining for the fjords...",
 		"TFCond_DisguisedAsDispenser": "Something weird just happened to %s.",

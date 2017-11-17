@@ -47,6 +47,8 @@ ConVar sm_buffbot_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot
 //Debug assistants. Not generally useful for server admins who aren't also coding the buff bot itself.
 ConVar sm_buffbot_debug_force_category = null; //(0) Debug - force roulette to give good (1), bad (2), weird (3), or death (4)
 ConVar sm_buffbot_debug_force_effect = null; //(0) Debug - force roulette/gift to give the Nth effect in that category (ignored if out of bounds)
+//More knobs
+ConVar sm_buffbot_gravity_modifier = null; //(3) Ratio used for gravity effects - either multiply by this or divide by it
 #include "convars"
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
@@ -339,9 +341,13 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
+//Silence the warning "unused parameter"
+any ignore(any ignoreme) {return ignoreme;}
+
 int ticking_down[MAXPLAYERS + 1]; //Any effect that's managed by a timer will tick down in this.
 Action regenerate(Handle timer, any target)
 {
+	ignore(timer);
 	//When you die, you stop regenerating.
 	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
 	//Debug("Regenerating %d", target);
@@ -352,10 +358,20 @@ Action regenerate(Handle timer, any target)
 	return Plugin_Handled;
 }
 
+//NOTE: If you get multiple gravity-changing effects, they will
+//overwrite each other, AND the end of any gravity change results
+//in your gravity resetting to normal.
+Action reset_gravity(Handle timer, any target)
+{
+	ignore(timer);
+	SetEntityGravity(target, 1.0);
+	return Plugin_Stop;
+}
+
 void apply_effect(int target, TFCond condition)
 {
 	int duration = GetConVarInt(sm_buffbot_buff_duration);
-	//Special-case some effects (well, currently one effect) that we handle
+	//Special-case some effects (or pseudo-effects) that we handle
 	//ourselves with a timer, rather than pushing through AddCondition.
 	//Since all of these (all one of these) use the same ticking_down array,
 	//applying a second such effect during another's duration will extend
@@ -365,6 +381,22 @@ void apply_effect(int target, TFCond condition)
 		ticking_down[target] = duration;
 		CreateTimer(1.0, regenerate, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		Debug("Applied effect Regeneration to %d", target);
+		return;
+	}
+	else if (condition == view_as<TFCond>(-1))
+	{
+		float gravity_factor = GetConVarFloat(sm_buffbot_gravity_modifier);
+		SetEntityGravity(target, 1/gravity_factor);
+		CreateTimer(duration + 0.0, reset_gravity, target);
+		Debug("Applied effect Low Gravity to %d", target);
+		return;
+	}
+	else if (condition == view_as<TFCond>(-2))
+	{
+		float gravity_factor = GetConVarFloat(sm_buffbot_gravity_modifier);
+		SetEntityGravity(target, gravity_factor);
+		CreateTimer(duration + 0.0, reset_gravity, target);
+		Debug("Applied effect High Gravity to %d", target);
 		return;
 	}
 	else if (condition == TFCond_Plague)
@@ -381,7 +413,6 @@ void apply_effect(int target, TFCond condition)
 
 /* More ideas:
 Blind Rage: Ubercharge, 100% crits, and freedom of movement (cf Quick-Fix)... plus blindness
-Gravity (increased or decreased). How much? Halve/double?
 Gravity, weirded. Every second, adjust gravity factor by five percentage points; "wind down" to 1.0 as it wears off.
 Put a beacon on a player who gets marked for death
 */
