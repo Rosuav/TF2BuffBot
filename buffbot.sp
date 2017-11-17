@@ -364,3 +364,11 @@ void apply_effect(int target, TFCond condition)
 	TF2_AddCondition(target, condition, duration + 0.0, 0);
 	Debug("Applied effect %d to %d", condition, target);
 }
+
+
+/* More ideas:
+Blind Rage: Ubercharge, 100% crits, and freedom of movement (cf Quick-Fix)... plus blindness
+Gravity (increased or decreased). How much? Halve/double?
+Gravity, weirded. Every second, adjust gravity factor by five percentage points; "wind down" to 1.0 as it wears off.
+Put a beacon on a player who gets marked for death
+*/
