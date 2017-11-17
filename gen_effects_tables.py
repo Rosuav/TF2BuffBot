@@ -26,10 +26,12 @@ effects = {
 		"TFCond_Plague": "A rat bites %s and inflicts a non-contagious form of the Bubonic Plague.",
 		# TFCond_RestrictToMelee, //TODO: If this gets triggered, also force selection of melee weapon
 		"view_as<TFCond>(-2)": "%s becomes as heavy as... well, a Heavy?",
+		"view_as<TFCond>(-4)": "Blood clouds %s's vision...",
 	}, "weird": {
 		"TFCond_HalloweenGhostMode": "%s is pining for the fjords...",
 		"TFCond_DisguisedAsDispenser": "Something weird just happened to %s.",
 		"view_as<TFCond>(-3)": "Chaotic gravity waves surround %s.",
+		"view_as<TFCond>(-5)": "%s goes into a blind rage!!!",
 	}
 }
 with open("randeffects.inc", "w") as f:

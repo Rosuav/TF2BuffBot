@@ -432,6 +432,56 @@ Action beacon(Handle timer, int target)
 	return Plugin_Handled;
 }
 
+int blinded[MAXPLAYERS + 1];
+void blind(int target, int amount)
+{
+	//Borrowed from funcommands::blind.sp
+	//This code is governed by the terms of the GPL. (The rest of this file
+	//is under even more free terms.)
+	int duration = 1536;
+	int holdtime = 1536;
+	//Magic numbers. I've no idea what these flags do/mean.
+	int flags = amount ? 10 : 17;
+	int color[4] = { 128, 0, 0, 0 };
+	color[3] = amount;
+	
+	int targets[2]; targets[0] = target; targets[1] = 0;
+	Handle message = StartMessageEx(GetUserMessageId("Fade"), targets, 1);
+	if (GetUserMessageType() == UM_Protobuf)
+	{
+		Protobuf pb = UserMessageToProtobuf(message);
+		pb.SetInt("duration", duration);
+		pb.SetInt("hold_time", holdtime);
+		pb.SetInt("flags", flags);
+		pb.SetColor("clr", color);
+	}
+	else
+	{
+		BfWrite bf = UserMessageToBfWrite(message);
+		bf.WriteShort(duration);
+		bf.WriteShort(holdtime);
+		bf.WriteShort(flags);		
+		bf.WriteByte(color[0]);
+		bf.WriteByte(color[1]);
+		bf.WriteByte(color[2]);
+		bf.WriteByte(color[3]);
+	}
+	
+	EndMessage();
+	//End code governed by the GPL.
+}
+
+Action unblind(Handle timer, any target)
+{
+	if (--blinded[target]) return Plugin_Stop; //Still blinded by something else
+	char targetname[MAX_NAME_LENGTH];
+	GetClientName(target, targetname, sizeof(targetname));
+	PrintToChatAll("%s's vision returns to normal.", targetname);
+	ignore(timer);
+	blind(target, 0);
+	return Plugin_Stop;
+}
+
 void apply_effect(int target, TFCond condition)
 {
 	int duration = GetConVarInt(sm_buffbot_buff_duration);
@@ -472,6 +522,26 @@ void apply_effect(int target, TFCond condition)
 		Debug("Applied effect Weird Gravity to %d", target);
 		return;
 	}
+	else if (condition == view_as<TFCond>(-4))
+	{
+		++blinded[target];
+		blind(target, 253);
+		Debug("Applied effect Darkened Vision to %d", target);
+		CreateTimer(duration + 0.0, unblind, target);
+		return;
+	}
+	else if (condition == view_as<TFCond>(-5))
+	{
+		++blinded[target];
+		blind(target, 255);
+		CreateTimer(duration + 0.0, unblind, target);
+		TF2_AddCondition(target, TFCond_UberchargedOnTakeDamage, duration + 0.0, 0);
+		TF2_AddCondition(target, TFCond_CritOnDamage, duration + 0.0, 0);
+		TF2_AddCondition(target, TFCond_MarkedForDeathSilent, duration + 0.0, 0);
+		TF2_AddCondition(target, TFCond_MegaHeal, duration + 0.0, 0); //Immunity to knock-back
+		Debug("Applied effect Blind Rage to %d", target);
+		return;
+	}
 	//Some effects need additional code.
 	else if (condition == TFCond_Plague)
 	{
@@ -489,8 +559,3 @@ void apply_effect(int target, TFCond condition)
 	TF2_AddCondition(target, condition, duration + 0.0, 0);
 	Debug("Applied effect %d to %d", condition, target);
 }
-
-
-/* More ideas:
-Blind Rage: Ubercharge, 100% crits, and freedom of movement (cf Quick-Fix)... plus blindness
-*/
