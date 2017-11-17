@@ -363,6 +363,9 @@ Action regenerate(Handle timer, any target)
 //in your gravity resetting to normal.
 Action reset_gravity(Handle timer, any target)
 {
+	char targetname[MAX_NAME_LENGTH];
+	GetClientName(target, targetname, sizeof(targetname));
+	PrintToChatAll("%s returns to normal gravity.", targetname);
 	ignore(timer);
 	SetEntityGravity(target, 1.0);
 	return Plugin_Stop;
