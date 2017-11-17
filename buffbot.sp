@@ -371,6 +371,43 @@ Action reset_gravity(Handle timer, any target)
 	return Plugin_Stop;
 }
 
+Action weird_gravity(Handle timer, any target)
+{
+	char targetname[MAX_NAME_LENGTH];
+	GetClientName(target, targetname, sizeof(targetname));
+	float max_gravity_factor = GetConVarFloat(sm_buffbot_gravity_modifier);
+	float gravity_factor = GetEntityGravity(target);
+	//Debug("Current gravity_factor: %f", gravity_factor);
+	//To simplify some of the calculations, we always work with values >1.
+	//That way, "2" means either half or double, and we can never hit 0.0 gravity.
+	bool reduced = gravity_factor < 1.0;
+	if (reduced) gravity_factor = 1.0 / gravity_factor;
+	if (gravity_factor == 1.0) reduced = (GetURandomFloat() < 0.5); //Initially, pick heavier/lighter at random
+	if (GetURandomFloat() < 0.1) reduced = !reduced; //Sometimes, we flip from heavier to lighter or vice versa.
+	if (GetURandomFloat() < (gravity_factor - 0.9) / max_gravity_factor)
+	{
+		//Reduce effect or invert
+		if (gravity_factor <= 1.0 + max_gravity_factor / 10.0)
+			reduced = !reduced;
+		else
+			gravity_factor -= max_gravity_factor / 10.0;
+		Debug("%s gets closer to normal: %f %s", targetname, gravity_factor, reduced ? "lighter" : "heavier");
+	}
+	else
+	{
+		//Increase effect (if possible)
+		gravity_factor += max_gravity_factor / 10.0;
+		if (gravity_factor > max_gravity_factor)
+			gravity_factor = max_gravity_factor;
+		Debug("%s gets more abnormal: %f %s", targetname, gravity_factor, reduced ? "lighter" : "heavier");
+	}
+	ignore(timer);
+	if (reduced) gravity_factor = 1.0 / gravity_factor;
+	SetEntityGravity(target, gravity_factor);
+	if (--ticking_down[target] <= 0) return Plugin_Stop;
+	return Plugin_Handled;
+}
+
 void apply_effect(int target, TFCond condition)
 {
 	int duration = GetConVarInt(sm_buffbot_buff_duration);
@@ -402,6 +439,15 @@ void apply_effect(int target, TFCond condition)
 		Debug("Applied effect High Gravity to %d", target);
 		return;
 	}
+	else if (condition == view_as<TFCond>(-3))
+	{
+		ticking_down[target] = duration - 1; //Just to make sure, this one has one second less duration.
+		SetEntityGravity(target, 1.0);
+		CreateTimer(1.0, weird_gravity, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(duration + 1.0, reset_gravity, target); //Just to make sure, we reset *one second* after normal duration
+		Debug("Applied effect Weird Gravity to %d", target);
+		return;
+	}
 	else if (condition == TFCond_Plague)
 	{
 		//Start a bleed effect as well as applying the Plague condition.
@@ -416,6 +462,5 @@ void apply_effect(int target, TFCond condition)
 
 /* More ideas:
 Blind Rage: Ubercharge, 100% crits, and freedom of movement (cf Quick-Fix)... plus blindness
-Gravity, weirded. Every second, adjust gravity factor by five percentage points; "wind down" to 1.0 as it wears off.
 Put a beacon on a player who gets marked for death
 */

@@ -29,6 +29,7 @@ effects = {
 	}, "weird": {
 		"TFCond_HalloweenGhostMode": "%s is pining for the fjords...",
 		"TFCond_DisguisedAsDispenser": "Something weird just happened to %s.",
+		"view_as<TFCond>(-3)": "Chaotic gravity waves surround %s.",
 	}
 }
 with open("randeffects.inc", "w") as f:
