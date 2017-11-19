@@ -201,6 +201,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	if (!strcmp(msg, "!roulette"))
 	{
 		int target = GetClientOfUserId(event.GetInt("userid"));
+		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
 		int slot = event.GetInt("userid") % sizeof(carnage_points);
 		if (carnage_points[slot] < GetConVarInt(sm_buffbot_carnage_required))
 		{
@@ -285,6 +286,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		//Pick a random target OTHER THAN the one who said it
 		//Give a random effect, guaranteed beneficial
 		int self = GetClientOfUserId(event.GetInt("userid"));
+		if (!IsClientInGame(self) || !IsPlayerAlive(self)) return;
 		int slot = event.GetInt("userid") % sizeof(carnage_points);
 		if (carnage_points[slot] < GetConVarInt(sm_buffbot_carnage_required))
 		{
@@ -373,6 +375,7 @@ Action regenerate(Handle timer, any target)
 //in your gravity resetting to normal.
 Action reset_gravity(Handle timer, any target)
 {
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
 	char targetname[MAX_NAME_LENGTH];
 	GetClientName(target, targetname, sizeof(targetname));
 	PrintToChatAll("%s returns to normal gravity.", targetname);
@@ -423,6 +426,7 @@ Action weird_gravity(Handle timer, any target)
 Action beacon(Handle timer, int target)
 {
 	ignore(timer);
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
 	if (!TF2_IsPlayerInCondition(target, TFCond_MarkedForDeathSilent)) return Plugin_Stop;
 	float vec[3];
 	GetClientAbsOrigin(target, vec);
@@ -435,6 +439,7 @@ Action beacon(Handle timer, int target)
 int blinded[MAXPLAYERS + 1];
 void blind(int target, int amount)
 {
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
 	//Borrowed from funcommands::blind.sp
 	//This code is governed by the terms of the GPL. (The rest of this file
 	//is under even more free terms.)
