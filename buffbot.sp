@@ -559,7 +559,9 @@ void apply_effect(int target, TFCond condition)
 	{
 		//Make the death mark less silent. No tickdown - it looks for
 		//the MFD condition's removal.
-		CreateTimer(0.25, beacon, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		//Removed 20171119 as it may be the cause of some crashes (????)
+		if (!target) //aka "if (0)" but w/o warning
+			CreateTimer(0.25, beacon, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 	}
 	TF2_AddCondition(target, condition, duration + 0.0, 0);
 	Debug("Applied effect %d to %d", condition, target);
