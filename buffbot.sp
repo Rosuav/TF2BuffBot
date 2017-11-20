@@ -49,6 +49,8 @@ ConVar sm_buffbot_debug_force_category = null; //(0) Debug - force roulette to g
 ConVar sm_buffbot_debug_force_effect = null; //(0) Debug - force roulette/gift to give the Nth effect in that category (ignored if out of bounds)
 //More knobs
 ConVar sm_buffbot_gravity_modifier = null; //(3) Ratio used for gravity effects - either multiply by this or divide by it
+//Not directly triggered by chat, but other ways to encourage carnage
+ConVar sm_buffbot_crits_on_domination = null; //(5) Number of seconds to crit-boost everyone (both teams) after a domination - 0 to disable
 #include "convars"
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
@@ -164,6 +166,53 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		add_score(event.GetInt("assister"), GetConVarInt(sm_buffbot_carnage_per_assist));
 	}
 	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_death));
+	int deathflags = event.GetInt("death_flags");
+	if (deathflags & (TF_DEATHFLAG_KILLERDOMINATION | TF_DEATHFLAG_ASSISTERDOMINATION))
+	{
+		//Someone got a domination. Give everyone crits for a few seconds!
+		//Of course, someone's dead right now. Sucks to be you. :)
+		int duration = GetConVarInt(sm_buffbot_crits_on_domination);
+		if (duration)
+			for (int target = 1; target <= MaxClients; ++target)
+				if (IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target))
+					TF2_AddCondition(target, TFCond_CritOnDamage, duration + 0.0, 0);
+		if (deathflags & TF_DEATHFLAG_GIBBED)
+			PrintToChatAll("Pieces of %s splatter all over everyone. Muahahaha, such happy carnage!", playername);
+		else
+			PrintToChatAll("The lifeless corpse of %s flies around the map. Muahahaha, such happy carnage!", playername);
+	}
+	//Revenge doesn't have any in-game effect, but we put a message up about it.
+	if (deathflags & (TF_DEATHFLAG_KILLERREVENGE | TF_DEATHFLAG_ASSISTERREVENGE))
+	{
+		int killer = GetClientOfUserId(event.GetInt("attacker"));
+		char killername[MAX_NAME_LENGTH]; GetClientName(killer, killername, sizeof(killername));
+		int assister = GetClientOfUserId(event.GetInt("assister"));
+		char assistername[MAX_NAME_LENGTH]; GetClientName(assister, assistername, sizeof(assistername));
+		int gibbed = deathflags & TF_DEATHFLAG_GIBBED;
+		//ugh the verbosity
+		if ((deathflags & (TF_DEATHFLAG_KILLERREVENGE | TF_DEATHFLAG_ASSISTERREVENGE)) == (TF_DEATHFLAG_KILLERREVENGE | TF_DEATHFLAG_ASSISTERREVENGE))
+		{
+			//Double revenge!
+			if (gibbed)
+				PrintToChatAll("Bwahahahaha! Ooh that feels good. %s and %s splatter %s everywhere!!", killername, assistername, playername);
+			else
+				PrintToChatAll("Double revenge by %s and %s on the dominating %s!!", killername, assistername, playername);
+		}
+		else if (deathflags & TF_DEATHFLAG_KILLERREVENGE)
+		{
+			if (gibbed)
+				PrintToChatAll("Takedown! %s splatters %s all over everyone. Feels good.", killername, playername);
+			else
+				PrintToChatAll("Takedown! %s kicks the lifeless corpse of %s. Feels good.", killername, playername);
+		}
+		else
+		{
+			if (gibbed)
+				PrintToChatAll("%s helps %s to splatter %s all over everyone. Kaboom!", assistername, killername, playername);
+			else
+				PrintToChatAll("%s helps %s to kick the corpse of %s. That felt good.", assistername, killername, playername);
+		}
+	}
 }
 
 public void BuildingBlownUp(Event event, const char[] name, bool dontBroadcast)
