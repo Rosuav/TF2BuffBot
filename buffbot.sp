@@ -51,6 +51,7 @@ ConVar sm_buffbot_debug_force_effect = null; //(0) Debug - force roulette/gift t
 ConVar sm_buffbot_gravity_modifier = null; //(3) Ratio used for gravity effects - either multiply by this or divide by it
 //Not directly triggered by chat, but other ways to encourage carnage
 ConVar sm_buffbot_crits_on_domination = null; //(5) Number of seconds to crit-boost everyone (both teams) after a domination - 0 to disable
+//ConVar sm_buffbot_ignite_chance_on_capture = null; //(25) Percentage chance that a point capture will set everyone on fire. (TODO)
 #include "convars"
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
