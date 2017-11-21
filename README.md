@@ -29,7 +29,8 @@ Server admins, check out the sm_buffbot_* cvars to tweak a variety of knobs.
 Note that carnage points are always reset if a player leaves the game or
 changes team, but are otherwise carried over; this means you can accrue points
 during Humiliation after one stage of a Payload map, and then use them in the
-next stage.
+next stage. And if the server starts up "waiting for players", use that time to
+get in a few early kills...
 
 No carnage points are granted for achieving map goals (capturing the flag,
 taking a control point, moving the payload, etc). Such actions may help you
