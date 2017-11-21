@@ -13,6 +13,7 @@ public void Debug(const char[] fmt, any ...) { }
 
 public Plugin myinfo =
 {
+	//TODO: Rename this to something more appropriate. Preferably with "Carnage" in the name.
 	name = "Buff Bot",
 	author = "Chris Angelico",
 	description = "Experimental bot that can buff players",
