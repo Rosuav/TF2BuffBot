@@ -62,6 +62,7 @@ ConVar sm_ccc_ignite_chance_on_start_capture = null; //(5) Chance that STARTING 
 //level of activity all the time for this to wrap and collide (wrapping itself is going
 //to be rare, and on its own isn't a problem).
 int carnage_points[16384];
+int ticking_down[MAXPLAYERS + 1]; //Any effect that's managed by a timer will tick down in this.
 
 int BeamSprite, HaloSprite;
 public void OnPluginStart()
@@ -527,7 +528,6 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 //Silence the warning "unused parameter"
 any ignore(any ignoreme) {return ignoreme;}
 
-int ticking_down[MAXPLAYERS + 1]; //Any effect that's managed by a timer will tick down in this.
 Action regenerate(Handle timer, any target)
 {
 	ignore(timer);
