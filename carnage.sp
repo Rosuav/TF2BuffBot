@@ -66,7 +66,7 @@ int carnage_points[16384];
 int BeamSprite, HaloSprite;
 public void OnPluginStart()
 {
-	RegAdminCmd("sm_critboost", Command_CritBoost, ADMFLAG_SLAY);
+	RegAdminCmd("sm_hysteria", Command_Hysteria, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("player_team", InitializePlayer);
 	HookEvent("player_death", PlayerDied);
@@ -90,22 +90,38 @@ public void OnPluginStart()
 	//End GPL code. (The rest of this file is even more freely usable.)
 }
 
-public Action Command_CritBoost(int client, int args)
+public Action Command_Hysteria(int client, int args)
 {
 	char player[32];
 	/* Try and find a matching player */
 	GetCmdArg(1, player, sizeof(player));
 	int target = FindTarget(client, player);
 	if (target == -1) return Plugin_Handled;
-
-	//Demo: Add one condition permanently, and one temporarily
-	//Other ideas: Pick one of the Rune powerups at random
-	TF2_AddCondition(target, TFCond_CritOnDamage, TFCondDuration_Infinite, 0);
-	TF2_AddCondition(target, TFCond_UberchargedOnTakeDamage, 5.0, 0);
-
 	char name[MAX_NAME_LENGTH];
 	GetClientName(target, name, sizeof(name));
-	ReplyToCommand(client, "[SM] You crit-boosted %s [%d]!", name, target);
+
+	TFCond effects[] = {
+		TFCond_CritOnDamage,
+		TFCond_BulletImmune,
+		TFCond_BlastImmune,
+		TFCond_FireImmune,
+	};
+	if (TF2_IsPlayerInCondition(target, TFCond_CritOnDamage))
+	{
+		//Remove the effects and clear the vision
+		for (int i = 0; i < sizeof(effects); ++i)
+			TF2_RemoveCondition(target, effects[i]);
+		blind(target, 0);
+		ReplyToCommand(client, "[SM] %s [%d] leaves hysteria behind.", name, target);
+	}
+	else
+	{
+		//Add the effects and wash out your vision
+		for (int i = 0; i < sizeof(effects); ++i)
+			TF2_AddCondition(target, effects[i], TFCondDuration_Infinite, 0);
+		blind(target, 192);
+		ReplyToCommand(client, "[SM] %s [%d] goes into hysteria mode!", name, target);
+	}
 
 	return Plugin_Handled;
 }
