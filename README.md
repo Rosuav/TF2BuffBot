@@ -44,6 +44,35 @@ they affect gameplay.
 Known bugs: Some effects don't reset on death, some do reset when you touch a
 resupply locker, and there's not a lot of consistency.
 
+### Turreting
+
+You can turn your character into a stationary turret (no, not a stationery
+turret, that would be QUITE different) with the command "!turret". Turrets are
+ineligible to participate in the regular roulette system (including gifting -
+a turret will not receive a gift), and have serious restrictions, but in return
+are turned into indestructible killing machines.
+
+Once you turn into a turret, the same command will cause you to pack up and
+prepare to move. Movement is in ghosted form. When you find the right spot, hit
+the command again to plonk down as a turret again. You can't ghost instantly
+after deploying, nor vice versa, but other than that, you have full control.
+
+PLEASE NOTE: It is possible to use this feature to spawn-camp. Don't do that,
+it's neither fun nor fair. Ladies'/gentlemen's agreement? Thanks. Of course,
+you're welcome (and encouraged) to use this to control a choke point or control
+point.
+
+Strategy:
+* Since you can't move, you can't pick up ammo boxes unless you're right on
+  top of an ammo respawn or your enemies die right at your feet. Consider
+  having a dispenser beside you, so you don't have to ghost yourself away to
+  collect ammunition.
+* The name of the command is "turret", but there's nothing stopping a Medic
+  from turning into an indestructible source of healing.
+* A long-range class like Heavy can command a large area, but a Pyro in a
+  narrow choke will be more likely to score those crucial ammo drops.
+
+
 Bot Control
 -----------
 
