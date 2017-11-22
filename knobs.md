@@ -46,7 +46,7 @@ reasonable to take the buff bot for a spin without changing any of these.
   several of the deleterious effects (doesn't mean much to be marked for death
   if you have ubercharge, for example).
 * sm_ccc_buff_duration: 30 seconds by default. Whatever buff or debuff you
-  get, it lasts this long. Effects can be terminated prematurely, notably by
+  get, it lasts this long. Effects can be terminated prematurely, often by
   touching a resupply locker; some effects have their own cutoffs too (eg
   invisibility, which ends immediately upon attacking).
 
@@ -59,9 +59,9 @@ When you spin the roulette wheel, you could get something good or something
 bad. Within each category, a selection of effects will be picked from with
 uniform probability, but the categories themselves are tweakable:
 
-* sm_ccc_roulette_chance_good: 66 by default - chance of something good.
+* sm_ccc_roulette_chance_good: 64 by default - chance of something good.
 * sm_ccc_roulette_chance_bad: 30 by default - chance of something bad.
-* sm_ccc_roulette_chance_weird: 3 by default - chance of something odd.
+* sm_ccc_roulette_chance_weird: 5 by default - chance of something odd.
 
 Gift-giving has its own set of knobs. Instead of having some chance of a good
 result and some chance of bad, the gift is guaranteed to be good, but might go
