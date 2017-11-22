@@ -468,6 +468,10 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		{
 			int weight;
 			if (i == self) weight = 0; //You never receive your own gift.
+			else if (TF2_IsPlayerInCondition(i, TFCond_HalloweenGhostMode))
+				weight = 0; //Ghosts can't receive buffs (they often are useless anyway)
+			else if (TF2_IsPlayerInCondition(i, TFCond_MedigunDebuff))
+				weight = 0; //Turrets can't receive buffs
 			else if (GetClientTeam(i) == myteam)
 			{
 				//Is there any way to play TF2 without a Steam account connected? VAC-unsecured
