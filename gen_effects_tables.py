@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Generate the randeffects.inc file for inclusion into buffbot.sp
+# Generate the randeffects.inc file for inclusion into carnage.sp
 import json # Quickest way to get C-like string encoding
 
 effects = {
