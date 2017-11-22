@@ -1,14 +1,14 @@
-TF2 Buff Bot and Bot Control
-============================
+TF2 Carnage Compensation and Bot Control
+========================================
 
-These two Team Fortress 2 mods can be used independently or together. The Buff
-Bot is a roll-the-dice mod based around a desire to create carnage; Bot Control
-allows a human player to give instructions to bots on the same team.
+These two Team Fortress 2 mods can be used independently or together. Carnage
+Compensation is a roll-the-dice mod based around a desire to create carnage;
+Bot Control allows human players to give instructions to bots on the same team.
 
-Buff Bot
---------
+Carnage Collection and Compensation
+-----------------------------------
 
-The Buff Bot's primary statistic is "carnage points", which are earned by all
+The CCC's primary statistic is "carnage points", which are earned by all
 game participants. Once you have enough, you can spend all your carnage points
 on either a random effect for yourself, or a gift for another player.
 
@@ -35,6 +35,8 @@ get in a few early kills...
 No carnage points are granted for achieving map goals (capturing the flag,
 taking a control point, moving the payload, etc). Such actions may help you
 win, but they don't create death and destruction. Get out there killing stuff!
+Though... the CCC might sometimes take it upon itself to "reward" these actions
+with a bit of a fireball, so take care...
 
 See [knobs](knobs.md) for a full list of tweakable knobs and some advice on how
 they affect gameplay.
