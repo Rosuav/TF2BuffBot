@@ -50,7 +50,7 @@ ConVar sm_ccc_debug_force_effect = null; //(0) Debug - force roulette/gift to gi
 //More knobs
 ConVar sm_ccc_gravity_modifier = null; //(3) Ratio used for gravity effects - either multiply by this or divide by it
 ConVar sm_ccc_turret_invuln_after_placement = null; //(30) Length of time a turret can remain invulnerable after deployment
-ConVar sm_ccc_turret_invuln_per_kill = null; //(3) Additional time a turret gains each time it gets a kill
+ConVar sm_ccc_turret_invuln_per_kill = null; //(2) Additional time a turret gains each time it gets a kill
 ConVar sm_ccc_turret_max_invuln = null; //(60) Maximum 'banked' invulnerability a turret can have
 //Not directly triggered by chat, but other ways to encourage carnage
 ConVar sm_ccc_crits_on_domination = null; //(5) Number of seconds to crit-boost everyone (both teams) after a domination - 0 to disable
