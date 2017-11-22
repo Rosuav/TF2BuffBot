@@ -52,7 +52,8 @@ ConVar sm_buffbot_debug_force_effect = null; //(0) Debug - force roulette/gift t
 ConVar sm_buffbot_gravity_modifier = null; //(3) Ratio used for gravity effects - either multiply by this or divide by it
 //Not directly triggered by chat, but other ways to encourage carnage
 ConVar sm_buffbot_crits_on_domination = null; //(5) Number of seconds to crit-boost everyone (both teams) after a domination - 0 to disable
-//ConVar sm_buffbot_ignite_chance_on_capture = null; //(25) Percentage chance that a point capture will set everyone on fire. (TODO)
+ConVar sm_buffbot_ignite_chance_on_capture = null; //(25) Percentage chance that a point/flag capture will set everyone on fire.
+ConVar sm_buffbot_ignite_chance_on_start_capture = null; //(5) Chance that STARTING a point capture will set everyone on fire.
 #include "convars"
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
@@ -73,6 +74,9 @@ public void OnPluginStart()
 	HookEvent("object_destroyed", BuildingBlownUp);
 	HookEvent("player_chargedeployed", Ubered);
 	HookEvent("player_upgradedobject", Upgraded);
+	HookEvent("ctf_flag_captured", Captured);
+	HookEvent("teamplay_point_captured", Captured);
+	HookEvent("teamplay_point_startcapture", StartCapture);
 	//The actual code to create convars convars is built by the Python script,
 	//and yes, I'm aware that I now have two problems.
 	CreateConVars();
@@ -242,6 +246,26 @@ public void Upgraded(Event event, const char[] name, bool dontBroadcast)
 {
 	if (GetConVarInt(sm_buffbot_carnage_per_upgrade)) Debug("Object upgraded!");
 	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_upgrade));
+}
+
+public void Captured(Event event, const char[] name, bool dontBroadcast)
+{
+	int chance = GetConVarInt(sm_buffbot_ignite_chance_on_capture);
+	if (100 * GetURandomFloat() >= chance) return; //Percentage chance
+	PrintToChatAll("The air opens with fire and everyone is caught in it!");
+	for (int target = 1; target <= MaxClients; ++target)
+		if (IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target))
+			TF2_IgnitePlayer(target, target);
+}
+
+public void StartCapture(Event event, const char[] name, bool dontBroadcast)
+{
+	int chance = GetConVarInt(sm_buffbot_ignite_chance_on_start_capture);
+	if (100 * GetURandomFloat() >= chance) return; //Percentage chance
+	PrintToChatAll("The volatility of capture point air sets EVERYONE on fire!");
+	for (int target = 1; target <= MaxClients; ++target)
+		if (IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target))
+			TF2_IgnitePlayer(target, target);
 }
 
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
