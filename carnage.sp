@@ -283,11 +283,75 @@ public void StartCapture(Event event, const char[] name, bool dontBroadcast)
 			TF2_IgnitePlayer(target, target);
 }
 
+//Turret-specific regeneration (similar to regenerate() below)
+Action returret(Handle timer, any target)
+{
+	ignore(timer);
+	//When you die, you stop regenerating. This allows you to kill yourself
+	//(eg change class, or with the console) to de-turret yourself.
+	int slot = GetClientUserId(target) % sizeof(carnage_points);
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) carnage_points[slot] = 0;
+	if (carnage_points[slot] >= 0) return Plugin_Stop; //Something's reset you. Maybe a team change or map change.
+	if (!TF2_IsPlayerInCondition(target, TFCond_MedigunDebuff)) return Plugin_Stop; //Ghost mode activated.
+	//Debug("Regenerating %d", target);
+	TF2_RegeneratePlayer(target);
+	//Ensure that knockback immunity remains. If the turret gets healed by a
+	//medic, MegaHeal disappears; but this way, it'll kick in again momentarily.
+	//So in effect, a turret can be moved by knockback only while it's being
+	//healed. A bit odd, but less so than the alternative.
+	if (!TF2_IsPlayerInCondition(target, TFCond_MegaHeal))
+		TF2_AddCondition(target, TFCond_MegaHeal, TFCondDuration_Infinite, 0);
+	return Plugin_Handled;
+}
+
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 {
 	//if (event.GetBool("teamonly")) return; //Ignore team chat (not working)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
+	if (!strcmp(msg, "!turret"))
+	{
+		//Turret mode. The first time you use this command, you become a
+		//turret; after that, it toggles between turret and ghost.
+		//While you are a turret, you cannot move, but can shoot; while
+		//you are a ghost, you cannot shoot, but can move.
+		int target = GetClientOfUserId(event.GetInt("userid"));
+		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
+		char targetname[MAX_NAME_LENGTH];
+		GetClientName(target, targetname, sizeof(targetname));
+		TFCond turret[] = {
+			TFCond_MedigunDebuff, //The flag that marks you as turret-mode
+			TFCond_UberchargedOnTakeDamage,
+			TFCond_CritOnDamage,
+			TFCond_MegaHeal,
+			TFCond_SpawnOutline,
+		};
+		TFCond ghost[] = {TFCond_HalloweenGhostMode};
+		int slot = event.GetInt("userid") % sizeof(carnage_points);
+		carnage_points[slot] = -1048576; //Turrets don't spin the roulette wheel
+		if (!TF2_IsPlayerInCondition(target, TFCond_MedigunDebuff))
+		{
+			PrintToChatAll("%s turns into a stationary turret.", targetname);
+			//I can't stun a player for infinite time. Ehh, one week should
+			//be sufficient...
+			TF2_StunPlayer(target, 604800.0, 1.0, TF_STUNFLAG_SLOWDOWN);
+			for (int i = 0; i < sizeof(ghost); ++i)
+				TF2_RemoveCondition(target, ghost[i]);
+			for (int i = 0; i < sizeof(turret); ++i)
+				TF2_AddCondition(target, turret[i], TFCondDuration_Infinite, 0);
+			CreateTimer(1.0, returret, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		}
+		else
+		{
+			PrintToChatAll("%s packs up and moves the turret elsewhere.", targetname);
+			TF2_RemoveCondition(target, TFCond_Dazed); //Undo TF2_StunPlayer
+			for (int i = 0; i < sizeof(turret); ++i)
+				TF2_RemoveCondition(target, turret[i]);
+			for (int i = 0; i < sizeof(ghost); ++i)
+				TF2_AddCondition(target, ghost[i], TFCondDuration_Infinite, 0);
+		}
+		return;
+	}
 	if (!strcmp(msg, "!roulette"))
 	{
 		int target = GetClientOfUserId(event.GetInt("userid"));
