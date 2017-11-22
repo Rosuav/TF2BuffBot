@@ -46,10 +46,10 @@ with open("randeffects.inc", "w") as f:
 		print("};\n", file=f)
 
 import re
-with open("buffbot.sp") as source, open("convars.inc", "w") as cv:
+with open("carnage.sp") as source, open("convars.inc", "w") as cv:
 	print("void CreateConVars() {", file=cv)
 	for line in source:
-		m = re.match(r"^ConVar (sm_buffbot_[a-z_]+) = null; //\(([0-9]+)\) (.*)", line)
+		m = re.match(r"^ConVar (sm_ccc_[a-z_]+) = null; //\(([0-9]+)\) (.*)", line)
 		if not m: continue
 		print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0, true, 0.0);".format(*m.groups()), file=cv)
 	print("}", file=cv)

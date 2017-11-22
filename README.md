@@ -25,7 +25,7 @@ receive your own gift (if there is nobody to receive it, the gift is wasted).
 Human players have far greater chance to receive gifts than bots do, and those
 on your own team have twice the chance that opponents have.
 
-Server admins, check out the sm_buffbot_* cvars to tweak a variety of knobs.
+Server admins, check out the sm_ccc_* cvars to tweak a variety of knobs.
 Note that carnage points are always reset if a player leaves the game or
 changes team, but are otherwise carried over; this means you can accrue points
 during Humiliation after one stage of a Payload map, and then use them in the

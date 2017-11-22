@@ -21,38 +21,38 @@ public Plugin myinfo =
 };
 
 //Before you can use !roulette or !gift, you must fill your (invisible) carnage counter.
-ConVar sm_buffbot_carnage_initial = null; //(0) Carnage points a player has on first joining or changing team
-ConVar sm_buffbot_carnage_per_solo_kill = null; //(2) Carnage points gained for each unassisted kill
-ConVar sm_buffbot_carnage_per_kill = null; //(2) Carnage points gained for each kill
-ConVar sm_buffbot_carnage_per_assist = null; //(1) Carnage points gained for each assist
-ConVar sm_buffbot_carnage_per_death = null; //(3) Carnage points gained when you die
-ConVar sm_buffbot_carnage_per_building = null; //(1) Carnage points gained when you destroy a non-gun building (assists ignored here)
-ConVar sm_buffbot_carnage_per_sentry = null; //(2) Carnage points gained when you destroy a sentry gun
-ConVar sm_buffbot_carnage_per_ubercharge = null; //(0) Carnage points gained by a medic who deploys Uber
-ConVar sm_buffbot_carnage_per_upgrade = null; //(0) Carnage points gained by an engineer who upgrades a building
+ConVar sm_ccc_carnage_initial = null; //(0) Carnage points a player has on first joining or changing team
+ConVar sm_ccc_carnage_per_solo_kill = null; //(2) Carnage points gained for each unassisted kill
+ConVar sm_ccc_carnage_per_kill = null; //(2) Carnage points gained for each kill
+ConVar sm_ccc_carnage_per_assist = null; //(1) Carnage points gained for each assist
+ConVar sm_ccc_carnage_per_death = null; //(3) Carnage points gained when you die
+ConVar sm_ccc_carnage_per_building = null; //(1) Carnage points gained when you destroy a non-gun building (assists ignored here)
+ConVar sm_ccc_carnage_per_sentry = null; //(2) Carnage points gained when you destroy a sentry gun
+ConVar sm_ccc_carnage_per_ubercharge = null; //(0) Carnage points gained by a medic who deploys Uber
+ConVar sm_ccc_carnage_per_upgrade = null; //(0) Carnage points gained by an engineer who upgrades a building
 //No carnage points are granted for achieving map goals (capturing the flag, taking a control point, moving the
 //payload, etc). Such actions may help you win, but they don't create death and destruction.
-ConVar sm_buffbot_carnage_required = null; //(10) Carnage points required to use !roulette or !gift
-ConVar sm_buffbot_buff_duration = null; //(30) Length of time that each buff/debuff lasts
+ConVar sm_ccc_carnage_required = null; //(10) Carnage points required to use !roulette or !gift
+ConVar sm_ccc_buff_duration = null; //(30) Length of time that each buff/debuff lasts
 //When you spin the !roulette wheel, you have these odds of getting different buff categories.
 //There will always be exactly one chance that you will die, so scale these numbers accordingly.
-ConVar sm_buffbot_roulette_chance_good = null; //(64) Chance that a roulette spin will give a beneficial effect
-ConVar sm_buffbot_roulette_chance_bad = null; //(30) Chance that a roulette spin will give a detrimental effect
-ConVar sm_buffbot_roulette_chance_weird = null; //(5) Chance that a roulette spin will give a weird effect
+ConVar sm_ccc_roulette_chance_good = null; //(64) Chance that a roulette spin will give a beneficial effect
+ConVar sm_ccc_roulette_chance_bad = null; //(30) Chance that a roulette spin will give a detrimental effect
+ConVar sm_ccc_roulette_chance_weird = null; //(5) Chance that a roulette spin will give a weird effect
 //When you grant a !gift, players (other than yourself) will have this many chances each.
-ConVar sm_buffbot_gift_chance_friendly_human = null; //(20) Chance that each friendly human has of receiving a !gift
-ConVar sm_buffbot_gift_chance_friendly_bot = null; //(2) Chance that each friendly bot has of receiving a !gift
-ConVar sm_buffbot_gift_chance_enemy_human = null; //(10) Chance that each enemy human has of receiving a !gift
-ConVar sm_buffbot_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot has of receiving a !gift
-//Debug assistants. Not generally useful for server admins who aren't also coding the buff bot itself.
-ConVar sm_buffbot_debug_force_category = null; //(0) Debug - force roulette to give good (1), bad (2), weird (3), or death (4)
-ConVar sm_buffbot_debug_force_effect = null; //(0) Debug - force roulette/gift to give the Nth effect in that category (ignored if out of bounds)
+ConVar sm_ccc_gift_chance_friendly_human = null; //(20) Chance that each friendly human has of receiving a !gift
+ConVar sm_ccc_gift_chance_friendly_bot = null; //(2) Chance that each friendly bot has of receiving a !gift
+ConVar sm_ccc_gift_chance_enemy_human = null; //(10) Chance that each enemy human has of receiving a !gift
+ConVar sm_ccc_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot has of receiving a !gift
+//Debug assistants. Not generally useful for server admins who aren't also coding CCC itself.
+ConVar sm_ccc_debug_force_category = null; //(0) Debug - force roulette to give good (1), bad (2), weird (3), or death (4)
+ConVar sm_ccc_debug_force_effect = null; //(0) Debug - force roulette/gift to give the Nth effect in that category (ignored if out of bounds)
 //More knobs
-ConVar sm_buffbot_gravity_modifier = null; //(3) Ratio used for gravity effects - either multiply by this or divide by it
+ConVar sm_ccc_gravity_modifier = null; //(3) Ratio used for gravity effects - either multiply by this or divide by it
 //Not directly triggered by chat, but other ways to encourage carnage
-ConVar sm_buffbot_crits_on_domination = null; //(5) Number of seconds to crit-boost everyone (both teams) after a domination - 0 to disable
-ConVar sm_buffbot_ignite_chance_on_capture = null; //(25) Percentage chance that a point/flag capture will set everyone on fire.
-ConVar sm_buffbot_ignite_chance_on_start_capture = null; //(5) Chance that STARTING a point capture will set everyone on fire.
+ConVar sm_ccc_crits_on_domination = null; //(5) Number of seconds to crit-boost everyone (both teams) after a domination - 0 to disable
+ConVar sm_ccc_ignite_chance_on_capture = null; //(25) Percentage chance that a point/flag capture will set everyone on fire.
+ConVar sm_ccc_ignite_chance_on_start_capture = null; //(5) Chance that STARTING a point capture will set everyone on fire.
 #include "convars"
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
@@ -119,7 +119,7 @@ public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 		event.GetInt("team"),
 		event.GetInt("oldteam"),
 		playername);
-	carnage_points[event.GetInt("userid") % sizeof(carnage_points)] = GetConVarInt(sm_buffbot_carnage_initial);
+	carnage_points[event.GetInt("userid") % sizeof(carnage_points)] = GetConVarInt(sm_ccc_carnage_initial);
 }
 
 void add_score(int userid, int score)
@@ -162,21 +162,21 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	if (event.GetInt("assister") == -1)
 	{
 		//Solo kill - might be given more points than an assisted one
-		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_solo_kill));
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_solo_kill));
 	}
 	else
 	{
 		//Assisted kill - award points to both attacker and assister
-		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_kill));
-		add_score(event.GetInt("assister"), GetConVarInt(sm_buffbot_carnage_per_assist));
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_kill));
+		add_score(event.GetInt("assister"), GetConVarInt(sm_ccc_carnage_per_assist));
 	}
-	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_death));
+	add_score(event.GetInt("userid"), GetConVarInt(sm_ccc_carnage_per_death));
 	int deathflags = event.GetInt("death_flags");
 	if (deathflags & (TF_DEATHFLAG_KILLERDOMINATION | TF_DEATHFLAG_ASSISTERDOMINATION))
 	{
 		//Someone got a domination. Give everyone crits for a few seconds!
 		//Of course, someone's dead right now. Sucks to be you. :)
-		int duration = GetConVarInt(sm_buffbot_crits_on_domination);
+		int duration = GetConVarInt(sm_ccc_crits_on_domination);
 		if (duration)
 			for (int target = 1; target <= MaxClients; ++target)
 				if (IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target))
@@ -231,25 +231,25 @@ public void BuildingBlownUp(Event event, const char[] name, bool dontBroadcast)
 	Debug("Object blown up! uid %d destroyed %d's building.",
 		event.GetInt("attacker"), event.GetInt("userid"));
 	if (event.GetInt("objecttype") == 2) //TFObject_Sentry
-		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_sentry));
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_sentry));
 	else
-		add_score(event.GetInt("attacker"), GetConVarInt(sm_buffbot_carnage_per_building));
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_building));
 }
 
 public void Ubered(Event event, const char[] name, bool dontBroadcast)
 {
 	Debug("Ubercharge deployed!");
-	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_ubercharge));
+	add_score(event.GetInt("userid"), GetConVarInt(sm_ccc_carnage_per_ubercharge));
 }
 public void Upgraded(Event event, const char[] name, bool dontBroadcast)
 {
-	if (GetConVarInt(sm_buffbot_carnage_per_upgrade)) Debug("Object upgraded!");
-	add_score(event.GetInt("userid"), GetConVarInt(sm_buffbot_carnage_per_upgrade));
+	if (GetConVarInt(sm_ccc_carnage_per_upgrade)) Debug("Object upgraded!");
+	add_score(event.GetInt("userid"), GetConVarInt(sm_ccc_carnage_per_upgrade));
 }
 
 public void Captured(Event event, const char[] name, bool dontBroadcast)
 {
-	int chance = GetConVarInt(sm_buffbot_ignite_chance_on_capture);
+	int chance = GetConVarInt(sm_ccc_ignite_chance_on_capture);
 	if (100 * GetURandomFloat() >= chance) return; //Percentage chance
 	PrintToChatAll("The air opens with fire and everyone is caught in it!");
 	for (int target = 1; target <= MaxClients; ++target)
@@ -259,7 +259,7 @@ public void Captured(Event event, const char[] name, bool dontBroadcast)
 
 public void StartCapture(Event event, const char[] name, bool dontBroadcast)
 {
-	int chance = GetConVarInt(sm_buffbot_ignite_chance_on_start_capture);
+	int chance = GetConVarInt(sm_ccc_ignite_chance_on_start_capture);
 	if (100 * GetURandomFloat() >= chance) return; //Percentage chance
 	PrintToChatAll("The volatility of capture point air sets EVERYONE on fire!");
 	for (int target = 1; target <= MaxClients; ++target)
@@ -277,7 +277,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int target = GetClientOfUserId(event.GetInt("userid"));
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
 		int slot = event.GetInt("userid") % sizeof(carnage_points);
-		if (carnage_points[slot] < GetConVarInt(sm_buffbot_carnage_required))
+		if (carnage_points[slot] < GetConVarInt(sm_ccc_carnage_required))
 		{
 			PrintToChat(target, "You'll have to wreak more havoc before you can do that, sorry.");
 			return;
@@ -287,12 +287,12 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		TFCond condition;
 		char targetname[MAX_NAME_LENGTH];
 		GetClientName(target, targetname, sizeof(targetname));
-		int prob_good = GetConVarInt(sm_buffbot_roulette_chance_good);
-		int prob_bad = GetConVarInt(sm_buffbot_roulette_chance_bad);
-		int prob_weird = GetConVarInt(sm_buffbot_roulette_chance_weird);
+		int prob_good = GetConVarInt(sm_ccc_roulette_chance_good);
+		int prob_bad = GetConVarInt(sm_ccc_roulette_chance_bad);
+		int prob_weird = GetConVarInt(sm_ccc_roulette_chance_weird);
 		int category = RoundToFloor((prob_good + prob_bad + prob_weird + 1) * GetURandomFloat());
-		int sel = GetConVarInt(sm_buffbot_debug_force_effect);
-		switch (GetConVarInt(sm_buffbot_debug_force_category))
+		int sel = GetConVarInt(sm_ccc_debug_force_effect);
+		switch (GetConVarInt(sm_ccc_debug_force_category))
 		{
 			case 1: category = 0; //Force to Good
 			case 2: category = prob_good; //Force to Bad
@@ -325,7 +325,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			//Super-secret super buff: if you would get the death effect
 			//but you had ten times the required carnage points, grant a
 			//Mannpower pickup instead of killing the player.
-			if (carnage_points[slot] > 10 * GetConVarInt(sm_buffbot_carnage_required))
+			if (carnage_points[slot] > 10 * GetConVarInt(sm_ccc_carnage_required))
 			{
 				TFCond runes[] = {
 					TFCond_RuneStrength,
@@ -362,7 +362,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int self = GetClientOfUserId(event.GetInt("userid"));
 		if (!IsClientInGame(self) || !IsPlayerAlive(self)) return;
 		int slot = event.GetInt("userid") % sizeof(carnage_points);
-		if (carnage_points[slot] < GetConVarInt(sm_buffbot_carnage_required))
+		if (carnage_points[slot] < GetConVarInt(sm_ccc_carnage_required))
 		{
 			PrintToChat(self, "You'll have to wreak more havoc before you can do that, sorry.");
 			return;
@@ -383,13 +383,13 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 				//Is there any way to play TF2 without a Steam account connected? VAC-unsecured
 				//servers? If so, those not Steamy will be considered bots, as I haven't found
 				//a better way to recognize bots.
-				if (GetSteamAccountID(i)) weight = GetConVarInt(sm_buffbot_gift_chance_friendly_human);
-				else weight = GetConVarInt(sm_buffbot_gift_chance_friendly_bot);
+				if (GetSteamAccountID(i)) weight = GetConVarInt(sm_ccc_gift_chance_friendly_human);
+				else weight = GetConVarInt(sm_ccc_gift_chance_friendly_bot);
 			}
 			else
 			{
-				if (GetSteamAccountID(i)) weight = GetConVarInt(sm_buffbot_gift_chance_enemy_human);
-				else weight = GetConVarInt(sm_buffbot_gift_chance_enemy_bot);
+				if (GetSteamAccountID(i)) weight = GetConVarInt(sm_ccc_gift_chance_enemy_human);
+				else weight = GetConVarInt(sm_ccc_gift_chance_enemy_bot);
 			}
 			client_weight[i] = weight;
 			tot_weight += weight;
@@ -464,7 +464,7 @@ Action weird_gravity(Handle timer, any target)
 	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return reset_gravity(timer, target);
 	char targetname[MAX_NAME_LENGTH];
 	GetClientName(target, targetname, sizeof(targetname));
-	float max_gravity_factor = GetConVarFloat(sm_buffbot_gravity_modifier);
+	float max_gravity_factor = GetConVarFloat(sm_ccc_gravity_modifier);
 	float gravity_factor = GetEntityGravity(target);
 	//Debug("Current gravity_factor: %f", gravity_factor);
 	//To simplify some of the calculations, we always work with values >1.
@@ -563,7 +563,7 @@ Action unblind(Handle timer, any target)
 
 void apply_effect(int target, TFCond condition)
 {
-	int duration = GetConVarInt(sm_buffbot_buff_duration);
+	int duration = GetConVarInt(sm_ccc_buff_duration);
 	//Special-case some effects (or pseudo-effects) that we handle
 	//ourselves with a timer, rather than pushing through AddCondition.
 	//Since all of these (all one of these) use the same ticking_down array,
@@ -578,7 +578,7 @@ void apply_effect(int target, TFCond condition)
 	}
 	else if (condition == view_as<TFCond>(-1))
 	{
-		float gravity_factor = GetConVarFloat(sm_buffbot_gravity_modifier);
+		float gravity_factor = GetConVarFloat(sm_ccc_gravity_modifier);
 		SetEntityGravity(target, 1/gravity_factor);
 		CreateTimer(duration + 0.0, reset_gravity, target);
 		Debug("Applied effect Low Gravity to %d", target);
@@ -586,7 +586,7 @@ void apply_effect(int target, TFCond condition)
 	}
 	else if (condition == view_as<TFCond>(-2))
 	{
-		float gravity_factor = GetConVarFloat(sm_buffbot_gravity_modifier);
+		float gravity_factor = GetConVarFloat(sm_ccc_gravity_modifier);
 		SetEntityGravity(target, gravity_factor);
 		CreateTimer(duration + 0.0, reset_gravity, target);
 		Debug("Applied effect High Gravity to %d", target);
