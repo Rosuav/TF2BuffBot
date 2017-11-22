@@ -289,6 +289,7 @@ Action returret(Handle timer, any target)
 	ignore(timer);
 	//When you die, you stop regenerating. This allows you to kill yourself
 	//(eg change class, or with the console) to de-turret yourself.
+	if (!IsClientConnected(target)) return Plugin_Stop;
 	int slot = GetClientUserId(target) % sizeof(carnage_points);
 	if (!IsClientInGame(target) || !IsPlayerAlive(target)) carnage_points[slot] = 0;
 	if (carnage_points[slot] >= 0) return Plugin_Stop; //Something's reset you. Maybe a team change or map change.
