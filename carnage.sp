@@ -634,6 +634,7 @@ void apply_effect(int target, TFCond condition)
 		TF2_AddCondition(target, TFCond_CritOnDamage, duration + 0.0, 0);
 		TF2_AddCondition(target, TFCond_MarkedForDeathSilent, duration + 0.0, 0);
 		TF2_AddCondition(target, TFCond_MegaHeal, duration + 0.0, 0); //Immunity to knock-back
+		TF2_AddCondition(target, TFCond_SpawnOutline, duration + 0.0, 0); //Data link tells you where your friends are
 		Debug("Applied effect Blind Rage to %d", target);
 		return;
 	}
@@ -652,6 +653,7 @@ void apply_effect(int target, TFCond condition)
 		TF2_AddCondition(target, TFCond_UberchargedOnTakeDamage, duration + 0.0, 0);
 		TF2_AddCondition(target, TFCond_CritOnDamage, duration + 0.0, 0);
 		TF2_AddCondition(target, TFCond_MegaHeal, duration + 0.0, 0); //Immunity to knock-back (so you REALLY don't move)
+		TF2_AddCondition(target, TFCond_SpawnOutline, duration + 0.0, 0); //Sentries get to see where their friends are
 		ticking_down[target] = duration;
 		CreateTimer(1.0, regenerate, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		Debug("Applied effect Sentry Mode to %d", target);
