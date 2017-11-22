@@ -52,7 +52,7 @@ effects = {
 		"TFCond_Milked": "%s just got covered in something that's almost, but not entirely, unlike milk.",
 		"TFCond_MarkedForDeathSilent": "%s needs to die. Go! Arrange that for me!",
 		# Will probably result in death. Thirty seconds unable to move is gonna suck.
-		# "TFCond_HalloweenKartCage": "%s has been naughty and is now imprisoned.", # Doesn't seem to work properly
+		"TFCond_HalloweenKartCage": "%s has been naughty and is now imprisoned.",
 		"TFCond_Plague": "A rat bites %s and inflicts a non-contagious form of the Bubonic Plague.",
 		# TFCond_RestrictToMelee, //TODO: If this gets triggered, also force selection of melee weapon
 		"view_as<TFCond>(-2)": "%s becomes as heavy as... well, a Heavy?",
@@ -61,6 +61,7 @@ effects = {
 		"TFCond_HalloweenGhostMode": "%s is pining for the fjords...",
 		"view_as<TFCond>(-3)": "Chaotic gravity waves surround %s.",
 		"view_as<TFCond>(-5)": "%s goes into a blind rage!!!",
+		"view_as<TFCond>(-6)": "%s roars 'YOU SHALL NOT PASS!'",
 	}
 }
 with open("randeffects.inc", "w") as f:

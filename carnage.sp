@@ -637,6 +637,26 @@ void apply_effect(int target, TFCond condition)
 		Debug("Applied effect Blind Rage to %d", target);
 		return;
 	}
+	else if (condition == TFCond_HalloweenKartCage)
+	{
+		//The Halloween effect seems to break things, but we can redefine the effect
+		//in terms of a stun.
+		TF2_StunPlayer(target, duration + 0.0, 1.0, TF_STUNFLAG_SLOWDOWN);
+		return;
+	}
+	else if (condition == view_as<TFCond>(-6))
+	{
+		//Become a stationery turret, shooting paper at everyone. No wait, try that again.
+		//Become a stationary turret, indestructible and with infinite critboosted ammo.
+		TF2_StunPlayer(target, duration + 0.0, 1.0, TF_STUNFLAG_SLOWDOWN);
+		TF2_AddCondition(target, TFCond_UberchargedOnTakeDamage, duration + 0.0, 0);
+		TF2_AddCondition(target, TFCond_CritOnDamage, duration + 0.0, 0);
+		TF2_AddCondition(target, TFCond_MegaHeal, duration + 0.0, 0); //Immunity to knock-back (so you REALLY don't move)
+		ticking_down[target] = duration;
+		CreateTimer(1.0, regenerate, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		Debug("Applied effect Sentry Mode to %d", target);
+		return;
+	}
 	//Some effects need additional code.
 	else if (condition == TFCond_Plague)
 	{
