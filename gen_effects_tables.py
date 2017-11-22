@@ -1,7 +1,36 @@
 #!/usr/bin/env python3
 # Generate the randeffects.inc file for inclusion into carnage.sp
 import json # Quickest way to get C-like string encoding
+import re
 
+# These tables define the effects possible from the !roulette command.
+# The "benefits" table is also used by the !gift command. The intention
+# is that anything in "benefits" is so rarely detrimental that it would
+# be considered strictly better than not having the buff; for instance,
+# getting ubercharged could potentially lose you the game since you can't
+# capture points while ubered, but that's a corner case, and usually a
+# free ubercharge would be considered good. Similarly, the Crit-A-Cola
+# from this buff does not include the death-mark effect that the actual
+# drink entails.
+
+# The difference between "detriments" and "weird" has no impact other than
+# the two-tier probability system. Conceptually, the "weird" category has
+# effects that can easily be beneficial or detrimental, whereas the
+# "detriments" category should be exclusively bad (to the same extent that
+# "benefits" are exclusively good; for instance, becoming heavier can at
+# times be useful). Ideally, "weird" effects should simultaneously be BOTH
+# good and bad - blind rage being a perfect example of this.
+
+# Most of the keys here are actual TF2 condition flags that get applied for
+# the specified duration. A few of them have additional or alternative
+# functionality as specified in carnage.sp:apply_effect; custom effects are
+# assigned negative numbers, and have their code entirely in apply_effect.
+
+# Every description should have exactly one "%s", which receives the name of
+# the recipient of the effect. (In the case of a !gift, the gifting has been
+# reported on prior to this message.) It's entirely acceptable for the message
+# to be a bit vague about the stranger effects - players can experiment, or of
+# course read the source code.
 effects = {
 	"benefits": {
 		"TFCond_UberchargedOnTakeDamage": "%s's Uber driver just arrived",
@@ -45,7 +74,6 @@ with open("randeffects.inc", "w") as f:
 			print("\t%s," % json.dumps(desc), file=f)
 		print("};\n", file=f)
 
-import re
 with open("carnage.sp") as source, open("convars.inc", "w") as cv:
 	print("void CreateConVars() {", file=cv)
 	for line in source:
