@@ -13,11 +13,10 @@ public void Debug(const char[] fmt, any ...) { }
 
 public Plugin myinfo =
 {
-	//TODO: Rename this to something more appropriate. Preferably with "Carnage" in the name.
-	name = "Buff Bot",
+	name = "Carnage Collection and Compensation",
 	author = "Chris Angelico",
-	description = "Experimental bot that can buff players",
-	version = "0.9",
+	description = "SourceMod extension to encourage carnage by rewarding those who engage in it",
+	version = "0.99",
 	url = "https://github.com/Rosuav/TF2BuffBot",
 };
 
