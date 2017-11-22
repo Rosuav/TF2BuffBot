@@ -295,7 +295,10 @@ Action returret(Handle timer, any target)
 	if (carnage_points[slot] >= 0) return Plugin_Stop; //Something's reset you. Maybe a team change or map change.
 	if (!TF2_IsPlayerInCondition(target, TFCond_MedigunDebuff)) return Plugin_Stop; //Ghost mode activated.
 	//Debug("Regenerating %d", target);
-	TF2_RegeneratePlayer(target);
+	//TF2_RegeneratePlayer(target); //This is just too powerful.
+	//TODO: Slow ammo regeneration. If you just hold mouse 1, you will quickly run
+	//out, but if you're cautious, you should be able to hold the point.
+
 	//Ensure that knockback immunity remains. If the turret gets healed by a
 	//medic, MegaHeal disappears; but this way, it'll kick in again momentarily.
 	//So in effect, a turret can be moved by knockback only while it's being
