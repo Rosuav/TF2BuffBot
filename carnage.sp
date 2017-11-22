@@ -318,6 +318,11 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		//you are a ghost, you cannot shoot, but can move.
 		int target = GetClientOfUserId(event.GetInt("userid"));
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
+		if (TF2_IsPlayerInCondition(target, TFCond_TeleportedGlow))
+		{
+			PrintToChat(target, "You're still astrally unwrapping yourself... hang tight!");
+			return;
+		}
 		char targetname[MAX_NAME_LENGTH];
 		GetClientName(target, targetname, sizeof(targetname));
 		TFCond turret[] = {
@@ -341,6 +346,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			for (int i = 0; i < sizeof(turret); ++i)
 				TF2_AddCondition(target, turret[i], TFCondDuration_Infinite, 0);
 			CreateTimer(1.0, returret, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+			//When you become a turret, you have to stay there for at least 30 seconds.
+			TF2_AddCondition(target, TFCond_TeleportedGlow, 30.0, 0);
 		}
 		else
 		{
@@ -350,6 +357,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 				TF2_RemoveCondition(target, turret[i]);
 			for (int i = 0; i < sizeof(ghost); ++i)
 				TF2_AddCondition(target, ghost[i], TFCondDuration_Infinite, 0);
+			//When you unturret, you can't returret quite immediately.
+			TF2_AddCondition(target, TFCond_TeleportedGlow, 5.0, 0);
 		}
 		return;
 	}
