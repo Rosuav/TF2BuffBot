@@ -71,6 +71,14 @@ Strategy:
   from turning into an indestructible source of healing.
 * A long-range class like Heavy can command a large area, but a Pyro in a
   narrow choke will be more likely to score those crucial ammo drops.
+* Your invulnerability can suddenly vanish at a crucial moment, leaving you
+  as a glass cannon. Place yourself where you can get all those kills, or be
+  ready to quickly ghost and redeploy if you need to.
+* If you turret during setup time, you'll waste some of that vital invuln
+  time. Stay as a ghost until the last second to make the most of it.
+* Harassed by an enemy turret? Just wait it out. Invuln will expire after, at
+  most, one minute, and then either the turret can be destroyed, or it will
+  ghost. Getting kills after losing invuln won't reinvuln it.
 
 
 Bot Control

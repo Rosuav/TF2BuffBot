@@ -49,6 +49,9 @@ ConVar sm_ccc_debug_force_category = null; //(0) Debug - force roulette to give 
 ConVar sm_ccc_debug_force_effect = null; //(0) Debug - force roulette/gift to give the Nth effect in that category (ignored if out of bounds)
 //More knobs
 ConVar sm_ccc_gravity_modifier = null; //(3) Ratio used for gravity effects - either multiply by this or divide by it
+ConVar sm_ccc_turret_invuln_after_placement = null; //(30) Length of time a turret can remain invulnerable after deployment
+ConVar sm_ccc_turret_invuln_per_kill = null; //(3) Additional time a turret gains each time it gets a kill
+ConVar sm_ccc_turret_max_invuln = null; //(60) Maximum 'banked' invulnerability a turret can have
 //Not directly triggered by chat, but other ways to encourage carnage
 ConVar sm_ccc_crits_on_domination = null; //(5) Number of seconds to crit-boost everyone (both teams) after a domination - 0 to disable
 ConVar sm_ccc_ignite_chance_on_capture = null; //(25) Percentage chance that a point/flag capture will set everyone on fire.
@@ -146,6 +149,17 @@ void add_score(int userid, int score)
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
 }
 
+//Getting kills (or assists) as a turret extends the length of time you can stay invulnerable.
+void add_turret(int userid)
+{
+	if (userid <= 0) return;
+	int target = GetClientOfUserId(userid);
+	if (!TF2_IsPlayerInCondition(target, TFCond_MedigunDebuff)) return;
+	ticking_down[target] += GetConVarInt(sm_ccc_turret_invuln_per_kill);
+	if (ticking_down[target] > GetConVarInt(sm_ccc_turret_max_invuln))
+		ticking_down[target] = GetConVarInt(sm_ccc_turret_max_invuln);
+}
+
 public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 {
 	//Is this the best (only?) way to get the name of the person who just died?
@@ -188,6 +202,8 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		add_score(event.GetInt("assister"), GetConVarInt(sm_ccc_carnage_per_assist));
 	}
 	add_score(event.GetInt("userid"), GetConVarInt(sm_ccc_carnage_per_death));
+	add_turret(event.GetInt("attacker"));
+	add_turret(event.GetInt("assister"));
 	int deathflags = event.GetInt("death_flags");
 	if (deathflags & (TF_DEATHFLAG_KILLERDOMINATION | TF_DEATHFLAG_ASSISTERDOMINATION))
 	{
@@ -300,6 +316,11 @@ Action returret(Handle timer, any target)
 	//TODO: Slow ammo regeneration. If you just hold mouse 1, you will quickly run
 	//out, but if you're cautious, you should be able to hold the point.
 
+	if (--ticking_down[target] <= 0)
+	{
+		//Your immunity has just run out. Suddenly and without warning.
+		TF2_RemoveCondition(target, TFCond_UberchargedOnTakeDamage);
+	}
 	//Ensure that knockback immunity remains. If the turret gets healed by a
 	//medic, MegaHeal disappears; but this way, it'll kick in again momentarily.
 	//So in effect, a turret can be moved by knockback only while it's being
@@ -352,6 +373,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			CreateTimer(1.0, returret, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 			//When you become a turret, you have to stay there for at least 30 seconds.
 			TF2_AddCondition(target, TFCond_TeleportedGlow, 30.0, 0);
+			ticking_down[target] = GetConVarInt(sm_ccc_turret_invuln_after_placement);
 		}
 		else
 		{
@@ -362,7 +384,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			for (int i = 0; i < sizeof(ghost); ++i)
 				TF2_AddCondition(target, ghost[i], TFCondDuration_Infinite, 0);
 			//When you unturret, you can't returret quite immediately.
-			TF2_AddCondition(target, TFCond_TeleportedGlow, 5.0, 0);
+			TF2_AddCondition(target, TFCond_TeleportedGlow, 10.0, 0);
 		}
 		return;
 	}
