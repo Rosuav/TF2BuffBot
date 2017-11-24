@@ -765,6 +765,15 @@ void apply_effect(int target, TFCond condition)
 		Debug("Applied effect Sentry Mode to %d", target);
 		return;
 	}
+	else if (condition == view_as<TFCond>(-7))
+	{
+		int healing = 30 * duration; //A default 30 sec duration means 900 hp of healing.
+		int hp = GetClientHealth(target) + healing; //Normally you gain that on top of your current health
+		if (hp > healing * 2) hp = healing * 2; //But if you get multiple of these in a row, they max out.
+		SetEntityHealth(target, hp);
+		Debug("Applied effect Massive Overheal to %d", target);
+		return;
+	}
 	//Some effects need additional code.
 	else if (condition == TFCond_Plague)
 	{

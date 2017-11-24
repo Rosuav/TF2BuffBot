@@ -46,6 +46,7 @@ effects = {
 		"view_as<TFCond>(-1)": "%s becomes as light as a feather!",
 		"TFCond_DisguisedAsDispenser": "%s can run, but... well, actually, can hide too.",
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
+		"view_as<TFCond>(-7)": "%s eats a radioactive ham sandvich.",
 
 	}, "detriments": {
 		"TFCond_Jarated": "%s just got covered in Jarate. Eww.",
