@@ -556,7 +556,17 @@ Action regenerate(Handle timer, any target)
 	//When you die, you stop regenerating.
 	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
 	//Debug("Regenerating %d", target);
-	TF2_RegeneratePlayer(target);
+	int resource = GetPlayerResourceEntity();
+	int max_health = GetEntProp(resource, Prop_Send, "m_iMaxHealth", _, target) * 11 / 10;
+	if (GetClientHealth(target) < max_health)
+		SetEntityHealth(target, max_health);
+	for (int slot = 0; slot < 7; ++slot)
+	{
+		int weapon = GetPlayerWeaponSlot(target, slot);
+		if (!IsValidEntity(weapon)) continue;
+		int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType", 1);
+		GivePlayerAmmo(target, 999, type, true);
+	}
 	//After thirty regens (approx 30 seconds, but maybe +/- a second or so),
 	//we stop regenerating.
 	if (--ticking_down[target] <= 0) return Plugin_Stop;
