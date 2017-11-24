@@ -145,7 +145,9 @@ public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 void add_score(int userid, int score)
 {
 	if (userid <= 0 || score <= 0) return;
-	int new_score = carnage_points[userid % sizeof(carnage_points)] += score;
+	userid %= sizeof(carnage_points);
+	if (carnage_points[userid] < 0) return; //Turrets don't gain carnage points.
+	int new_score = carnage_points[userid] += score;
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
 }
 
@@ -201,6 +203,8 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_kill));
 		add_score(event.GetInt("assister"), GetConVarInt(sm_ccc_carnage_per_assist));
 	}
+	int slot = event.GetInt("userid") % sizeof(carnage_points);
+	if (carnage_points[slot] < 0) carnage_points[slot] = 0; //Reset everything when you die.
 	add_score(event.GetInt("userid"), GetConVarInt(sm_ccc_carnage_per_death));
 	add_turret(event.GetInt("attacker"));
 	add_turret(event.GetInt("assister"));
@@ -371,8 +375,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			for (int i = 0; i < sizeof(turret); ++i)
 				TF2_AddCondition(target, turret[i], TFCondDuration_Infinite, 0);
 			CreateTimer(1.0, returret, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
-			//When you become a turret, you have to stay there for at least 30 seconds.
-			TF2_AddCondition(target, TFCond_TeleportedGlow, 30.0, 0);
+			//When you become a turret, you have to stay there for a while.
+			TF2_AddCondition(target, TFCond_TeleportedGlow, 60.0, 0);
 			ticking_down[target] = GetConVarInt(sm_ccc_turret_invuln_after_placement);
 		}
 		else
@@ -384,7 +388,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			for (int i = 0; i < sizeof(ghost); ++i)
 				TF2_AddCondition(target, ghost[i], TFCondDuration_Infinite, 0);
 			//When you unturret, you can't returret quite immediately.
-			TF2_AddCondition(target, TFCond_TeleportedGlow, 10.0, 0);
+			TF2_AddCondition(target, TFCond_TeleportedGlow, 15.0, 0);
 		}
 		return;
 	}
