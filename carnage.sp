@@ -347,6 +347,12 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		//you are a ghost, you cannot shoot, but can move.
 		int target = GetClientOfUserId(event.GetInt("userid"));
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
+		int slot = event.GetInt("userid") % sizeof(carnage_points);
+		if (carnage_points[slot] >= 0 && carnage_points[slot] < GetConVarInt(sm_ccc_carnage_required) * 2)
+		{
+			PrintToChat(target, "You'll have to wreak more havoc before you can do that, sorry.");
+			return;
+		}
 		if (TF2_IsPlayerInCondition(target, TFCond_TeleportedGlow))
 		{
 			PrintToChat(target, "You're still astrally unwrapping yourself... hang tight!");
@@ -362,7 +368,6 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			TFCond_SpawnOutline,
 		};
 		TFCond ghost[] = {TFCond_HalloweenGhostMode};
-		int slot = event.GetInt("userid") % sizeof(carnage_points);
 		carnage_points[slot] = -1048576; //Turrets don't spin the roulette wheel
 		if (!TF2_IsPlayerInCondition(target, TFCond_MedigunDebuff))
 		{
