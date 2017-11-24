@@ -831,6 +831,8 @@ void apply_effect(int target, TFCond condition)
 		SetEntPropEnt(target, Prop_Send, "m_hActiveWeapon", weapon);
 		//So... what would happen if we said that your active weapon was one that
 		//isn't in any weapon slot??
+		//CJA 20171125: Ah. You segfault the server as soon as you try to fire.
+		//That was very pretty and extremely entertaining... for a brief moment.
 	}
 	TF2_AddCondition(target, condition, duration + 0.0, 0);
 	Debug("Applied effect %d to %d", condition, target);
