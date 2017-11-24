@@ -823,6 +823,15 @@ void apply_effect(int target, TFCond condition)
 		CreateTimer(1.0, VeryHappyAmmo, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		Debug("Applied effect Very Happy Ammo to %d", target);
 	}
+	else if (condition == TFCond_RestrictToMelee)
+	{
+		//The cond stops you switching away from melee, but it doesn't actually
+		//select your melee weapon. So we do that as a separate operation.
+		int weapon = GetPlayerWeaponSlot(target, TFWeaponSlot_Melee);
+		SetEntPropEnt(target, Prop_Send, "m_hActiveWeapon", weapon);
+		//So... what would happen if we said that your active weapon was one that
+		//isn't in any weapon slot??
+	}
 	TF2_AddCondition(target, condition, duration + 0.0, 0);
 	Debug("Applied effect %d to %d", condition, target);
 }
