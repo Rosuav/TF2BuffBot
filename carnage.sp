@@ -552,7 +552,6 @@ any ignore(any ignoreme) {return ignoreme;}
 
 Action regenerate(Handle timer, any target)
 {
-	ignore(timer);
 	//When you die, you stop regenerating.
 	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
 	//Debug("Regenerating %d", target);
@@ -560,6 +559,15 @@ Action regenerate(Handle timer, any target)
 	int max_health = GetEntProp(resource, Prop_Send, "m_iMaxHealth", _, target) * 11 / 10;
 	if (GetClientHealth(target) < max_health)
 		SetEntityHealth(target, max_health);
+	return VeryHappyAmmo(timer, target);
+}
+
+//Similar to the above but without the health change
+Action VeryHappyAmmo(Handle timer, any target)
+{
+	ignore(timer);
+	//When you die, you stop regenerating.
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
 	for (int slot = 0; slot < 7; ++slot)
 	{
 		int weapon = GetPlayerWeaponSlot(target, slot);
@@ -799,6 +807,12 @@ void apply_effect(int target, TFCond condition)
 		//Removed 20171119 as it may be the cause of some crashes (????)
 		if (!target) //aka "if (0)" but w/o warning
 			CreateTimer(0.25, beacon, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+	}
+	else if (condition == TFCond_CritCola)
+	{
+		ticking_down[target] = duration;
+		CreateTimer(1.0, VeryHappyAmmo, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		Debug("Applied effect Very Happy Ammo to %d", target);
 	}
 	TF2_AddCondition(target, condition, duration + 0.0, 0);
 	Debug("Applied effect %d to %d", condition, target);

@@ -35,7 +35,7 @@ effects = {
 	"benefits": {
 		"TFCond_UberchargedOnTakeDamage": "%s's Uber driver just arrived",
 		"TFCond_CritOnDamage": "%s is critical of everyone!",
-		"TFCond_CritCola": "%s drinks some Crit-A-Cola!",
+		"TFCond_CritCola": "%s types IDKFA and downs a can of Cola!",
 		"TFCond_BulletImmune": "%s is bulletprooooooof!",
 		"TFCond_BlastImmune": "%s is bombprooooooof!",
 		"TFCond_FireImmune": "%s is inflammable... I mean non-flammable!",
@@ -47,7 +47,6 @@ effects = {
 		"TFCond_DisguisedAsDispenser": "%s can run, but... well, actually, can hide too.",
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
 		"view_as<TFCond>(-7)": "%s eats a radioactive ham sandvich.",
-
 	}, "detriments": {
 		"TFCond_Jarated": "%s just got covered in Jarate. Eww.",
 		"TFCond_Milked": "%s just got covered in something that's almost, but not entirely, unlike milk.",
