@@ -213,6 +213,9 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	{
 		//Someone got a domination. Give everyone crits for a few seconds!
 		//Of course, someone's dead right now. Sucks to be you. :)
+		//TODO: Make this happen less often. For instance, 100% chance in a 6v6 game,
+		//scaling down to 50% chance in 12v12, and either bound it at both ends, or
+		//have larger games have even lower probability (eg bound it at 5% at 32 players).
 		int duration = GetConVarInt(sm_ccc_crits_on_domination);
 		if (duration)
 			for (int target = 1; target <= MaxClients; ++target)
