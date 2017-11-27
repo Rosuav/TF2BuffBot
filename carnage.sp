@@ -54,8 +54,8 @@ ConVar sm_ccc_turret_invuln_per_kill = null; //(1) Additional time a turret gain
 ConVar sm_ccc_turret_max_invuln = null; //(60) Maximum 'banked' invulnerability a turret can have
 //Not directly triggered by chat, but other ways to encourage carnage
 ConVar sm_ccc_crits_on_domination = null; //(5) Number of seconds to crit-boost everyone (both teams) after a domination - 0 to disable
-ConVar sm_ccc_ignite_chance_on_capture = null; //(25) Percentage chance that a point/flag capture will set everyone on fire.
-ConVar sm_ccc_ignite_chance_on_start_capture = null; //(5) Chance that STARTING a point capture will set everyone on fire.
+ConVar sm_ccc_ignite_chance_on_capture = null; //(15) Percentage chance that a point/flag capture will set everyone on fire.
+ConVar sm_ccc_ignite_chance_on_start_capture = null; //(2) Chance that STARTING a point capture will set everyone on fire.
 #include "convars"
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
