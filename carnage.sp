@@ -213,14 +213,23 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	{
 		//Someone got a domination. Give everyone crits for a few seconds!
 		//Of course, someone's dead right now. Sucks to be you. :)
-		//TODO: Make this happen less often. For instance, 100% chance in a 6v6 game,
-		//scaling down to 50% chance in 12v12, and either bound it at both ends, or
-		//have larger games have even lower probability (eg bound it at 5% at 32 players).
+		//Doesn't happen all the time in large games; it's guaranteed in 6v6,
+		//but otherwise may "whiff" now and then. In huge games, it'll only
+		//happen a fraction of the time.
 		int duration = GetConVarInt(sm_ccc_crits_on_domination);
 		if (duration)
-			for (int target = 1; target <= MaxClients; ++target)
-				if (IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target))
-					TF2_AddCondition(target, TFCond_CritOnDamage, duration + 0.0, 0);
+		{
+			int clients = GetClientCount(true);
+			int chance = 100 - (clients - 12) * 5; //After 6v6, each additional player drops 5% chance
+			if (chance < 25) chance = 25; //At 14v14, we bottom out at 25% chance.
+			PrintToServer("Domination crits: %d clients => %d%% chance", clients, chance);
+			if (100 * GetURandomFloat() < chance)
+			{
+				for (int target = 1; target <= MaxClients; ++target)
+					if (IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target))
+						TF2_AddCondition(target, TFCond_CritOnDamage, duration + 0.0, 0);
+			}
+		}
 		if (deathflags & TF_DEATHFLAG_GIBBED)
 			PrintToChatAll("Pieces of %s splatter all over everyone. Muahahaha, such happy carnage!", playername);
 		else
