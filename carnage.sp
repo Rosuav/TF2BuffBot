@@ -741,7 +741,7 @@ void apply_effect(int target, TFCond condition)
 		SetEntityGravity(target, 1/gravity_factor);
 		CreateTimer(duration + 0.0, reset_gravity, target);
 		Debug("Applied effect Low Gravity to %d", target);
-		return;
+		condition = TFCond_MegaHeal; //Apply a bonus effect of immunity to push-back
 	}
 	else if (condition == view_as<TFCond>(-2))
 	{
