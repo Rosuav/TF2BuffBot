@@ -191,8 +191,32 @@ void class_specific_buff(int target, int duration)
 	8. Sniper: Focus for 3*duration
 	9. Spy: Crits for duration, even though that's less useful for a spy
 	*/
-	//temporarily everyone just gets crits
-	TF2_AddCondition(target, TFCond_CritOnDamage, duration + 0.0, 0);
+	TFClassType cls = TF2_GetPlayerClass(target);
+	TFCond buffs[] = { //These are in the order of TFClassType, *not* the order on the loading screen
+		TFCond_Slowed, //"Unknown" has an entry
+		TFCond_CritOnDamage, //Scout
+		TFCond_FocusBuff, //Sniper
+		TFCond_CritOnDamage, //Soldier
+		TFCond_CritCola, //DemoMan
+		TFCond_MegaHeal, //Medic
+		TFCond_CritOnDamage, //Heavy
+		TFCond_CritOnDamage, //Pyro
+		TFCond_CritOnDamage, //Spy
+		TFCond_CritCola, //Engineer
+	};
+	int scales[] = { //Duration gets scaled up for some classes
+		0, //"Unknown"
+		1, //Scout
+		3, //Sniper
+		1, //Soldier
+		2, //DemoMan
+		4, //Medic
+		1, //Heavy
+		1, //Pyro
+		1, //Spy
+		2, //Engineer
+	};
+	TF2_AddCondition(target, buffs[cls], duration * scales[cls] + 0.0, 0);
 }
 
 public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
