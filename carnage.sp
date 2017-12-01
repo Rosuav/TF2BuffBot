@@ -71,6 +71,7 @@ int BeamSprite, HaloSprite;
 public void OnPluginStart()
 {
 	RegAdminCmd("sm_hysteria", Command_Hysteria, ADMFLAG_SLAY);
+	RegAdminCmd("sm_grant_bonkvich", Command_Bonkvich, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("player_team", InitializePlayer);
 	HookEvent("player_death", PlayerDied);
@@ -127,6 +128,21 @@ public Action Command_Hysteria(int client, int args)
 		ReplyToCommand(client, "[SM] %s [%d] goes into hysteria mode!", name, target);
 	}
 
+	return Plugin_Handled;
+}
+
+int bonkvich_userid = -1;
+public Action Command_Bonkvich(int client, int args)
+{
+	char player[32];
+	GetCmdArg(1, player, sizeof(player));
+	int target = FindTarget(client, player);
+	if (target == -1) return Plugin_Handled;
+	char name[MAX_NAME_LENGTH];
+	GetClientName(target, name, sizeof(name));
+	int userid = GetClientUserId(target);
+	bonkvich_userid = userid;
+	ReplyToCommand(client, "[SM] %s is granted the Box of Bonkvich.", name);
 	return Plugin_Handled;
 }
 
@@ -364,6 +380,17 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	//if (event.GetBool("teamonly")) return; //Ignore team chat (not working)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
+	if (!strcmp(msg, "!bonkvich"))
+	{
+		int user = event.GetInt("userid");
+		if (user != bonkvich_userid) return;
+		int target = GetClientOfUserId(user);
+		char targetname[MAX_NAME_LENGTH];
+		GetClientName(target, targetname, sizeof(targetname));
+		PrintToChatAll("%s opens a lunch box and eats a Bonkvich.", targetname);
+		apply_effect(target, view_as<TFCond>(-7));
+		return;
+	}
 	if (!strcmp(msg, "!turret"))
 	{
 		//Turret mode. The first time you use this command, you become a
