@@ -223,7 +223,7 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 			int chance = 100 - (clients - 12) * 5; //After 6v6, each additional player drops 5% chance
 			//(chance could exceed 100, but it won't make any difference)
 			if (chance < 25) chance = 25; //At 14v14, we bottom out at 25% chance.
-			//PrintToChatAll("Domination crits: %d clients => %d%% chance", clients, chance);
+			Debug("Domination crits: %d clients => %d%% chance", clients, chance);
 			if (100 * GetURandomFloat() < chance)
 			{
 				/* Idea: Instead of everyone getting a crit boost, have class-specific
