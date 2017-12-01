@@ -47,6 +47,8 @@ effects = {
 		"TFCond_DisguisedAsDispenser": "%s can run, but... well, actually, can hide too.",
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
 		"view_as<TFCond>(-7)": "%s eats a radioactive ham sandvich.",
+		# "TFCond_FocusBuff": "Focus, %s. Focus.", # Beneficial only to snipers
+		# "TFCond_MegaHeal": "%s can't be knocked back.", # Not much on its own but could be good in combination
 	}, "detriments": {
 		"TFCond_Jarated": "%s just got covered in Jarate. Eww.",
 		"TFCond_Milked": "%s just got covered in something that's almost, but not entirely, unlike milk.",
@@ -61,6 +63,7 @@ effects = {
 		"view_as<TFCond>(-3)": "Chaotic gravity waves surround %s.",
 		"view_as<TFCond>(-5)": "%s goes into a blind rage!!!",
 		"view_as<TFCond>(-6)": "%s roars 'YOU SHALL NOT PASS!'",
+		"TFCond_Bonked": "%s opens a chilled can of a radioactive energy drink.",
 	}
 }
 with open("randeffects.inc", "w") as f:
