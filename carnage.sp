@@ -46,7 +46,7 @@ ConVar sm_ccc_gift_chance_enemy_human = null; //(10) Chance that each enemy huma
 ConVar sm_ccc_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot has of receiving a !gift
 //Debug assistants. Not generally useful for server admins who aren't also coding CCC itself.
 ConVar sm_ccc_debug_force_category = null; //(0) Debug - force roulette to give good (1), bad (2), weird (3), or death (4)
-ConVar sm_ccc_debug_force_effect = null; //(0) Debug - force roulette/gift to give the Nth effect in that category (ignored if out of bounds)
+ConVar sm_ccc_debug_force_effect = null; //(0) Debug - force roulette to give the Nth effect in that category (ignored if out of bounds)
 //More knobs
 ConVar sm_ccc_gravity_modifier = null; //(3) Ratio used for gravity effects - either multiply by this or divide by it
 ConVar sm_ccc_turret_invuln_after_placement = null; //(30) Length of time a turret can remain invulnerable after deployment
