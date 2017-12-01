@@ -245,13 +245,13 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 				/* Idea: Instead of everyone getting a crit boost, have class-specific
 				buffs applied. There is a "base duration" that scales them all.
 				1. Scout: Crits for duration
-				2. Soldier: Crits for duration?
+				2. Soldier: Crits for duration
 				3. Pyro: Crits for duration
 				4. Demoman: Mini-crits for 2*duration
 				5. Heavy: Crits for duration
-				6. Engineer: Metal?
-				7. Medic: ???
-				8. Sniper: Focus for 3*duration?
+				6. Engineer: Mini-crits for 2*duration
+				7. Medic: TFCond_MegaHeal for 4*duration (prevent knockback incl pyro airblast)
+				8. Sniper: Focus for 3*duration
 				9. Spy: Crits for duration, even though that's less useful for a spy
 				*/
 				for (int target = 1; target <= MaxClients; ++target)
