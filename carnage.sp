@@ -423,6 +423,20 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	//if (event.GetBool("teamonly")) return; //Ignore team chat (not working)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
+	if (!strcmp(msg, "!please"))
+	{
+		int target = GetClientOfUserId(event.GetInt("userid"));
+		char targetname[MAX_NAME_LENGTH];
+		GetClientName(target, targetname, sizeof(targetname));
+		if (!IsPlayerAlive(target))
+		{
+			PrintToChatAll("%s says the magic word, but even that isn't enough to raise the dead. Sorry.", targetname);
+			return;
+		}
+		PrintToChatAll("%s just said the magic word.", targetname);
+		PrintToChatAll("Nothing happens.");
+		return;
+	}
 	if (!strcmp(msg, "!bonkvich"))
 	{
 		int user = event.GetInt("userid");
