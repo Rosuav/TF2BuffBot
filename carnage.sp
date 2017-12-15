@@ -171,10 +171,33 @@ public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 	carnage_points[event.GetInt("userid") % sizeof(carnage_points)] = GetConVarInt(sm_ccc_carnage_initial);
 }
 
+//TODO: Cache this, but invalidate the cache any time the cvar changes or we go to a new map
+int in_coop_mode()
+{
+	int flag = GetConVarInt(sm_ccc_coop_mode);
+	if (flag < 2) return flag; //Mode is forced by admin
+	//flag == 2 means we autodetect. Currently: return false always.
+	//Ideally: return true on MVM maps.
+	return 0;
+}
+
 void add_score(int userid, int score)
 {
 	if (userid <= 0 || score <= 0) return;
 	userid %= sizeof(carnage_points);
+	if (in_coop_mode())
+	{
+		int self = GetClientOfUserId(userid);
+		int myteam = GetClientTeam(self);
+		for (int i = 1; i <= MaxClients; ++i)
+			if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == myteam)
+				real_add_score(GetClientUserId(i), score);
+	}
+	else real_add_score(userid, score);
+}
+
+void real_add_score(int userid, int score)
+{
 	if (carnage_points[userid] < 0) return; //Turrets don't gain carnage points.
 	int new_score = carnage_points[userid] += score;
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
@@ -529,7 +552,10 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int target = GetClientOfUserId(event.GetInt("userid"));
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
 		int slot = event.GetInt("userid") % sizeof(carnage_points);
-		if (carnage_points[slot] < GetConVarInt(sm_ccc_carnage_required))
+		int req = GetConVarInt(sm_ccc_carnage_required);
+		int coop = in_coop_mode();
+		if (coop) req *= GetConVarInt(sm_ccc_coop_roulette_multiplier);
+		if (carnage_points[slot] < req)
 		{
 			PrintToChat(target, "You'll have to wreak more havoc before you can do that, sorry.");
 			return;
@@ -544,7 +570,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int prob_weird = GetConVarInt(sm_ccc_roulette_chance_weird);
 		int category = RoundToFloor((prob_good + prob_bad + prob_weird + 1) * GetURandomFloat());
 		int sel = GetConVarInt(sm_ccc_debug_force_effect);
-		switch (GetConVarInt(sm_ccc_debug_force_category))
+		switch (coop || GetConVarInt(sm_ccc_debug_force_category)) //In co-op mode, force to Good
 		{
 			case 1: category = 0; //Force to Good
 			case 2: category = prob_good; //Force to Bad
@@ -614,7 +640,10 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int self = GetClientOfUserId(event.GetInt("userid"));
 		if (!IsClientInGame(self) || !IsPlayerAlive(self)) return;
 		int slot = event.GetInt("userid") % sizeof(carnage_points);
-		if (carnage_points[slot] < GetConVarInt(sm_ccc_carnage_required))
+		int req = GetConVarInt(sm_ccc_carnage_required);
+		int coop = in_coop_mode();
+		if (coop) req *= GetConVarInt(sm_ccc_coop_gift_multiplier);
+		if (carnage_points[slot] < req)
 		{
 			PrintToChat(self, "You'll have to wreak more havoc before you can do that, sorry.");
 			return;
@@ -642,7 +671,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 				if (GetSteamAccountID(i)) weight = GetConVarInt(sm_ccc_gift_chance_friendly_human);
 				else weight = GetConVarInt(sm_ccc_gift_chance_friendly_bot);
 			}
-			else
+			else if (!coop) //In co-op mode, players on the opposite team cannot receive gifts.
 			{
 				if (GetSteamAccountID(i)) weight = GetConVarInt(sm_ccc_gift_chance_enemy_human);
 				else weight = GetConVarInt(sm_ccc_gift_chance_enemy_bot);
