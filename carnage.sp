@@ -224,6 +224,7 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	//Is this the best (only?) way to get the name of the person who just died?
 	int player = GetClientOfUserId(event.GetInt("userid"));
 	char playername[MAX_NAME_LENGTH]; GetClientName(player, playername, sizeof(playername));
+	SetEntityGravity(player, 1.0); //Just in case.
 	if (event.GetInt("userid") == event.GetInt("attacker"))
 	{
 		//You killed yourself. Good job.
