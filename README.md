@@ -80,6 +80,12 @@ Strategy:
   most, one minute, and then either the turret can be destroyed, or it will
   ghost. Getting kills after losing invuln won't reinvuln it.
 
+### Co-op mode
+
+Designed for Mann vs Machine, co-op mode removes the "might be good, might be
+bad" risk, instead increasing the carnage point requirements. Enable it by
+setting sm_ccc_coop_mode to 1; setting it to 2 will autodetect (not currently
+implemented, and will always leave co-op mode inactive).
 
 Bot Control
 -----------
