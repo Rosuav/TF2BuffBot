@@ -56,6 +56,10 @@ ConVar sm_ccc_turret_max_invuln = null; //(60) Maximum 'banked' invulnerability 
 ConVar sm_ccc_crits_on_domination = null; //(5) Number of seconds to crit-boost everyone (both teams) after a domination - 0 to disable
 ConVar sm_ccc_ignite_chance_on_capture = null; //(15) Percentage chance that a point/flag capture will set everyone on fire.
 ConVar sm_ccc_ignite_chance_on_start_capture = null; //(2) Chance that STARTING a point capture will set everyone on fire.
+//For Mann vs Machine, and possibly other situations, co-op mode changes the parameters.
+ConVar sm_ccc_coop_mode = null; //(2) 0=normal, 1=co-op mode, 2=autodetect (if available)
+ConVar sm_ccc_coop_gift_multiplier = null; //(5) The cost of !gift is multiplied by this.
+ConVar sm_ccc_coop_roulette_multiplier = null; //(10) The cost of !roulette is multiplied by this. Should be significantly higher than the gift multiplier.
 #include "convars"
 
 /* Co-op mode (eg for MVM)
@@ -63,6 +67,8 @@ ConVar sm_ccc_ignite_chance_on_start_capture = null; //(2) Chance that STARTING 
 - Roulettes are always beneficial
 - To compensate, roulette/gift cost is massively increased.
 - Since roulette is more useful, its cost is even higher than gift
+- Carnage points are earned by the entire team, but spent individually.
+- Ergo all carnage point additions must loop over all players.
 */
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
