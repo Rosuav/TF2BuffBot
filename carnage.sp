@@ -415,6 +415,12 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int user = event.GetInt("userid");
 		if (user != bonkvich_userid) return;
 		int target = GetClientOfUserId(user);
+		if (!IsClientInGame(target)) return;
+		if (!IsPlayerAlive(target))
+		{
+			PrintToChatAll("Bonkvich, though highly nutritious AND delectable, is unable to restore life to the fallen.");
+			return;
+		}
 		char targetname[MAX_NAME_LENGTH];
 		GetClientName(target, targetname, sizeof(targetname));
 		PrintToChatAll("%s opens a lunch box and eats a Bonkvich.", targetname);
