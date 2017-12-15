@@ -58,6 +58,13 @@ ConVar sm_ccc_ignite_chance_on_capture = null; //(15) Percentage chance that a p
 ConVar sm_ccc_ignite_chance_on_start_capture = null; //(2) Chance that STARTING a point capture will set everyone on fire.
 #include "convars"
 
+/* Co-op mode (eg for MVM)
+- Gifts always land on your team
+- Roulettes are always beneficial
+- To compensate, roulette/gift cost is massively increased.
+- Since roulette is more useful, its cost is even higher than gift
+*/
+
 //Rolling array of carnage points per user id. If a user connects, then this many other
 //users connect and disconnect, there will be a collision, and they'll share the slot. I
 //rather doubt that this will happen often, but it might with bots - I don't know. Given
