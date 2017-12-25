@@ -85,6 +85,7 @@ public void OnPluginStart()
 {
 	RegAdminCmd("sm_hysteria", Command_Hysteria, ADMFLAG_SLAY);
 	RegAdminCmd("sm_grant_bonkvich", Command_Bonkvich, ADMFLAG_SLAY);
+	RegAdminCmd("sm_ccc_effects", Command_Effects, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("player_team", InitializePlayer);
 	HookEvent("player_death", PlayerDied);
@@ -156,6 +157,20 @@ public Action Command_Bonkvich(int client, int args)
 	int userid = GetClientUserId(target);
 	bonkvich_userid = userid;
 	ReplyToCommand(client, "[SM] %s is granted the Box of Bonkvich.", name);
+	return Plugin_Handled;
+}
+
+public Action Command_Effects(int client, int args)
+{
+	ReplyToCommand(client, "[SM] Effects available in category 1 (Good):");
+	for (int i = 0; i < sizeof(benefits); ++i)
+		ReplyToCommand(client, "[SM] %3d: %s", i + 1, benefits_desc[i]);
+	ReplyToCommand(client, "[SM] Effects available in category 2 (Bad):");
+	for (int i = 0; i < sizeof(detriments); ++i)
+		ReplyToCommand(client, "[SM] %3d: %s", i + 1, detriments_desc[i]);
+	ReplyToCommand(client, "[SM] Effects available in category 3 (Weird):");
+	for (int i = 0; i < sizeof(weird); ++i)
+		ReplyToCommand(client, "[SM] %3d: %s", i + 1, weird_desc[i]);
 	return Plugin_Handled;
 }
 
