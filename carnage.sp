@@ -226,6 +226,20 @@ void class_specific_buff(int target, int duration)
 	7. Medic: TFCond_MegaHeal for 4*duration (prevent knockback incl pyro airblast)
 	8. Sniper: Focus for 3*duration
 	9. Spy: Crits for duration, even though that's less useful for a spy
+
+	The goals of these buffs are:
+	- Everyone gets something useful
+	- Nobody's buff is strictly better than anybody else's.
+	- Buffs are "use it or lose it" (hence demomen don't get full crits, as they could
+	  pump out crit stickies and keep them there). This reduces the chances of abuse.
+	- Teamwork should not be destroyed. The buff for medics should NOT encourage them
+	  to abandon the team and go play combat medic, or to feel left out because they
+	  received no real buff (one of which would happen if they got crits).
+
+	I'm currently not entirely happy with the Medic buff. It's a lot weaker than the
+	combat classes' buffs. It doesn't HAVE to be a regular TFCond_* (I could use the
+	apply_effect helper and any custom effect), but it has to stay in the "use it or
+	lose it" limit, so it needs to be a duration-based effect.
 	*/
 	TFClassType cls = TF2_GetPlayerClass(target);
 	TFCond buffs[] = { //These are in the order of TFClassType, *not* the order on the loading screen
