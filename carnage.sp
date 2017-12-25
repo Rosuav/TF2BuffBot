@@ -191,12 +191,12 @@ void add_score(int userid, int score)
 		int myteam = GetClientTeam(self);
 		for (int i = 1; i <= MaxClients; ++i)
 			if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == myteam)
-				real_add_score(GetClientUserId(i), score);
+				low_add_score(GetClientUserId(i), score);
 	}
-	else real_add_score(userid, score);
+	else low_add_score(userid, score);
 }
 
-void real_add_score(int userid, int score)
+void low_add_score(int userid, int score)
 {
 	if (carnage_points[userid] < 0) return; //Turrets don't gain carnage points.
 	int new_score = carnage_points[userid] += score;
