@@ -223,7 +223,7 @@ void class_specific_buff(int target, int duration)
 	4. Demoman: Mini-crits for 2*duration
 	5. Heavy: Crits for duration
 	6. Engineer: Mini-crits for 2*duration
-	7. Medic: TFCond_MegaHeal for 4*duration (prevent knockback incl pyro airblast)
+	7. Medic: Healing (possibly overheal) of 30*duration hitpoints
 	8. Sniper: Focus for 3*duration
 	9. Spy: Crits for duration, even though that's less useful for a spy
 
@@ -236,10 +236,10 @@ void class_specific_buff(int target, int duration)
 	  to abandon the team and go play combat medic, or to feel left out because they
 	  received no real buff (one of which would happen if they got crits).
 
-	I'm currently not entirely happy with the Medic buff. It's a lot weaker than the
-	combat classes' buffs. It doesn't HAVE to be a regular TFCond_* (I could use the
-	apply_effect helper and any custom effect), but it has to stay in the "use it or
-	lose it" limit, so it needs to be a duration-based effect.
+	I'm currently not entirely happy with the Medic buff. Previously it was MegaHeal
+	(immunity to pushback etc - the Quick Fix effect), but it's now an overheal bonus
+	(a sudden one-shot spike of hitpoints). Neither truly fulfils the goals. Open to
+	further suggestions.
 	*/
 	TFClassType cls = TF2_GetPlayerClass(target);
 	TFCond buffs[] = { //These are in the order of TFClassType, *not* the order on the loading screen
@@ -248,7 +248,7 @@ void class_specific_buff(int target, int duration)
 		TFCond_FocusBuff, //Sniper
 		TFCond_CritOnDamage, //Soldier
 		TFCond_CritCola, //DemoMan
-		TFCond_MegaHeal, //Medic
+		view_as<TFCond>(-7), //Medic
 		TFCond_CritOnDamage, //Heavy
 		TFCond_CritOnDamage, //Pyro
 		TFCond_CritOnDamage, //Spy
@@ -260,13 +260,13 @@ void class_specific_buff(int target, int duration)
 		3, //Sniper
 		1, //Soldier
 		2, //DemoMan
-		4, //Medic
+		1, //Medic
 		1, //Heavy
 		1, //Pyro
 		1, //Spy
 		2, //Engineer
 	};
-	TF2_AddCondition(target, buffs[cls], duration * scales[cls] + 0.0, 0);
+	apply_effect(target, buffs[cls], duration * scales[cls]);
 }
 
 public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
