@@ -968,7 +968,9 @@ void apply_effect(int target, TFCond condition)
 	{
 		int healing = 30 * duration; //A default 30 sec duration means 900 hp of healing.
 		int hp = GetClientHealth(target) + healing; //Normally you gain that on top of your current health
-		if (hp > healing * 2) hp = healing * 2; //But if you get multiple of these in a row, they max out.
+		int resource = GetPlayerResourceEntity();
+		int max = GetEntProp(resource, Prop_Send, "m_iMaxHealth", _, target) + healing * 2;
+		if (hp > max) hp = max; //But the overheal maxes out at twice the Bonkvich's benefit.
 		SetEntityHealth(target, hp);
 		Debug("Applied effect Massive Overheal to %d", target);
 		return;
