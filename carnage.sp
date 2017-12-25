@@ -879,9 +879,9 @@ Action unblind(Handle timer, any target)
 	return Plugin_Stop;
 }
 
-void apply_effect(int target, TFCond condition)
+void apply_effect(int target, TFCond condition, int duration=0)
 {
-	int duration = GetConVarInt(sm_ccc_buff_duration);
+	if (!duration) duration = GetConVarInt(sm_ccc_buff_duration);
 	//Special-case some effects (or pseudo-effects) that we handle
 	//ourselves with a timer, rather than pushing through AddCondition.
 	//Since all of these (all one of these) use the same ticking_down array,
