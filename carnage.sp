@@ -310,6 +310,10 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		//Doesn't happen all the time in large games; it's guaranteed in 6v6,
 		//but otherwise may "whiff" now and then. In huge games, it'll only
 		//happen a fraction of the time.
+		if (deathflags & TF_DEATHFLAG_GIBBED)
+			PrintToChatAll("Pieces of %s splatter all over everyone. Muahahaha, such happy carnage!", playername);
+		else
+			PrintToChatAll("The lifeless corpse of %s flies around the map. Muahahaha, such happy carnage!", playername);
 		int duration = GetConVarInt(sm_ccc_crits_on_domination);
 		if (duration)
 		{
@@ -320,15 +324,13 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 			Debug("Domination crits: %d clients => %d%% chance", clients, chance);
 			if (100 * GetURandomFloat() < chance)
 			{
+				if (chance < 100)
+					PrintToChatAll("It's time to celebrate with MORE CARNAGE!");
 				for (int target = 1; target <= MaxClients; ++target)
 					if (IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target))
 						class_specific_buff(target, duration);
 			}
 		}
-		if (deathflags & TF_DEATHFLAG_GIBBED)
-			PrintToChatAll("Pieces of %s splatter all over everyone. Muahahaha, such happy carnage!", playername);
-		else
-			PrintToChatAll("The lifeless corpse of %s flies around the map. Muahahaha, such happy carnage!", playername);
 	}
 	//Revenge doesn't have any in-game effect, but we put a message up about it.
 	if (deathflags & (TF_DEATHFLAG_KILLERREVENGE | TF_DEATHFLAG_ASSISTERREVENGE))
