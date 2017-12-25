@@ -171,6 +171,7 @@ public Action Command_Effects(int client, int args)
 	ReplyToCommand(client, "[SM] Effects available in category 3 (Weird):");
 	for (int i = 0; i < sizeof(weird); ++i)
 		ReplyToCommand(client, "[SM] %3d: %s", i + 1, weird_desc[i]);
+	ReplyToCommand(client, "[SM] The 1-based indices can be used with sm_ccc_debug_force_effect.");
 	return Plugin_Handled;
 }
 
