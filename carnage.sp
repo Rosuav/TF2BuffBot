@@ -854,6 +854,9 @@ void blind(int target, int amount)
 	int duration = 1536;
 	int holdtime = 1536;
 	//Magic numbers. I've no idea what these flags do/mean.
+	//https://wiki.alliedmods.net/User_messages suggests 10 is FFADE_STAYOUT|FFADE_OUT
+	//and 17 is FFADE_PURGE|FFADE_IN but I'm still not sure exactly what they do. How can
+	//the fade-out be done more smoothly? Change holdtime maybe?
 	int flags = amount ? 10 : 17;
 	int color[4] = { 128, 0, 0, 0 };
 	color[3] = amount;
