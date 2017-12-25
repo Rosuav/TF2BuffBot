@@ -449,7 +449,7 @@ public void StartCapture(Event event, const char[] name, bool dontBroadcast)
 {
 	int chance = GetConVarInt(sm_ccc_ignite_chance_on_start_capture);
 	if (100 * GetURandomFloat() >= chance) return; //Percentage chance
-	PrintToChatAll("The volatility of capture point air sets EVERYONE on fire!");
+	PrintToChatAll("A spy lit a cigarette and EVERYONE is set on fire! Smoking kills, folks.");
 	for (int target = 1; target <= MaxClients; ++target)
 		if (IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target))
 			TF2_IgnitePlayer(target, target);
