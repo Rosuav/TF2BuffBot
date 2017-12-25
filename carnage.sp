@@ -58,8 +58,8 @@ ConVar sm_ccc_ignite_chance_on_capture = null; //(15) Percentage chance that a p
 ConVar sm_ccc_ignite_chance_on_start_capture = null; //(2) Chance that STARTING a point capture will set everyone on fire.
 //For Mann vs Machine, and possibly other situations, co-op mode changes the parameters.
 ConVar sm_ccc_coop_mode = null; //(2) 0=normal, 1=co-op mode, 2=autodetect (if available)
-ConVar sm_ccc_coop_gift_multiplier = null; //(5) The cost of !gift is multiplied by this.
-ConVar sm_ccc_coop_roulette_multiplier = null; //(10) The cost of !roulette is multiplied by this. Should be significantly higher than the gift multiplier.
+ConVar sm_ccc_coop_gift_multiplier = null; //(10) The cost of !gift is multiplied by this.
+ConVar sm_ccc_coop_roulette_multiplier = null; //(20) The cost of !roulette is multiplied by this. Should be significantly higher than the gift multiplier.
 #include "convars"
 
 /* Co-op mode (eg for MVM)
@@ -69,6 +69,18 @@ ConVar sm_ccc_coop_roulette_multiplier = null; //(10) The cost of !roulette is m
 - Since roulette is more useful, its cost is even higher than gift
 - Carnage points are earned by the entire team, but spent individually.
 - Ergo all carnage point additions must loop over all players.
+
+Since carnage points are earned by everyone, your rate of gain is higher. With a full
+six-person MVM team, each kill awards six players the points, which means each player
+gets six times as many points as in solo mode (roughly). Additionally, the "two thirds
+good one third bad" rule of thumb for !gift and !roulette is removed - gifts always go
+to a teammate, and roulette spins are always good. Thirdly, MVM gives you a target-rich
+environment, allowing you to clock up carnage points more rapidly than normal. Carnage
+point costs should be increased for ALL of these. Currently, the second and third are
+covered by sm_ccc_coop_{gift,roulette}_multiplier, but the first one may be harder. How
+do you define "number of players" fairly when they can come and go? Does kicking an idle
+player suddenly make the roulette wheel cheaper? Could a griefer enter the server with
+the sole purpose of racking up no kills and thus penalizing the other players?
 */
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
