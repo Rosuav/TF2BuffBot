@@ -49,6 +49,11 @@ reasonable to take the buff bot for a spin without changing any of these.
   get, it lasts this long. Effects can be terminated prematurely, often by
   touching a resupply locker; some effects have their own cutoffs too (eg
   invisibility, which ends immediately upon attacking).
+* sm_ccc_crits_on_domination: 5 seconds by default. Be aware that, despite this
+  cvar's name, not everyone gets crits; some classes get mini-crits for twice
+  this duration, or other buffs. See the source code for details. Don't set
+  this to high, or dominations will simply cascade, letting one team utterly
+  crush and, well, dominate.
 
 Note that using !roulette or !gift will always consume ALL of your carnage
 points (unless you don't have enough). Having triple the required points does
