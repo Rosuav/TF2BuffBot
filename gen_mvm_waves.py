@@ -114,7 +114,7 @@ def make_wave(tanks=1, support=()):
 
 with open("mvm_coaltown.pop", "w") as pop:
 	print(PREAMBLE % 1504, file=pop)
-	print(make_wave(tanks=5, support=["T_TFBot_Sniper"]), file=pop)
-	# Other useful support keywords: T_TFBot_Scout_Fish, T_TFBot_Demoman_Knight,
-	# T_TFBot_Pyro, T_TFBot_Demoman
+	print(make_wave(tanks=1, support=["T_TFBot_Scout_Fish"]), file=pop)
+	print(make_wave(tanks=3, support=["T_TFBot_Sniper", "T_TFBot_Demoman"]), file=pop)
+	print(make_wave(tanks=5, support=["T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", "T_TFBot_Demoman_Knight"]), file=pop)
 	print("}", file=pop)
