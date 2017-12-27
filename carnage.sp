@@ -528,7 +528,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int money = GetEntProp(target, Prop_Send, "m_nCurrency");
 		char targetname[MAX_NAME_LENGTH];
 		GetClientName(target, targetname, sizeof(targetname));
-		money += 20000;
+		money += 10000;
 		SetEntProp(target, Prop_Send, "m_nCurrency", money);
 		PrintToChatAll("%s now has $%d.", targetname, money);
 		return;
