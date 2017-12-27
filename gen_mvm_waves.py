@@ -61,7 +61,7 @@ def make_wave(tanks=1, support=()):
 		{
 			Name	"Tank %d"
 			WaitForAllDead	"Harbinger %d"
-			TotalCurrency	400
+			TotalCurrency	500
 			TotalCount	1
 			MaxActive	5
 			SpawnCount	2
@@ -93,7 +93,7 @@ def make_wave(tanks=1, support=()):
 	for botclass in support:
 		info += """		WaveSpawn
 		{
-			TotalCurrency	400
+			TotalCurrency	100
 			TotalCount	10
 			MaxActive	5
 			SpawnCount	2
