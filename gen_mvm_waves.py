@@ -120,8 +120,9 @@ def make_wave(tanks=1, support=()):
 		}
 """ % (SUPPORT_MONEY, botclass)
 		wave_money += SUPPORT_MONEY
-	print("Wave money:", wave_money)
-	global total_money; total_money += wave_money
+	# The maximum possible money after a wave includes a 100-credit bonus.
+	global total_money; total_money += wave_money + 100
+	print("Wave money:", wave_money, "+ 100 ==> cumulative", total_money)
 	return info + "	}"
 
 with open("mvm_coaltown.pop", "w") as pop:
