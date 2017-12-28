@@ -142,6 +142,7 @@ with open("mvm_coaltown.pop", "w") as pop:
 	print("Starting money:", STARTING_MONEY)
 	print(PREAMBLE % STARTING_MONEY, file=pop)
 	print(make_wave(tanks=1, support=["T_TFBot_Scout_Fish"]), file=pop)
+	print(make_wave(tanks=2, support=["T_TFBot_Heavy"]), file=pop)
 	print(make_wave(tanks=3, support=["T_TFBot_Sniper", "T_TFBot_Demoman"]), file=pop)
 	print(make_wave(tanks=5, support=["T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", "T_TFBot_Demoman_Knight"]), file=pop)
 	print("}", file=pop)
