@@ -110,6 +110,7 @@ public void OnPluginStart()
 	//The actual code to create convars convars is built by the Python script,
 	//and yes, I'm aware that I now have two problems.
 	CreateConVars();
+	HookConVarChange(sm_ccc_coop_mode, CoopModeChanged);
 	//Load up some sprites from funcommands. This is GPL'd, so the following section
 	//of code is also GPL'd.
 	char buffer[PLATFORM_MAX_PATH];
@@ -199,14 +200,38 @@ public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 	carnage_points[event.GetInt("userid") % sizeof(carnage_points)] = GetConVarInt(sm_ccc_carnage_initial);
 }
 
-//TODO: Cache this, but invalidate the cache any time the cvar changes or we go to a new map
+int coop_mode = 2;
+int mvm_map = 0;
 int in_coop_mode()
 {
-	int flag = GetConVarInt(sm_ccc_coop_mode);
-	if (flag < 2) return flag; //Mode is forced by admin
-	//flag == 2 means we autodetect. Currently: return false always.
-	//Ideally: return true on MVM maps.
-	return 0;
+	//int coop_mode = GetConVarInt(sm_ccc_coop_mode);
+	if (coop_mode < 2) return coop_mode; //Mode is forced by admin
+	//flag == 2 means we autodetect. True if we're on an MVM map, false else.
+	return mvm_map;
+}
+
+void CoopModeChanged(ConVar convar, const char[] old, const char[] val)
+{
+	if (old[0]) ignore(convar); //Ignore both those parameters.
+	int flag = StringToInt(val);
+	if (flag == 0 || flag == 1)
+	{
+		coop_mode = flag; //Force off, or force on
+		PrintToServer("[SM] Co-op mode is now forced %sactive.", coop_mode ? "" : "in");
+	}
+	else
+	{
+		coop_mode = 2; //If you set it to an invalid value, assume "autodetect"
+		PrintToServer("[SM] Co-op mode will be auto-detected based on map name.");
+	}
+}
+
+public void OnMapStart()
+{
+	char mapname[64];
+	GetCurrentMap(mapname, sizeof(mapname));
+	mvm_map = !strncmp(mapname, "mvm_", 4);
+	PrintToServer("[SM] Starting new %smap: %s", mvm_map ? "MVM " : "", mapname);
 }
 
 void add_score(int userid, int score)
