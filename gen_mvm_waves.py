@@ -15,7 +15,20 @@ population
 {
 	StartingCurrency	%d
 	RespawnWaveTime		6
-	CanBotsAttackWhileInSpawnRoom	no"""
+	CanBotsAttackWhileInSpawnRoom	no
+	Templates
+	{
+		T_TFBot_Heavy
+		{
+			Health	300
+			Name	Heavy
+			Class	HeavyWeapons
+			Skill	Normal
+			Item	"tf_weapon_minigun"
+			Item	"tf_weapon_shotgun_hwg"
+			Item	"tf_weapon_fists"
+		}
+	}"""
 
 total_money = STARTING_MONEY
 
