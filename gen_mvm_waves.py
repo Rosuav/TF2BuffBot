@@ -50,6 +50,22 @@ population
 				"airblast vulnerability multiplier"	0
 			}
 		}
+		T_TFBot_Demoman_Boom
+		{
+			Health	175
+			Name	Demoman
+			Class	Demoman
+			Skill	Normal
+			Item	"tf_weapon_grenadelauncher"
+			Item	"tf_weapon_pipebomblauncher"
+			Item	"the ullapool caber"
+			Item	"scotsman's stove pipe"
+			Item	"ttg glasses"
+			CharacterAttributes
+			{
+				"health regen"	5
+			}
+		}
 	}"""
 
 total_money = STARTING_MONEY
@@ -209,9 +225,9 @@ with open("mvm_coaltown.pop", "w") as pop:
 	with wave:
 		harby_tanks(5)
 		subwave("T_TFBot_Sniper", 25, max_active=10, spawn_count=5)
-		support("T_TFBot_Pyro", "T_TFBot_Demoman")
+		support("T_TFBot_Pyro", "T_TFBot_Demoman_Boom")
 	with wave:
 		subwave("BOSS_ReflectMe", 1)
-		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Demoman_Knight")
+		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Demoman_Knight", "T_TFBot_Pyro")
 	print("}", file=pop)
 	print("Total money after all waves:", total_money)
