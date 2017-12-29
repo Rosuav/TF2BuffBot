@@ -1,7 +1,7 @@
 # Generate MVM waves with harbingers and such
 # The actual .pop file has tons of redundancy, which means editing it is tedious.
 
-STARTING_MONEY = 1507 # I use a weird value here so that versioning becomes easy
+STARTING_MONEY = 1508 # I use a weird value here so that versioning becomes easy
 WAVE_MONEY = 500 # Money from regular waves
 HARBINGER_MONEY = 100 # Money from the harbingers in tank waves
 TANK_MONEY = 500 # Money from the tanks themselves
@@ -192,18 +192,21 @@ with open("mvm_coaltown.pop", "w") as pop:
 	print("Starting money:", STARTING_MONEY)
 	print(PREAMBLE % STARTING_MONEY, file=pop)
 	with wave:
-		subwave("T_TFBot_Heavy", 30)
-	with wave:
-		harby_tanks(1)
+		subwave("T_TFBot_Heavy", 25)
 		support("T_TFBot_Scout_Fish")
 	with wave:
-		harby_tanks(2)
-		support("T_TFBot_Heavy")
+		harby_tanks(1)
+		support("T_TFBot_Scout_Scattergun_SlowFire")
 	with wave:
-		harby_tanks(3)
-		support("T_TFBot_Sniper", "T_TFBot_Demoman")
+		harby_tanks(2)
+		subwave("T_TFBot_Demoman", 10)
+		support("T_TFBot_Heavy", "T_TFBot_Sniper")
 	with wave:
 		harby_tanks(5)
-		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", "T_TFBot_Demoman_Knight")
+		subwave("T_TFBot_Sniper", 25)
+		support("T_TFBot_Pyro", "T_TFBot_Demoman")
+	with wave:
+		subwave("BOSS_ReflectMe", 1)
+		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Demoman_Knight")
 	print("}", file=pop)
 	print("Total money after all waves:", total_money)
