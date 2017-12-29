@@ -78,7 +78,7 @@ class Wave:
 		print("Wave money:", self.money, "+ 100 ==> cumulative", total_money)
 wave = Wave()
 
-def subwave(botclass, count, *, max_active=5, spawn_count=2):
+def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY):
 	print("""		WaveSpawn
 		{
 			TotalCurrency	%d
@@ -95,8 +95,8 @@ def subwave(botclass, count, *, max_active=5, spawn_count=2):
 					Template	%s
 				}
 			}
-		}""" % (WAVE_MONEY, count, max_active, spawn_count, botclass), file=pop)
-	wave.money += WAVE_MONEY
+		}""" % (money, count, max_active, spawn_count, botclass), file=pop)
+	wave.money += money
 
 def harby_tanks(count):
 	# TODO: Make the names unique within a wave, such that calling
@@ -195,8 +195,10 @@ with open("mvm_coaltown.pop", "w") as pop:
 	print("Starting money:", STARTING_MONEY)
 	print(PREAMBLE % STARTING_MONEY, file=pop)
 	with wave:
-		subwave("T_TFBot_Heavy", 25, max_active=10, spawn_count=5)
-		support("T_TFBot_Scout_Fish")
+		subwave("T_TFBot_Heavy", 25, max_active=10, spawn_count=5, money=250)
+		subwave("T_TFBot_Scout_Fish", 10, money=100)
+		subwave("T_TFBot_Demoman", 15, money=150)
+		subwave("T_TFBot_Pyro", 5, money=50)
 	with wave:
 		harby_tanks(1)
 		support("T_TFBot_Scout_Scattergun_SlowFire")
