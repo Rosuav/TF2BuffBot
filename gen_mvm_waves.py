@@ -98,13 +98,10 @@ def subwave(botclass, count):
 		}""" % (WAVE_MONEY, count, botclass), file=pop)
 	wave.money += WAVE_MONEY
 
-def make_wave(waves={}, tanks=0, support=()):
-	if not waves and not tanks:
-		raise ValueError("Must have at least SOME non-support waves")
-	info = ""
-	for i in range(tanks):
+def harby_tanks(count):
+	for i in range(count):
 		# Add the harbinger. The first one is a little bit different.
-		info += """		WaveSpawn
+		print("""		WaveSpawn
 		{
 			Name	"Harbinger %d"
 			%s
@@ -128,10 +125,14 @@ def make_wave(waves={}, tanks=0, support=()):
 					Item	"tf_weapon_shovel"
 				}
 			}
-		}
-""" % (i + 1, 'WaitForAllDead	"Harbinger %d"' % i if i else '', HARBINGER_MONEY, 30 if i else 0)
+		}""" % (
+			i + 1,
+			'WaitForAllDead	"Harbinger %d"' % i if i else '',
+			HARBINGER_MONEY,
+			30 if i else 0
+		), file=pop)
 		# And add the tank itself.
-		info += """		WaveSpawn
+		print("""		WaveSpawn
 		{
 			Name	"Tank %d"
 			WaitForAllDead	"Harbinger %d"
@@ -162,11 +163,12 @@ def make_wave(waves={}, tanks=0, support=()):
 					}
 				}
 			}
-		}
-""" % (i+1, i+1, TANK_MONEY)
+		}""" % (i+1, i+1, TANK_MONEY), file=pop)
 		wave.money += HARBINGER_MONEY + TANK_MONEY
-	for botclass in support:
-		info += """		WaveSpawn
+
+def support(*botclasses):
+	for botclass in botclasses:
+		print("""		WaveSpawn
 		{
 			TotalCurrency	%d
 			TotalCount	10
@@ -183,10 +185,8 @@ def make_wave(waves={}, tanks=0, support=()):
 					Template	%s
 				}
 			}
-		}
-""" % (SUPPORT_MONEY, botclass)
+		}""" % (SUPPORT_MONEY, botclass), file=pop)
 		wave.money += SUPPORT_MONEY
-	print(info, file=pop) # Sends it to the global pop, because practicality beats purity.
 
 with open("mvm_coaltown.pop", "w") as pop:
 	print("Starting money:", STARTING_MONEY)
@@ -194,12 +194,16 @@ with open("mvm_coaltown.pop", "w") as pop:
 	with wave:
 		subwave("T_TFBot_Heavy", 30)
 	with wave:
-		make_wave(tanks=1, support=["T_TFBot_Scout_Fish"])
+		harby_tanks(1)
+		support("T_TFBot_Scout_Fish")
 	with wave:
-		make_wave(tanks=2, support=["T_TFBot_Heavy"])
+		harby_tanks(2)
+		support("T_TFBot_Heavy")
 	with wave:
-		make_wave(tanks=3, support=["T_TFBot_Sniper", "T_TFBot_Demoman"])
+		harby_tanks(3)
+		support("T_TFBot_Sniper", "T_TFBot_Demoman")
 	with wave:
-		make_wave(tanks=5, support=["T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", "T_TFBot_Demoman_Knight"])
+		harby_tanks(5)
+		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", "T_TFBot_Demoman_Knight")
 	print("}", file=pop)
 	print("Total money after all waves:", total_money)
