@@ -99,6 +99,9 @@ def subwave(botclass, count, *, max_active=5, spawn_count=2):
 	wave.money += WAVE_MONEY
 
 def harby_tanks(count):
+	# TODO: Make the names unique within a wave, such that calling
+	# this function more than once results in parallel chains of
+	# harbingers and tanks (muahahahahaha)
 	for i in range(count):
 		# Add the harbinger. The first one is a little bit different.
 		print("""		WaveSpawn
