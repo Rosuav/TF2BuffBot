@@ -78,6 +78,26 @@ class Wave:
 		print("Wave money:", self.money, "+ 100 ==> cumulative", total_money)
 wave = Wave()
 
+def subwave(botclass, count):
+	print("""		WaveSpawn
+		{
+			TotalCurrency	%d
+			TotalCount	%d
+			MaxActive	10
+			SpawnCount	5
+			Where	spawnbot
+			WaitBeforeStarting	0
+			WaitBetweenSpawns	10
+			Squad
+			{
+				TFBot
+				{
+					Template	%s
+				}
+			}
+		}""" % (WAVE_MONEY, count, botclass), file=pop)
+	wave.money += WAVE_MONEY
+
 def make_wave(waves={}, tanks=0, support=()):
 	if not waves and not tanks:
 		raise ValueError("Must have at least SOME non-support waves")
@@ -145,26 +165,6 @@ def make_wave(waves={}, tanks=0, support=()):
 		}
 """ % (i+1, i+1, TANK_MONEY)
 		wave.money += HARBINGER_MONEY + TANK_MONEY
-	for botclass, count in waves.items():
-		info += """		WaveSpawn
-		{
-			TotalCurrency	%d
-			TotalCount	%d
-			MaxActive	10
-			SpawnCount	5
-			Where	spawnbot
-			WaitBeforeStarting	0
-			WaitBetweenSpawns	10
-			Squad
-			{
-				TFBot
-				{
-					Template	%s
-				}
-			}
-		}
-""" % (WAVE_MONEY, count, botclass)
-		wave.money += WAVE_MONEY
 	for botclass in support:
 		info += """		WaveSpawn
 		{
@@ -192,7 +192,7 @@ with open("mvm_coaltown.pop", "w") as pop:
 	print("Starting money:", STARTING_MONEY)
 	print(PREAMBLE % STARTING_MONEY, file=pop)
 	with wave:
-		make_wave(waves={"T_TFBot_Heavy": 30})
+		subwave("T_TFBot_Heavy", 30)
 	with wave:
 		make_wave(tanks=1, support=["T_TFBot_Scout_Fish"])
 	with wave:
