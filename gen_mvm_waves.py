@@ -223,6 +223,11 @@ with open("mvm_coaltown.pop", "w") as pop:
 		subwave("T_TFBot_Demoman", 10)
 		support("T_TFBot_Heavy", "T_TFBot_Sniper")
 	with wave:
+		harby_tanks(3)
+		subwave("T_TFBot_Pyro", 20)
+		subwave("T_TFBot_Medic", 10)
+		support("T_TFBot_Scout_Fish")
+	with wave:
 		harby_tanks(5)
 		subwave("T_TFBot_Sniper", 25, max_active=10, spawn_count=5)
 		support("T_TFBot_Pyro", "T_TFBot_Demoman_Boom")
