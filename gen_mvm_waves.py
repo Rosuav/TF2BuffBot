@@ -78,13 +78,13 @@ class Wave:
 		print("Wave money:", self.money, "+ 100 ==> cumulative", total_money)
 wave = Wave()
 
-def subwave(botclass, count):
+def subwave(botclass, count, *, max_active=5, spawn_count=2):
 	print("""		WaveSpawn
 		{
 			TotalCurrency	%d
 			TotalCount	%d
-			MaxActive	10
-			SpawnCount	5
+			MaxActive	%d
+			SpawnCount	%d
 			Where	spawnbot
 			WaitBeforeStarting	0
 			WaitBetweenSpawns	10
@@ -95,7 +95,7 @@ def subwave(botclass, count):
 					Template	%s
 				}
 			}
-		}""" % (WAVE_MONEY, count, botclass), file=pop)
+		}""" % (WAVE_MONEY, count, max_active, spawn_count, botclass), file=pop)
 	wave.money += WAVE_MONEY
 
 def harby_tanks(count):
@@ -192,7 +192,7 @@ with open("mvm_coaltown.pop", "w") as pop:
 	print("Starting money:", STARTING_MONEY)
 	print(PREAMBLE % STARTING_MONEY, file=pop)
 	with wave:
-		subwave("T_TFBot_Heavy", 25)
+		subwave("T_TFBot_Heavy", 25, max_active=10, spawn_count=5)
 		support("T_TFBot_Scout_Fish")
 	with wave:
 		harby_tanks(1)
@@ -203,7 +203,7 @@ with open("mvm_coaltown.pop", "w") as pop:
 		support("T_TFBot_Heavy", "T_TFBot_Sniper")
 	with wave:
 		harby_tanks(5)
-		subwave("T_TFBot_Sniper", 25)
+		subwave("T_TFBot_Sniper", 25, max_active=10, spawn_count=5)
 		support("T_TFBot_Pyro", "T_TFBot_Demoman")
 	with wave:
 		subwave("BOSS_ReflectMe", 1)
