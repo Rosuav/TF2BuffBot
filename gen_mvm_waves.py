@@ -180,15 +180,15 @@ def make_wave(waves={}, tanks=0, support=()):
 	# The maximum possible money after a wave includes a 100-credit bonus.
 	global total_money; total_money += wave_money + 100
 	print("Wave money:", wave_money, "+ 100 ==> cumulative", total_money)
-	return info + "	}"
+	print(info + "	}", file=pop) # Sends it to the global pop, because practicality beats purity.
 
 with open("mvm_coaltown.pop", "w") as pop:
 	print("Starting money:", STARTING_MONEY)
 	print(PREAMBLE % STARTING_MONEY, file=pop)
-	print(make_wave(waves={"T_TFBot_Heavy": 30}), file=pop)
-	print(make_wave(tanks=1, support=["T_TFBot_Scout_Fish"]), file=pop)
-	print(make_wave(tanks=2, support=["T_TFBot_Heavy"]), file=pop)
-	print(make_wave(tanks=3, support=["T_TFBot_Sniper", "T_TFBot_Demoman"]), file=pop)
-	print(make_wave(tanks=5, support=["T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", "T_TFBot_Demoman_Knight"]), file=pop)
+	make_wave(waves={"T_TFBot_Heavy": 30})
+	make_wave(tanks=1, support=["T_TFBot_Scout_Fish"])
+	make_wave(tanks=2, support=["T_TFBot_Heavy"])
+	make_wave(tanks=3, support=["T_TFBot_Sniper", "T_TFBot_Demoman"])
+	make_wave(tanks=5, support=["T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", "T_TFBot_Demoman_Knight"])
 	print("}", file=pop)
 	print("Total money after all waves:", total_money)
