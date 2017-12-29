@@ -28,6 +28,27 @@ population
 			Item	"tf_weapon_shotgun_hwg"
 			Item	"tf_weapon_fists"
 		}
+		BOSS_ReflectMe
+		{
+			Health	200000
+			Name	"Reflect Me"
+			Class	Soldier
+			Skill	Normal
+			WeaponRestrictions	PrimaryOnly
+			Attributes	"AlwaysCrit"
+			Attributes	"MiniBoss"
+			Item	"the original"
+			Item	"tf_weapon_shotgun_soldier"
+			Item	"tf_weapon_shovel"
+			CharacterAttributes
+			{
+				"Projectile speed decreased"	0.75
+				"damage bonus"			10
+				"dmg falloff decreased"		1
+				"move speed penalty"		0.15
+				"airblast vulnerability multiplier"	0
+			}
+		}
 	}"""
 
 total_money = STARTING_MONEY
