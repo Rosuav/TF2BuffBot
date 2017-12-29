@@ -54,11 +54,9 @@ population
 
 total_money = STARTING_MONEY
 
-def make_wave(waves={}, tanks=0, support=()):
-	if not waves and not tanks:
-		raise ValueError("Must have at least SOME non-support waves")
-	wave_money = 0
-	info = """	Wave
+class Wave:
+	def __enter__(self):
+		print("""	Wave
 	{
 		WaitWhenDone	65
 		Checkpoint	Yes
@@ -71,8 +69,19 @@ def make_wave(waves={}, tanks=0, support=()):
 		{
 			Target	wave_finished_relay
 			Action	Trigger
-		}
-"""
+		}""", file=pop)
+		self.money = 0
+	def __exit__(self, t, v, tb):
+		print("	}", file=pop)
+		# The maximum possible money after a wave includes a 100-credit bonus.
+		global total_money; total_money += self.money + 100
+		print("Wave money:", self.money, "+ 100 ==> cumulative", total_money)
+wave = Wave()
+
+def make_wave(waves={}, tanks=0, support=()):
+	if not waves and not tanks:
+		raise ValueError("Must have at least SOME non-support waves")
+	info = ""
 	for i in range(tanks):
 		# Add the harbinger. The first one is a little bit different.
 		info += """		WaveSpawn
@@ -135,7 +144,7 @@ def make_wave(waves={}, tanks=0, support=()):
 			}
 		}
 """ % (i+1, i+1, TANK_MONEY)
-		wave_money += HARBINGER_MONEY + TANK_MONEY
+		wave.money += HARBINGER_MONEY + TANK_MONEY
 	for botclass, count in waves.items():
 		info += """		WaveSpawn
 		{
@@ -155,7 +164,7 @@ def make_wave(waves={}, tanks=0, support=()):
 			}
 		}
 """ % (WAVE_MONEY, count, botclass)
-		wave_money += WAVE_MONEY
+		wave.money += WAVE_MONEY
 	for botclass in support:
 		info += """		WaveSpawn
 		{
@@ -176,19 +185,21 @@ def make_wave(waves={}, tanks=0, support=()):
 			}
 		}
 """ % (SUPPORT_MONEY, botclass)
-		wave_money += SUPPORT_MONEY
-	# The maximum possible money after a wave includes a 100-credit bonus.
-	global total_money; total_money += wave_money + 100
-	print("Wave money:", wave_money, "+ 100 ==> cumulative", total_money)
-	print(info + "	}", file=pop) # Sends it to the global pop, because practicality beats purity.
+		wave.money += SUPPORT_MONEY
+	print(info, file=pop) # Sends it to the global pop, because practicality beats purity.
 
 with open("mvm_coaltown.pop", "w") as pop:
 	print("Starting money:", STARTING_MONEY)
 	print(PREAMBLE % STARTING_MONEY, file=pop)
-	make_wave(waves={"T_TFBot_Heavy": 30})
-	make_wave(tanks=1, support=["T_TFBot_Scout_Fish"])
-	make_wave(tanks=2, support=["T_TFBot_Heavy"])
-	make_wave(tanks=3, support=["T_TFBot_Sniper", "T_TFBot_Demoman"])
-	make_wave(tanks=5, support=["T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", "T_TFBot_Demoman_Knight"])
+	with wave:
+		make_wave(waves={"T_TFBot_Heavy": 30})
+	with wave:
+		make_wave(tanks=1, support=["T_TFBot_Scout_Fish"])
+	with wave:
+		make_wave(tanks=2, support=["T_TFBot_Heavy"])
+	with wave:
+		make_wave(tanks=3, support=["T_TFBot_Sniper", "T_TFBot_Demoman"])
+	with wave:
+		make_wave(tanks=5, support=["T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", "T_TFBot_Demoman_Knight"])
 	print("}", file=pop)
 	print("Total money after all waves:", total_money)
