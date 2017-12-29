@@ -141,8 +141,8 @@ def make_wave(waves={}, tanks=0, support=()):
 		{
 			TotalCurrency	%d
 			TotalCount	%d
-			MaxActive	5
-			SpawnCount	2
+			MaxActive	10
+			SpawnCount	5
 			Where	spawnbot
 			WaitBeforeStarting	0
 			WaitBetweenSpawns	10
