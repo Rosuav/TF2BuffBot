@@ -31,7 +31,7 @@ population
 		}
 		BOSS_ReflectMe
 		{
-			Health	200000
+			Health	500000
 			Name	"Reflect Me"
 			Class	Soldier
 			Skill	Normal
