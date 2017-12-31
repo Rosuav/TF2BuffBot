@@ -71,6 +71,7 @@ population
 total_money = STARTING_MONEY
 
 class Wave:
+	"""Singleton just to allow 'with wave:' constructs"""
 	def __enter__(self):
 		print("""	Wave
 	{
