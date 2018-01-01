@@ -87,7 +87,7 @@ class Wave:
 			Target	wave_finished_relay
 			Action	Trigger
 		}""", file=pop)
-		self.money = 0
+		self.money = self.subwaves = 0
 	def __exit__(self, t, v, tb):
 		print("	}", file=pop)
 		# The maximum possible money after a wave includes a 100-credit bonus.
@@ -95,9 +95,16 @@ class Wave:
 		print("Wave money:", self.money, "+ 100 ==> cumulative", total_money)
 wave = Wave()
 
-def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY):
+def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, chain=False):
+	if chain:
+		chain = 'WaitForAllSpawned	"Subwave %d"' % wave.subwaves
+	else:
+		chain = ''
+	wave.subwaves += 1
 	print("""		WaveSpawn
 		{
+			Name		"Subwave %d"
+			%s
 			TotalCurrency	%d
 			TotalCount	%d
 			MaxActive	%d
@@ -112,7 +119,7 @@ def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY):
 					Template	%s
 				}
 			}
-		}""" % (money, count, max_active, spawn_count, botclass), file=pop)
+		}""" % (wave.subwaves, chain, money, count, max_active, spawn_count, botclass), file=pop)
 	wave.money += money
 
 def harby_tanks(count):
@@ -212,10 +219,10 @@ with open("mvm_coaltown.pop", "w") as pop:
 	print("Starting money:", STARTING_MONEY)
 	print(PREAMBLE % STARTING_MONEY, file=pop)
 	with wave:
-		subwave("T_TFBot_Heavy", 25, money=250)
 		subwave("T_TFBot_Scout_Fish", 10, money=100)
+		subwave("T_TFBot_Heavy", 25, money=250, chain=True)
 		subwave("T_TFBot_Demoman", 15, money=150)
-		subwave("T_TFBot_Pyro", 5, money=50)
+		subwave("T_TFBot_Pyro", 5, money=50, chain=True)
 	with wave:
 		harby_tanks(1)
 		support("T_TFBot_Scout_Scattergun_SlowFire")
