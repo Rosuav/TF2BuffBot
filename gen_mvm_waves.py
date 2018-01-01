@@ -212,7 +212,7 @@ with open("mvm_coaltown.pop", "w") as pop:
 	print("Starting money:", STARTING_MONEY)
 	print(PREAMBLE % STARTING_MONEY, file=pop)
 	with wave:
-		subwave("T_TFBot_Heavy", 25, max_active=10, spawn_count=5, money=250)
+		subwave("T_TFBot_Heavy", 25, money=250)
 		subwave("T_TFBot_Scout_Fish", 10, money=100)
 		subwave("T_TFBot_Demoman", 15, money=150)
 		subwave("T_TFBot_Pyro", 5, money=50)
