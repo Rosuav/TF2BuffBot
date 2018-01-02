@@ -629,8 +629,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			PrintToChat(target, "You'll have to wreak more havoc before you can do that, sorry.");
 			return;
 		}
-		//Give a random effect to self, more of which are beneficial than not
-		//There's a small chance of death (since this is Russian Roulette after all).
+		//Give a random effect to self, more of which are beneficial than not. Also,
+		//there's a small chance of death (since this is Russian Roulette after all).
 		TFCond condition;
 		char targetname[MAX_NAME_LENGTH];
 		GetClientName(target, targetname, sizeof(targetname));
