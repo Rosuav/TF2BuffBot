@@ -19,6 +19,17 @@ population
 	CanBotsAttackWhileInSpawnRoom	no
 	Templates
 	{
+		Anorexic_Heavy
+		{
+			Health	100
+			Name	Heavy
+			Class	HeavyWeapons
+			Skill	Normal
+			WeaponRestrictions	SecondaryOnly
+			Item	"tf_weapon_minigun"
+			Item	"tf_weapon_shotgun_hwg"
+			Item	"tf_weapon_fists"
+		}
 		T_TFBot_Heavy
 		{
 			Health	300
@@ -48,6 +59,7 @@ population
 				"dmg falloff decreased"		1
 				"move speed penalty"		0.15
 				"airblast vulnerability multiplier"	0
+				"cannot pick up intelligence"	1
 			}
 		}
 		T_TFBot_Demoman_Boom
@@ -220,7 +232,7 @@ with open("mvm_coaltown.pop", "w") as pop:
 	print(PREAMBLE % STARTING_MONEY, file=pop)
 	with wave:
 		subwave("T_TFBot_Scout_Fish", 10, money=100)
-		subwave("T_TFBot_Heavy", 25, money=250, chain=True)
+		subwave("Anorexic_Heavy", 25, money=250, chain=True)
 		subwave("T_TFBot_Demoman", 15, money=150)
 		subwave("T_TFBot_Pyro", 5, money=50, chain=True)
 	with wave:
@@ -241,6 +253,7 @@ with open("mvm_coaltown.pop", "w") as pop:
 		support("T_TFBot_Heavyweapons_Fist", "T_TFBot_Demoman_Boom")
 	with wave:
 		subwave("BOSS_ReflectMe", 1)
+		# TODO: Turn one of these into a non-support subwave so there's prospects of it ending.
 		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Demoman_Knight", "T_TFBot_Pyro")
 	print("}", file=pop)
 	print("Total money after all waves:", total_money)
