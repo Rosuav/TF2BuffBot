@@ -147,8 +147,8 @@ wave = Wave()
 def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, chain=False):
 	wave.subwaves += 1
 	write("WaveSpawn", {
-		"Name": "Subwave %d" % wave.subwaves,
-		"WaitForAllSpawned": "Subwave %d" % (wave.subwaves-1) if chain else None,
+		"Name": f"Subwave {wave.subwaves}",
+		"WaitForAllSpawned": f"Subwave {wave.subwaves-1}" if chain else None,
 		"TotalCurrency": money,
 		"TotalCount": count,
 		"MaxActive": max_active,
