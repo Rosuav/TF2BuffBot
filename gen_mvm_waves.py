@@ -23,6 +23,7 @@ def write(key, obj, autoclose=True):
 	closing brace will be omitted, allowing subsequent write() calls
 	to continue the current object.
 	"""
+	global _indentation
 	indent = "\t" * _indentation
 	print(indent + key, file=pop)
 	print(indent + "{", file=pop)
@@ -38,6 +39,7 @@ def close(levels=1):
 	indentation level accordingly. If levels is Ellipsis, close
 	*all* braces still open.
 	"""
+	global _indentation
 	if levels is Ellipsis:
 		levels = _indentation
 	for _ in range(levels):
