@@ -166,36 +166,21 @@ def harby_tanks(count):
 	# harbingers and tanks (muahahahahaha)
 	for i in range(count):
 		# Add the harbinger. The first one is a little bit different.
-		print("""		WaveSpawn
-		{
-			Name	"Harbinger %d"
-			%s
-			TotalCurrency	%d
-			TotalCount	1
-			MaxActive	5
-			SpawnCount	2
-			Where	spawnbot
-			WaitBeforeStarting	%d
-			WaitBetweenSpawns	10
-			Squad
-			{
-				TFBot
-				{
-					Health	500
-					Name	Soldier
-					Class	Soldier
-					Skill	Normal
-					Item	"tf_weapon_rocketlauncher"
-					Item	"tf_weapon_shotgun_soldier"
-					Item	"tf_weapon_shovel"
-				}
-			}
-		}""" % (
-			i + 1,
-			'WaitForAllDead	"Harbinger %d"' % i if i else '',
-			HARBINGER_MONEY,
-			30 if i else 0
-		), file=pop)
+		write("WaveSpawn", {
+			"Name": f"Harbinger {i + 1}",
+			"WaitForAllDead": f"Harbinger {i}" if i else None,
+			"TotalCurrency": HARBINGER_MONEY,
+			"TotalCount": 1,
+			"Where": "spawnbot",
+			"WaitBeforeStarting": 30 if i else 0,
+			"Squad": {"TFBot": {
+				"Health": 500,
+				"Name": "Soldier",
+				"Class": "Soldier",
+				"Skill": "Normal",
+				"Item": ["tf_weapon_rocketlauncher", "tf_weapon_shotgun_soldier", "tf_weapon_shovel"],
+			}},
+		})
 		# And add the tank itself.
 		print("""		WaveSpawn
 		{
