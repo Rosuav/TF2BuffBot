@@ -182,38 +182,28 @@ def harby_tanks(count):
 			}},
 		})
 		# And add the tank itself.
-		print("""		WaveSpawn
-		{
-			Name	"Tank %d"
-			WaitForAllDead	"Harbinger %d"
-			TotalCurrency	%d
-			TotalCount	1
-			MaxActive	5
-			SpawnCount	2
-			Where	spawnbot
-			WaitBeforeStarting	0
-			WaitBetweenSpawns	30
-			Squad
-			{
-				Tank
-				{
-					Health	40000
-					Name	Tank
-					Speed	75
-					StartingPathTrackNode	boss_path_1
-					OnKilledOutput
-					{
-						Target	boss_dead_relay
-						Action	Trigger
-					}
-					OnBombDroppedOutput
-					{
-						Target	boss_deploy_relay
-						Action	Trigger
-					}
+		write("WaveSpawn", {
+			"Name": f"Tank {i + 1}",
+			"WaitForAllDead": f"Harbinger {i + 1}",
+			"TotalCurrency": TANK_MONEY,
+			"TotalCount": 1,
+			"Where": "spawnbot",
+			"WaitBeforeStarting": 0,
+			"Squad": {"Tank": {
+				"Health": 40000,
+				"Name": "Tank",
+				"Speed": 75,
+				"StartingPathTrackNode": "boss_path_1",
+				"OnKilledOutput": {
+					"Target": "boss_dead_relay",
+					"Action": "Trigger",
+				},
+				"OnBombDroppedOutput": {
+					"Target": "boss_deploy_relay",
+					"Action": "Trigger",
 				}
-			}
-		}""" % (i+1, i+1, TANK_MONEY), file=pop)
+			}},
+		})
 		wave.money += HARBINGER_MONEY + TANK_MONEY
 
 def support(*botclasses):
