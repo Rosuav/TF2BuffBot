@@ -1,7 +1,7 @@
 # Generate MVM waves with harbingers and such
 # The actual .pop file has tons of redundancy, which means editing it is tedious.
 
-STARTING_MONEY = 1508 # I use a weird value here so that versioning becomes easy
+STARTING_MONEY = 1509 # I use a weird value here so that versioning becomes easy
 WAVE_MONEY = 500 # Money from regular waves
 HARBINGER_MONEY = 100 # Money from the harbingers in tank waves
 TANK_MONEY = 500 # Money from the tanks themselves
@@ -25,12 +25,28 @@ def write(key, obj, autoclose=True):
 	"""
 	global _indentation
 	indent = "\t" * _indentation
-	print(indent + key, file=pop)
-	print(indent + "{", file=pop)
-	_indentation += 1; indent += "\t"
-	...
-	if autoclose:
-		close(1)
+	if " " in key and not key.startswith('"'):
+		# Keys and string values with spaces in them get quoted.
+		key = '"' + key + '"'
+	if isinstance(obj, dict):
+		print(indent + key, file=pop)
+		print(indent + "{", file=pop)
+		_indentation += 1; indent += "\t"
+		for k, v in obj.items():
+			write(k, v)
+		if autoclose:
+			close(1)
+	elif isinstance(obj, (list, tuple)):
+		for val in obj:
+			write(key, val)
+	else:
+		# Should normally be a string, integer, float, or similar
+		# simple type.
+		obj = str(obj)
+		# If there's a space in the value, it gets quoted for safety.
+		if " " in obj:
+			obj = '"' + obj + '"'
+		print(indent + key + "\t" + obj, file=pop)
 
 def close(levels=1):
 	"""Close one or more indentation levels in the 'pop' file
@@ -46,73 +62,61 @@ def close(levels=1):
 		_indentation -= 1
 		print("\t" * _indentation + "}", file=pop)
 
-PREAMBLE += """population
-{
-	StartingCurrency	%d
-	RespawnWaveTime		6
-	CanBotsAttackWhileInSpawnRoom	no
-	Templates
-	{
-		Anorexic_Heavy
-		{
-			Health	100
-			Name	Heavy
-			Class	HeavyWeapons
-			Skill	Normal
-			WeaponRestrictions	SecondaryOnly
-			Item	"tf_weapon_minigun"
-			Item	"tf_weapon_shotgun_hwg"
-			Item	"tf_weapon_fists"
-		}
-		T_TFBot_Heavy
-		{
-			Health	300
-			Name	Heavy
-			Class	HeavyWeapons
-			Skill	Normal
-			Item	"tf_weapon_minigun"
-			Item	"tf_weapon_shotgun_hwg"
-			Item	"tf_weapon_fists"
-		}
-		BOSS_ReflectMe
-		{
-			Health	500000
-			Name	"Reflect Me"
-			Class	Soldier
-			Skill	Normal
-			WeaponRestrictions	PrimaryOnly
-			Attributes	"AlwaysCrit"
-			Attributes	"MiniBoss"
-			Item	"the original"
-			Item	"tf_weapon_shotgun_soldier"
-			Item	"tf_weapon_shovel"
-			CharacterAttributes
-			{
-				"Projectile speed decreased"	0.75
-				"damage bonus"			10
-				"dmg falloff decreased"		1
-				"move speed penalty"		0.15
-				"airblast vulnerability multiplier"	0
-				"cannot pick up intelligence"	1
+MASTER = {
+	"StartingCurrency": STARTING_MONEY,
+	"RespawnWaveTime": 6,
+	"CanBotsAttackWhileInSpawnRoom": "no",
+	"Templates": {
+		"Anorexic_Heavy": {
+			"Health": 100,
+			"Name": "Heavy",
+			"Class": "HeavyWeapons",
+			"Skill": "Normal",
+			"WeaponRestrictions": "SecondaryOnly",
+			"Item": ["tf_weapon_minigun", "tf_weapon_shotgun_hwg", "tf_weapon_fists"],
+		},
+		"T_TFBot_Heavy": {
+			"Health": 300,
+			"Name": "Heavy",
+			"Class": "HeavyWeapons",
+			"Skill": "Normal",
+			"Item": ["tf_weapon_minigun", "tf_weapon_shotgun_hwg", "tf_weapon_fists"],
+		},
+		"BOSS_ReflectMe": {
+			"Health": 500000,
+			"Name": "Reflect Me",
+			"Class": "Soldier",
+			"Skill": "Normal",
+			"WeaponRestrictions": "PrimaryOnly",
+			"Attributes": ["AlwaysCrit", "MiniBoss"],
+			"Item": ["the original", "tf_weapon_shotgun_soldier", "tf_weapon_shovel"],
+			"CharacterAttributes": {
+				"Projectile speed decreased": 0.75,
+				"damage bonus": 10,
+				"dmg falloff decreased": 1,
+				"move speed penalty": 0.15,
+				"airblast vulnerability multiplier": 0,
+				"cannot pick up intelligence": 1,
+			}
+		},
+		"T_TFBot_Demoman_Boom": {
+			"Health": 175,
+			"Name": "Demoman",
+			"Class": "Demoman",
+			"Skill": "Normal",
+			"Item": [
+				"tf_weapon_grenadelauncher",
+				"tf_weapon_pipebomblauncher",
+				"the ullapool caber",
+				"scotsman's stove pipe",
+				"ttg glasses",
+			],
+			"CharacterAttributes": {
+				"health regen": 5,
 			}
 		}
-		T_TFBot_Demoman_Boom
-		{
-			Health	175
-			Name	Demoman
-			Class	Demoman
-			Skill	Normal
-			Item	"tf_weapon_grenadelauncher"
-			Item	"tf_weapon_pipebomblauncher"
-			Item	"the ullapool caber"
-			Item	"scotsman's stove pipe"
-			Item	"ttg glasses"
-			CharacterAttributes
-			{
-				"health regen"	5
-			}
-		}
-	}"""
+	}
+}
 
 total_money = STARTING_MONEY
 
@@ -263,7 +267,8 @@ def support(*botclasses):
 
 with open("mvm_coaltown.pop", "w") as pop:
 	print("Starting money:", STARTING_MONEY)
-	print(PREAMBLE % STARTING_MONEY, file=pop)
+	print(PREAMBLE, file=pop)
+	write("population", MASTER, autoclose=False)
 	with wave:
 		subwave("T_TFBot_Scout_Fish", 10, money=100)
 		subwave("Anorexic_Heavy", 25, money=250, chain=True)
@@ -289,5 +294,5 @@ with open("mvm_coaltown.pop", "w") as pop:
 		subwave("BOSS_ReflectMe", 1)
 		# TODO: Turn one of these into a non-support subwave so there's prospects of it ending.
 		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Demoman_Knight", "T_TFBot_Pyro")
-	print("}", file=pop)
+	close(...)
 	print("Total money after all waves:", total_money)
