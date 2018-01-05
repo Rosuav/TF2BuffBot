@@ -208,24 +208,17 @@ def harby_tanks(count):
 
 def support(*botclasses):
 	for botclass in botclasses:
-		print("""		WaveSpawn
-		{
-			TotalCurrency	%d
-			TotalCount	10
-			MaxActive	5
-			SpawnCount	2
-			Where	spawnbot
-			WaitBeforeStarting	0
-			WaitBetweenSpawns	10
-			Support	1
-			Squad
-			{
-				TFBot
-				{
-					Template	%s
-				}
-			}
-		}""" % (SUPPORT_MONEY, botclass), file=pop)
+		write("WaveSpawn", {
+			"TotalCurrency": SUPPORT_MONEY,
+			"TotalCount": 10, # With support waves, I think this controls the money drops
+			"MaxActive": 5,
+			"SpawnCount": 2,
+			"Where": "spawnbot",
+			"WaitBeforeStarting": 0,
+			"WaitBetweenSpawns": 10,
+			"Support": 1,
+			"Squad": {"TFBot": {"Template": botclass}},
+		})
 		wave.money += SUPPORT_MONEY
 
 with open("mvm_coaltown.pop", "w") as pop:
