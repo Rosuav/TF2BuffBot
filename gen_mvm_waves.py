@@ -206,13 +206,13 @@ def harby_tanks(count):
 		})
 		wave.money += HARBINGER_MONEY + TANK_MONEY
 
-def support(*botclasses):
+def support(*botclasses, max_active=5, spawn_count=2):
 	for botclass in botclasses:
 		write("WaveSpawn", {
 			"TotalCurrency": SUPPORT_MONEY,
 			"TotalCount": 10, # With support waves, I think this controls the money drops
-			"MaxActive": 5,
-			"SpawnCount": 2,
+			"MaxActive": max_active,
+			"SpawnCount": spawn_count,
 			"Where": "spawnbot",
 			"WaitBeforeStarting": 0,
 			"WaitBetweenSpawns": 10,
@@ -248,7 +248,7 @@ with open("mvm_coaltown.pop", "w") as pop:
 		support("T_TFBot_Heavyweapons_Fist", "T_TFBot_Demoman_Boom")
 	with wave:
 		subwave("BOSS_ReflectMe", 1)
-		subwave("T_TFBot_Demoman_Knight", 25, max_active=10, spawn_count=5)
-		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro")
+		subwave("T_TFBot_Demoman_Knight", 50, max_active=10, spawn_count=5)
+		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", spawn_count=1)
 	close(...)
 	print("Total money after all waves:", total_money)
