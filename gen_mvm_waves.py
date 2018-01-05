@@ -123,23 +123,21 @@ total_money = STARTING_MONEY
 class Wave:
 	"""Singleton just to allow 'with wave:' constructs"""
 	def __enter__(self):
-		print("""	Wave
-	{
-		WaitWhenDone	65
-		Checkpoint	Yes
-		StartWaveOutput
-		{
-			Target	wave_start_relay
-			Action	Trigger
-		}
-		DoneOutput
-		{
-			Target	wave_finished_relay
-			Action	Trigger
-		}""", file=pop)
+		write("Wave", {
+			"WaitWhenDone": 65,
+			"Checkpoint": "Yes",
+			"StartWaveOutput": {
+				"Target": "wave_start_relay",
+				"Action": "Trigger",
+			},
+			"DoneOutput": {
+				"Target": "wave_finished_relay",
+				"Action": "Trigger",
+			}
+		}, autoclose=False)
 		self.money = self.subwaves = 0
 	def __exit__(self, t, v, tb):
-		print("	}", file=pop)
+		close(1)
 		# The maximum possible money after a wave includes a 100-credit bonus.
 		global total_money; total_money += self.money + 100
 		print("Wave money:", self.money, "+ 100 ==> cumulative", total_money)
