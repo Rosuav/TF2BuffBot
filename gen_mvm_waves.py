@@ -84,7 +84,7 @@ MASTER = {
 			"Item": ["tf_weapon_minigun", "tf_weapon_shotgun_hwg", "tf_weapon_fists"],
 		},
 		"BOSS_ReflectMe": {
-			"Health": 500000,
+			"Health": 250000,
 			"Name": "Reflect Me",
 			"Class": "Soldier",
 			"Skill": "Normal",
@@ -248,7 +248,7 @@ with open("mvm_coaltown.pop", "w") as pop:
 		support("T_TFBot_Heavyweapons_Fist", "T_TFBot_Demoman_Boom")
 	with wave:
 		subwave("BOSS_ReflectMe", 1)
-		# TODO: Turn one of these into a non-support subwave so there's prospects of it ending.
-		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Demoman_Knight", "T_TFBot_Pyro")
+		subwave("T_TFBot_Demoman_Knight", 25, max_active=10, spawn_count=5)
+		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro")
 	close(...)
 	print("Total money after all waves:", total_money)
