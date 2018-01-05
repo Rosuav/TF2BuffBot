@@ -23,6 +23,7 @@ def write(key, obj, autoclose=True):
 	closing brace will be omitted, allowing subsequent write() calls
 	to continue the current object.
 	"""
+	if obj is None: return # Allow "sometimes there, sometimes not" entries in dicts/lists
 	global _indentation
 	indent = "\t" * _indentation
 	if " " in key and not key.startswith('"'):
@@ -144,30 +145,19 @@ class Wave:
 wave = Wave()
 
 def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, chain=False):
-	if chain:
-		chain = 'WaitForAllSpawned	"Subwave %d"' % wave.subwaves
-	else:
-		chain = ''
 	wave.subwaves += 1
-	print("""		WaveSpawn
-		{
-			Name		"Subwave %d"
-			%s
-			TotalCurrency	%d
-			TotalCount	%d
-			MaxActive	%d
-			SpawnCount	%d
-			Where	spawnbot
-			WaitBeforeStarting	0
-			WaitBetweenSpawns	10
-			Squad
-			{
-				TFBot
-				{
-					Template	%s
-				}
-			}
-		}""" % (wave.subwaves, chain, money, count, max_active, spawn_count, botclass), file=pop)
+	write("WaveSpawn", {
+		"Name": "Subwave %d" % wave.subwaves,
+		"WaitForAllSpawned": "Subwave %d" % (wave.subwaves-1) if chain else None,
+		"TotalCurrency": money,
+		"TotalCount": count,
+		"MaxActive": max_active,
+		"SpawnCount": spawn_count,
+		"Where": "spawnbot",
+		"WaitBeforeStarting": 0,
+		"WaitBetweenSpawns": 10,
+		"Squad": {"TFBot": {"Template": botclass}},
+	})
 	wave.money += money
 
 def harby_tanks(count):
