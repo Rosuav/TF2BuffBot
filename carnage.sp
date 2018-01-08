@@ -98,6 +98,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_hysteria", Command_Hysteria, ADMFLAG_SLAY);
 	RegAdminCmd("sm_grant_bonkvich", Command_Bonkvich, ADMFLAG_SLAY);
 	RegAdminCmd("sm_ccc_effects", Command_Effects, ADMFLAG_SLAY);
+	RegAdminCmd("sm_rage_box", Command_RageBox, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("player_team", InitializePlayer);
 	HookEvent("player_death", PlayerDied);
@@ -122,6 +123,27 @@ public void OnPluginStart()
 	//End GPL code. (The rest of this file is even more freely usable.)
 }
 
+TFCond hysteria_effects[] = {
+	TFCond_CritOnDamage,
+	TFCond_BulletImmune,
+	TFCond_BlastImmune,
+	TFCond_FireImmune,
+};
+void add_hysteria(int target)
+{
+	//Add the effects and wash out your vision
+	for (int i = 0; i < sizeof(hysteria_effects); ++i)
+		TF2_AddCondition(target, hysteria_effects[i], TFCondDuration_Infinite, 0);
+	blind(target, 192);
+}
+void remove_hysteria(int target)
+{
+	//Remove the effects and clear the vision
+	for (int i = 0; i < sizeof(hysteria_effects); ++i)
+		TF2_RemoveCondition(target, hysteria_effects[i]);
+	blind(target, 0);
+}
+
 public Action Command_Hysteria(int client, int args)
 {
 	char player[32];
@@ -132,26 +154,14 @@ public Action Command_Hysteria(int client, int args)
 	char name[MAX_NAME_LENGTH];
 	GetClientName(target, name, sizeof(name));
 
-	TFCond effects[] = {
-		TFCond_CritOnDamage,
-		TFCond_BulletImmune,
-		TFCond_BlastImmune,
-		TFCond_FireImmune,
-	};
 	if (TF2_IsPlayerInCondition(target, TFCond_CritOnDamage))
 	{
-		//Remove the effects and clear the vision
-		for (int i = 0; i < sizeof(effects); ++i)
-			TF2_RemoveCondition(target, effects[i]);
-		blind(target, 0);
+		remove_hysteria(target);
 		ReplyToCommand(client, "[SM] %s [%d] leaves hysteria behind.", name, target);
 	}
 	else
 	{
-		//Add the effects and wash out your vision
-		for (int i = 0; i < sizeof(effects); ++i)
-			TF2_AddCondition(target, effects[i], TFCondDuration_Infinite, 0);
-		blind(target, 192);
+		add_hysteria(target);
 		ReplyToCommand(client, "[SM] %s [%d] goes into hysteria mode!", name, target);
 	}
 
@@ -170,6 +180,22 @@ public Action Command_Bonkvich(int client, int args)
 	int userid = GetClientUserId(target);
 	bonkvich_userid = userid;
 	ReplyToCommand(client, "[SM] %s is granted the Box of Bonkvich.", name);
+	return Plugin_Handled;
+}
+
+int ragebox_userid = -1;
+public Action Command_RageBox(int client, int args)
+{
+	char player[32];
+	GetCmdArg(1, player, sizeof(player));
+	int target = FindTarget(client, player);
+	if (target == -1) return Plugin_Handled;
+	char name[MAX_NAME_LENGTH];
+	GetClientName(target, name, sizeof(name));
+	int userid = GetClientUserId(target);
+	ragebox_userid = userid;
+	add_hysteria(target);
+	PrintToChatAll("A Rage Box has entered the game! %s holds it.", name);
 	return Plugin_Handled;
 }
 
