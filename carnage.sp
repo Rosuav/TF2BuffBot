@@ -129,12 +129,12 @@ TFCond hysteria_effects[] = {
 	TFCond_BlastImmune,
 	TFCond_FireImmune,
 };
-void add_hysteria(int target)
+void add_hysteria(int target, int blindness)
 {
 	//Add the effects and wash out your vision
 	for (int i = 0; i < sizeof(hysteria_effects); ++i)
 		TF2_AddCondition(target, hysteria_effects[i], TFCondDuration_Infinite, 0);
-	blind(target, 192);
+	blind(target, blindness);
 }
 void remove_hysteria(int target)
 {
@@ -161,7 +161,7 @@ public Action Command_Hysteria(int client, int args)
 	}
 	else
 	{
-		add_hysteria(target);
+		add_hysteria(target, 192);
 		ReplyToCommand(client, "[SM] %s [%d] goes into hysteria mode!", name, target);
 	}
 
@@ -194,7 +194,7 @@ public Action Command_RageBox(int client, int args)
 	GetClientName(target, name, sizeof(name));
 	int userid = GetClientUserId(target);
 	ragebox_userid = userid;
-	add_hysteria(target);
+	add_hysteria(target, 224);
 	PrintToChatAll("A Rage Box has entered the game! %s holds it.", name);
 	return Plugin_Handled;
 }
@@ -365,6 +365,8 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		//award no points. And to maximize the humiliation, we'll announce
 		//this to everyone in chat. Muahahaha.
 		PrintToChatAll("%s is awarded no points for self-destruction. May God have mercy on your soul.", playername);
+		if (event.GetInt("userid") == ragebox_userid)
+			ragebox_userid = 0; //Suicide destroys the rage box. (Should it be reassigned randomly?)
 		return;
 	}
 	if (event.GetInt("userid") == event.GetInt("assister"))
@@ -379,6 +381,20 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	//Would be nice to give a cool message for that too.
 	Debug("That's a kill! %s died (uid %d) by %d, assist %d",
 		playername, event.GetInt("userid"), event.GetInt("attacker"), event.GetInt("assister"));
+	if (event.GetInt("userid") == ragebox_userid)
+	{
+		ragebox_userid = 0;
+		int recipient = event.GetInt("attacker");
+		int target = GetClientOfUserId(recipient);
+		if (target && IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target))
+		{
+			char recipname[MAX_NAME_LENGTH]; GetClientName(target, recipname, sizeof(recipname));
+			PrintToChatAll("The Rage Box has been conquered by %s!", recipname);
+			ragebox_userid = recipient;
+			add_hysteria(target, 224);
+			remove_hysteria(player); //In case it's a Dead Ringer or something
+		}
+	}
 	if (event.GetInt("assister") == -1)
 	{
 		//Solo kill - might be given more points than an assisted one
