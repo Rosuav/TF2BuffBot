@@ -744,11 +744,35 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		apply_effect(target, condition);
 		carnage_points[slot] = 0;
 	}
+	if (!strcmp(msg, "!milk") && event.GetInt("userid") == bonkvich_userid)
+	{
+		PrintToChatAll("The clouds unleash life-giving rain...");
+		for (int i = 1; i <= MaxClients; ++i) if (IsClientInGame(i) && IsPlayerAlive(i))
+		{
+			apply_effect(i, TFCond_Milked, -1);
+		}
+		return;
+	}
 	if (!strcmp(msg, "!gift"))
 	{
 		//Pick a random target OTHER THAN the one who said it
 		//Give a random effect, guaranteed beneficial
 		int self = GetClientOfUserId(event.GetInt("userid"));
+		if (event.GetInt("userid") == bonkvich_userid && !IsPlayerAlive(self))
+		{
+			//Hack: If you have the Box of Bonkvich, you can give gifts to
+			//EVERYONE on the server.
+			PrintToChatAll("Gifts for all!");
+			for (int i = 1; i <= MaxClients; ++i) if (IsClientInGame(i) && IsPlayerAlive(i))
+			{
+				char targetname[MAX_NAME_LENGTH];
+				GetClientName(i, targetname, sizeof(targetname));
+				int sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
+				PrintToChatAll(benefits_desc[sel], targetname);
+				apply_effect(i, benefits[sel]);
+			}
+			return;
+		}
 		if (!IsClientInGame(self) || !IsPlayerAlive(self)) return;
 		int slot = event.GetInt("userid") % sizeof(carnage_points);
 		int req = GetConVarInt(sm_ccc_carnage_required);
