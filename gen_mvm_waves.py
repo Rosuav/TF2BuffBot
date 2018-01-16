@@ -1,7 +1,7 @@
 # Generate MVM waves with harbingers and such
 # The actual .pop file has tons of redundancy, which means editing it is tedious.
 
-STARTING_MONEY = 1509 # I use a weird value here so that versioning becomes easy
+STARTING_MONEY = 1510 # I use a weird value here so that versioning becomes easy
 WAVE_MONEY = 500 # Money from regular waves
 HARBINGER_MONEY = 100 # Money from the harbingers in tank waves
 TANK_MONEY = 500 # Money from the tanks themselves
