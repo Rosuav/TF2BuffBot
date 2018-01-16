@@ -169,9 +169,11 @@ def support(*botclasses, money=SUPPORT_MONEY, max_active=5, spawn_count=2):
 		wave.money += money
 
 class PopFile:
+	"""Context manager to create an entire .pop file"""
 	def __init__(self, fn, **kw):
 		self.fn = fn
 		self.__dict__.update(kw)
+
 	def __enter__(self):
 		self.file = open(self.fn, "w")
 		print("Starting:", self.fn)
@@ -186,6 +188,7 @@ class PopFile:
 			"Templates": TEMPLATES,
 		}, autoclose=False)
 		return self
+
 	def __exit__(self, t, v, tb):
 		while self.indentation:
 			self.closeblock()
@@ -193,6 +196,7 @@ class PopFile:
 		self.file.close()
 		self.file = None
 		print("Completing:", self.fn)
+
 	def write(self, key, obj, autoclose=True):
 		"""Write an object to the 'pop' file.
 
