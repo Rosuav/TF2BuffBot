@@ -225,8 +225,9 @@ def support(*botclasses, max_active=5, spawn_count=2):
 		wave.money += SUPPORT_MONEY
 
 class PopFile:
-	def __init__(self, fn):
+	def __init__(self, fn, **kw):
 		self.fn = fn
+		self.__dict__.update(kw)
 	def __enter__(self):
 		global pop
 		pop = open(self.fn, "w")
