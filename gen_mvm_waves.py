@@ -97,6 +97,7 @@ MASTER = {
 				"dmg falloff decreased": 1,
 				"move speed penalty": 0.15,
 				"airblast vulnerability multiplier": 0,
+				"damage force reduction": 0,
 				"cannot pick up intelligence": 1,
 			}
 		},
