@@ -229,8 +229,8 @@ class PopFile:
 		self.fn = fn
 		self.__dict__.update(kw)
 	def __enter__(self):
-		global pop
-		pop = open(self.fn, "w")
+		global pop; pop = self
+		self.file = open(self.fn, "w")
 		print("Starting:", self.fn)
 		print("Starting money:", STARTING_MONEY)
 		print(PREAMBLE, file=pop)
@@ -238,10 +238,13 @@ class PopFile:
 	def __exit__(self, t, v, tb):
 		close(...)
 		print("Total money after all waves:", total_money)
-		global pop
-		pop.close()
-		pop = None
+		global pop; pop = None
+		self.file.close()
+		self.file = None
 		print("Completing:", self.fn)
+	def write(self, content):
+		"""Allow print(file=this_object)"""
+		return self.file.write(content)
 
 with PopFile("mvm_coaltown.pop"):
 	with wave:
