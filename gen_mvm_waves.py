@@ -262,3 +262,8 @@ with PopFile("mvm_coaltown.pop", starting_money=1510) as pop:
 		subwave("BOSS_ReflectMe", 1)
 		subwave("T_TFBot_Demoman_Knight", 50, max_active=10, spawn_count=5)
 		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", spawn_count=1)
+
+with PopFile("mvm_mannhattan.pop", starting_money=1501) as pop:
+	with wave:
+		subwave("Anorexic_Heavy", 1, money=500)
+		harby_tanks(2) # I think Mannhattan can't handle tanks. Need more experimentation.
