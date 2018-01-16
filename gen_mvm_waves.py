@@ -1,6 +1,7 @@
 # Generate MVM waves with harbingers and such
 # The actual .pop file has tons of redundancy, which means editing it is tedious.
 
+# Default amounts of money per wave (can be changed per-wave)
 WAVE_MONEY = 500 # Money from regular waves
 HARBINGER_MONEY = 100 # Money from the harbingers in tank waves
 TANK_MONEY = 500 # Money from the tanks themselves
@@ -104,7 +105,7 @@ def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, c
 	})
 	wave.money += money
 
-def harby_tanks(count):
+def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 	# TODO: Make the names unique within a wave, such that calling
 	# this function more than once results in parallel chains of
 	# harbingers and tanks (muahahahahaha)
@@ -113,7 +114,7 @@ def harby_tanks(count):
 		pop.write("WaveSpawn", {
 			"Name": f"Harbinger {i + 1}",
 			"WaitForAllDead": f"Harbinger {i}" if i else None,
-			"TotalCurrency": HARBINGER_MONEY,
+			"TotalCurrency": harby_money,
 			"TotalCount": 1,
 			"Where": "spawnbot",
 			"WaitBeforeStarting": 30 if i else 0,
@@ -129,7 +130,7 @@ def harby_tanks(count):
 		pop.write("WaveSpawn", {
 			"Name": f"Tank {i + 1}",
 			"WaitForAllDead": f"Harbinger {i + 1}",
-			"TotalCurrency": TANK_MONEY,
+			"TotalCurrency": tank_money,
 			"TotalCount": 1,
 			"Where": "spawnbot",
 			"WaitBeforeStarting": 0,
@@ -148,12 +149,12 @@ def harby_tanks(count):
 				}
 			}},
 		})
-		wave.money += HARBINGER_MONEY + TANK_MONEY
+		wave.money += harby_money + tank_money
 
-def support(*botclasses, max_active=5, spawn_count=2):
+def support(*botclasses, money=SUPPORT_MONEY, max_active=5, spawn_count=2):
 	for botclass in botclasses:
 		pop.write("WaveSpawn", {
-			"TotalCurrency": SUPPORT_MONEY,
+			"TotalCurrency": money,
 			"TotalCount": 10, # With support waves, I think this controls the money drops
 			"MaxActive": max_active,
 			"SpawnCount": spawn_count,
@@ -163,7 +164,7 @@ def support(*botclasses, max_active=5, spawn_count=2):
 			"Support": 1,
 			"Squad": {"TFBot": {"Template": botclass}},
 		})
-		wave.money += SUPPORT_MONEY
+		wave.money += money
 
 class PopFile:
 	def __init__(self, fn, **kw):
