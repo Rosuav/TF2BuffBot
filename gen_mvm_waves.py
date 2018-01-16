@@ -171,7 +171,6 @@ class PopFile:
 		self.fn = fn
 		self.__dict__.update(kw)
 	def __enter__(self):
-		global pop; pop = self
 		self.file = open(self.fn, "w")
 		print("Starting:", self.fn)
 		print("Starting money:", STARTING_MONEY)
@@ -184,11 +183,11 @@ class PopFile:
 			"CanBotsAttackWhileInSpawnRoom": "no",
 			"Templates": TEMPLATES,
 		}, autoclose=False)
+		return self
 	def __exit__(self, t, v, tb):
 		while self.indentation:
 			self.close()
 		print("Total money after all waves:", self.total_money)
-		global pop; pop = None
 		self.file.close()
 		self.file = None
 		print("Completing:", self.fn)
@@ -230,7 +229,7 @@ class PopFile:
 		self.indentation -= 1
 		print("\t" * self.indentation + "}", file=self.file)
 
-with PopFile("mvm_coaltown.pop"):
+with PopFile("mvm_coaltown.pop") as pop:
 	with wave:
 		subwave("T_TFBot_Scout_Fish", 10, money=100)
 		subwave("Anorexic_Heavy", 25, money=250, chain=True)
