@@ -63,11 +63,7 @@ def close(levels=1):
 		_indentation -= 1
 		print("\t" * _indentation + "}", file=pop)
 
-MASTER = {
-	"StartingCurrency": STARTING_MONEY,
-	"RespawnWaveTime": 6,
-	"CanBotsAttackWhileInSpawnRoom": "no",
-	"Templates": {
+TEMPLATES = {
 		"Anorexic_Heavy": {
 			"Health": 100,
 			"Name": "Heavy",
@@ -118,6 +114,12 @@ MASTER = {
 			}
 		}
 	}
+
+MASTER = {
+	"StartingCurrency": STARTING_MONEY,
+	"RespawnWaveTime": 6,
+	"CanBotsAttackWhileInSpawnRoom": "no",
+	"Templates": TEMPLATES,
 }
 
 total_money = STARTING_MONEY
