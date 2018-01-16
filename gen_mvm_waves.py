@@ -122,8 +122,6 @@ MASTER = {
 	"Templates": TEMPLATES,
 }
 
-total_money = STARTING_MONEY
-
 class Wave:
 	"""Singleton just to allow 'with wave:' constructs"""
 	def __enter__(self):
@@ -143,8 +141,8 @@ class Wave:
 	def __exit__(self, t, v, tb):
 		close(1)
 		# The maximum possible money after a wave includes a 100-credit bonus.
-		global total_money; total_money += self.money + 100
-		print("Wave money:", self.money, "+ 100 ==> cumulative", total_money)
+		pop.total_money += self.money + 100
+		print("Wave money:", self.money, "+ 100 ==> cumulative", pop.total_money)
 wave = Wave()
 
 def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, chain=False):
@@ -234,10 +232,11 @@ class PopFile:
 		print("Starting:", self.fn)
 		print("Starting money:", STARTING_MONEY)
 		print(PREAMBLE, file=pop)
+		self.total_money = STARTING_MONEY
 		write("population", MASTER, autoclose=False)
 	def __exit__(self, t, v, tb):
 		close(...)
-		print("Total money after all waves:", total_money)
+		print("Total money after all waves:", self.total_money)
 		global pop; pop = None
 		self.file.close()
 		self.file = None
