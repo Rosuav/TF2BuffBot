@@ -1,7 +1,6 @@
 # Generate MVM waves with harbingers and such
 # The actual .pop file has tons of redundancy, which means editing it is tedious.
 
-STARTING_MONEY = 1510 # I use a weird value here so that versioning becomes easy
 WAVE_MONEY = 500 # Money from regular waves
 HARBINGER_MONEY = 100 # Money from the harbingers in tank waves
 TANK_MONEY = 500 # Money from the tanks themselves
@@ -173,12 +172,12 @@ class PopFile:
 	def __enter__(self):
 		self.file = open(self.fn, "w")
 		print("Starting:", self.fn)
-		print("Starting money:", STARTING_MONEY)
+		print("Starting money:", self.starting_money)
 		print(PREAMBLE, file=self.file)
-		self.total_money = STARTING_MONEY
+		self.total_money = self.starting_money
 		self.indentation = 0
 		self.write("population", {
-			"StartingCurrency": STARTING_MONEY,
+			"StartingCurrency": self.starting_money,
 			"RespawnWaveTime": 6,
 			"CanBotsAttackWhileInSpawnRoom": "no",
 			"Templates": TEMPLATES,
@@ -229,7 +228,8 @@ class PopFile:
 		self.indentation -= 1
 		print("\t" * self.indentation + "}", file=self.file)
 
-with PopFile("mvm_coaltown.pop") as pop:
+# The starting money also functions as a sort of version number
+with PopFile("mvm_coaltown.pop", starting_money=1510) as pop:
 	with wave:
 		subwave("T_TFBot_Scout_Fish", 10, money=100)
 		subwave("Anorexic_Heavy", 25, money=250, chain=True)
