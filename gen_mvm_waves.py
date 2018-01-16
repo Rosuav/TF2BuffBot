@@ -83,7 +83,7 @@ class Wave:
 		}, autoclose=False)
 		self.money = self.subwaves = 0
 	def __exit__(self, t, v, tb):
-		pop.close()
+		pop.closeblock()
 		# The maximum possible money after a wave includes a 100-credit bonus.
 		pop.total_money += self.money + 100
 		print("Wave money:", self.money, "+ 100 ==> cumulative", pop.total_money)
@@ -186,7 +186,7 @@ class PopFile:
 		return self
 	def __exit__(self, t, v, tb):
 		while self.indentation:
-			self.close()
+			self.closeblock()
 		print("Total money after all waves:", self.total_money)
 		self.file.close()
 		self.file = None
@@ -211,7 +211,7 @@ class PopFile:
 			for k, v in obj.items():
 				self.write(k, v)
 			if autoclose:
-				self.close()
+				self.closeblock()
 		elif isinstance(obj, (list, tuple)):
 			for val in obj:
 				self.write(key, val)
@@ -224,7 +224,7 @@ class PopFile:
 				obj = '"' + obj + '"'
 			print(indent + key + "\t" + obj, file=self.file)
 
-	def close(self):
+	def closeblock(self):
 		"""Close an object that was written with autoclose=False"""
 		self.indentation -= 1
 		print("\t" * self.indentation + "}", file=self.file)
