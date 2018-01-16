@@ -178,13 +178,12 @@ class PopFile:
 		print(PREAMBLE, file=self.file)
 		self.total_money = STARTING_MONEY
 		self.indentation = 0
-		MASTER = {
+		self.write("population", {
 			"StartingCurrency": STARTING_MONEY,
 			"RespawnWaveTime": 6,
 			"CanBotsAttackWhileInSpawnRoom": "no",
 			"Templates": TEMPLATES,
-		}
-		self.write("population", MASTER, autoclose=False)
+		}, autoclose=False)
 	def __exit__(self, t, v, tb):
 		while self.indentation:
 			self.close()
