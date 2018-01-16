@@ -106,9 +106,11 @@ def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, c
 	wave.money += money
 
 def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
-	# TODO: Make the names unique within a wave, such that calling
-	# this function more than once results in parallel chains of
-	# harbingers and tanks (muahahahahaha)
+	# NOTE: Calling this function twice within a wave will result in duplicate
+	# harby/tank subwave names, with confusing results (it'll wait for BOTH
+	# harbingers to die before sending BOTH tanks, for instance). It'd be very
+	# confusing to have parallel chains of harbies and tanks anyway, so just
+	# don't do this. It'd be poor UX. :)
 	for i in range(count):
 		# Add the harbinger. The first one is a little bit different.
 		pop.write("WaveSpawn", {
