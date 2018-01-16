@@ -232,16 +232,18 @@ class PopFile:
 		global pop
 		pop = open(self.fn, "w")
 		print("Starting:", self.fn)
+		print("Starting money:", STARTING_MONEY)
+		print(PREAMBLE, file=pop)
+		write("population", MASTER, autoclose=False)
 	def __exit__(self, t, v, tb):
+		close(...)
+		print("Total money after all waves:", total_money)
 		global pop
 		pop.close()
 		pop = None
 		print("Completing:", self.fn)
 
 with PopFile("mvm_coaltown.pop"):
-	print("Starting money:", STARTING_MONEY)
-	print(PREAMBLE, file=pop)
-	write("population", MASTER, autoclose=False)
 	with wave:
 		subwave("T_TFBot_Scout_Fish", 10, money=100)
 		subwave("Anorexic_Heavy", 25, money=250, chain=True)
@@ -267,5 +269,3 @@ with PopFile("mvm_coaltown.pop"):
 		subwave("BOSS_ReflectMe", 1)
 		subwave("T_TFBot_Demoman_Knight", 50, max_active=10, spawn_count=5)
 		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", spawn_count=1)
-	close(...)
-	print("Total money after all waves:", total_money)
