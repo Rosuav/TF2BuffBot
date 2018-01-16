@@ -222,7 +222,20 @@ def support(*botclasses, max_active=5, spawn_count=2):
 		})
 		wave.money += SUPPORT_MONEY
 
-with open("mvm_coaltown.pop", "w") as pop:
+class PopFile:
+	def __init__(self, fn):
+		self.fn = fn
+	def __enter__(self):
+		global pop
+		pop = open(self.fn, "w")
+		print("Starting:", self.fn)
+	def __exit__(self, t, v, tb):
+		global pop
+		pop.close()
+		pop = None
+		print("Completing:", self.fn)
+
+with PopFile("mvm_coaltown.pop"):
 	print("Starting money:", STARTING_MONEY)
 	print(PREAMBLE, file=pop)
 	write("population", MASTER, autoclose=False)
