@@ -681,7 +681,11 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int prob_weird = GetConVarInt(sm_ccc_roulette_chance_weird);
 		int category = RoundToFloor((prob_good + prob_bad + prob_weird + 1) * GetURandomFloat());
 		int sel = GetConVarInt(sm_ccc_debug_force_effect);
-		switch (coop || GetConVarInt(sm_ccc_debug_force_category)) //In co-op mode, force to Good
+		//The below three lines could be collapsed down to a boolean Or, except
+		//that SourcePawn is a hamstrung language.
+		int force = coop; //In co-op mode, force to Good
+		if (!force) force = GetConVarInt(sm_ccc_debug_force_category);
+		switch (force)
 		{
 			case 1: category = 0; //Force to Good
 			case 2: category = prob_good; //Force to Bad
