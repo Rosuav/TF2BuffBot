@@ -90,7 +90,7 @@ class Wave:
 		}, autoclose=False)
 		self.money = self.subwaves = 0
 	def __exit__(self, t, v, tb):
-		pop.close(1)
+		pop.close()
 		# The maximum possible money after a wave includes a 100-credit bonus.
 		pop.total_money += self.money + 100
 		print("Wave money:", self.money, "+ 100 ==> cumulative", pop.total_money)
@@ -187,7 +187,8 @@ class PopFile:
 		self.indentation = 0
 		self.write("population", MASTER, autoclose=False)
 	def __exit__(self, t, v, tb):
-		self.close(...)
+		while self.indentation:
+			self.close()
 		print("Total money after all waves:", self.total_money)
 		global pop; pop = None
 		self.file.close()
@@ -213,7 +214,7 @@ class PopFile:
 			for k, v in obj.items():
 				self.write(k, v)
 			if autoclose:
-				self.close(1)
+				self.close()
 		elif isinstance(obj, (list, tuple)):
 			for val in obj:
 				self.write(key, val)
@@ -226,18 +227,10 @@ class PopFile:
 				obj = '"' + obj + '"'
 			print(indent + key + "\t" + obj, file=self.file)
 
-	def close(self, levels=1):
-		"""Close one or more indentation levels in the 'pop' file
-
-		Writes out as many close braces as specified, reducing the
-		indentation level accordingly. If levels is Ellipsis, close
-		*all* braces still open.
-		"""
-		if levels is Ellipsis:
-			levels = self.indentation
-		for _ in range(levels):
-			self.indentation -= 1
-			print("\t" * self.indentation + "}", file=self.file)
+	def close(self):
+		"""Close an object that was written with autoclose=False"""
+		self.indentation -= 1
+		print("\t" * self.indentation + "}", file=self.file)
 
 with PopFile("mvm_coaltown.pop"):
 	with wave:
