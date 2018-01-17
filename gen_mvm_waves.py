@@ -175,7 +175,7 @@ class PopFile:
 		"mvm_coaltown_event.pop": ["boss_path_1"],
 		"mvm_decoy.pop": ["boss_path_1"],
 		"mvm_mannworks.pop": ["boss_path_1", "boss_path2_1"],
-		"mvm_bigrock.pop": ["boss_path_1", "boss_patha1"],
+		"mvm_bigrock.pop": ["boss_path_1", "boss_path_a1"],
 		"mvm_isolation_b4.pop": ["tank_path_a_1", "tank_path_b_1"],
 		"mvm_skullcave.pop": ["tank_path_left", "tank_path_right"],
 	}
