@@ -1,5 +1,6 @@
 # Generate MVM waves with harbingers and such
 # The actual .pop file has tons of redundancy, which means editing it is tedious.
+from itertools import cycle
 
 # Default amounts of money per wave (can be changed per-wave)
 WAVE_MONEY = 500 # Money from regular waves
@@ -140,7 +141,7 @@ def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 				"Health": 40000,
 				"Name": "Tank",
 				"Speed": 75,
-				"StartingPathTrackNode": "boss_path_1",
+				"StartingPathTrackNode": next(pop.tank_path),
 				"OnKilledOutput": {
 					"Target": "boss_dead_relay",
 					"Action": "Trigger",
@@ -170,9 +171,20 @@ def support(*botclasses, money=SUPPORT_MONEY, max_active=5, spawn_count=2):
 
 class PopFile:
 	"""Context manager to create an entire .pop file"""
+
+	TANK_PATHS = {
+		"mvm_coaltown.pop": ["boss_path_1"],
+	}
+
 	def __init__(self, fn, **kw):
 		self.fn = fn
 		self.__dict__.update(kw)
+		paths = self.TANK_PATHS.get(fn)
+		self.tank_path = cycle(paths) if paths else self
+
+	def __next__(self):
+		"""Abuse self as a raising non-iterable"""
+		raise ValueError("No tank paths on %s, cannot spawn tanks" % self.fn)
 
 	def __enter__(self):
 		self.file = open(self.fn, "w")
@@ -266,4 +278,4 @@ with PopFile("mvm_coaltown.pop", starting_money=1510) as pop:
 with PopFile("mvm_mannhattan.pop", starting_money=1501) as pop:
 	with wave:
 		subwave("Anorexic_Heavy", 1, money=500)
-		harby_tanks(2) # I think Mannhattan can't handle tanks. Need more experimentation.
+		# harby_tanks(2) # I think Mannhattan can't handle tanks. Need more experimentation.
