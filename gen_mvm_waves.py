@@ -83,7 +83,7 @@ class Wave:
 		print("Wave money:", self.money, "+ 100 ==> cumulative", pop.total_money)
 wave = Wave()
 
-def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, chain=False):
+def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, chain=False, delay=0):
 	wave.subwaves += 1
 	pop.write("WaveSpawn", {
 		"Name": f"Subwave {wave.subwaves}",
@@ -93,7 +93,7 @@ def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, c
 		"MaxActive": max_active,
 		"SpawnCount": spawn_count,
 		"Where": "spawnbot",
-		"WaitBeforeStarting": 0,
+		"WaitBeforeStarting": delay,
 		"WaitBetweenSpawns": 10,
 		"Squad": {"TFBot": {"Template": botclass}},
 	})
@@ -259,16 +259,16 @@ class PopFile:
 with PopFile("mvm_coaltown.pop", starting_money=1511) as pop:
 	with wave:
 		subwave("T_TFBot_Scout_Fish", 10, money=10)
-		subwave("Anorexic_Heavy", 25, money=10, chain=True)
+		subwave("Anorexic_Heavy", 20, money=10, chain=True)
 		subwave("T_TFBot_Demoman", 15, money=10)
 		subwave("T_TFBot_Pyro", 5, money=10, chain=True)
 	with wave:
 		harby_tanks(1, tank_money=500)
-		support("T_TFBot_Scout_Scattergun_SlowFire")
+		support("T_TFBot_Scout_Scattergun_SlowFire", count=20)
 	with wave:
 		harby_tanks(2, tank_money=300)
 		subwave("T_TFBot_Demoman", 10)
-		subwave("T_TFBot_Heavy", 20)
+		subwave("T_TFBot_Heavy", 20, max_active=3)
 		support("T_TFBot_Sniper")
 	with wave:
 		harby_tanks(3)
@@ -280,7 +280,10 @@ with PopFile("mvm_coaltown.pop", starting_money=1511) as pop:
 		subwave("T_TFBot_Sniper", 25, money=20, max_active=10, spawn_count=5)
 		support("T_TFBot_Heavyweapons_Fist", "T_TFBot_Demoman_Boom")
 	with wave:
-		subwave("BOSS_ReflectMe", 1)
+		# The big fat boss should never take the bomb, but it's possible for
+		# him to START with it. However, if he waits a few seconds before
+		# spawning, someone else should take the bomb.
+		subwave("BOSS_ReflectMe", 1, delay=5)
 		subwave("T_TFBot_Demoman_Knight", 50, max_active=10, spawn_count=5)
 		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro", spawn_count=1)
 
