@@ -268,7 +268,8 @@ with PopFile("mvm_coaltown.pop", starting_money=1511) as pop:
 	with wave:
 		harby_tanks(2, tank_money=300)
 		subwave("T_TFBot_Demoman", 10)
-		support("T_TFBot_Heavy", "T_TFBot_Sniper")
+		subwave("T_TFBot_Heavy", 20)
+		support("T_TFBot_Sniper")
 	with wave:
 		harby_tanks(3)
 		subwave("T_TFBot_Pyro", 20, max_active=10, spawn_count=4)
