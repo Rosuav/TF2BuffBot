@@ -172,8 +172,19 @@ def support(*botclasses, money=SUPPORT_MONEY, max_active=5, spawn_count=2):
 class PopFile:
 	"""Context manager to create an entire .pop file"""
 
+	# The possible tank paths were found from old.mvm.tf, and presumably come
+	# from the map details. If a map is not listed here, tanks will not be
+	# spawned on that map; for instance, on mvm_mannhattan, attempting to
+	# create a tank will make the wave unwinnable, as the tank appears and
+	# instantly goes into its victory sequence (without a hole for the bomb).
 	TANK_PATHS = {
 		"mvm_coaltown.pop": ["boss_path_1"],
+		"mvm_coaltown_event.pop": ["boss_path_1"],
+		"mvm_decoy.pop": ["boss_path_1"],
+		"mvm_mannworks.pop": ["boss_path_1", "boss_path2_1"],
+		"mvm_bigrock.pop": ["boss_path_1", "boss_patha1"],
+		"mvm_isolation_b4.pop": ["tank_path_a_1", "tank_path_b_1"],
+		"mvm_skullcave.pop": ["tank_path_left", "tank_path_right"],
 	}
 
 	def __init__(self, fn, **kw):
@@ -278,4 +289,4 @@ with PopFile("mvm_coaltown.pop", starting_money=1510) as pop:
 with PopFile("mvm_mannhattan.pop", starting_money=1501) as pop:
 	with wave:
 		subwave("Anorexic_Heavy", 1, money=500)
-		# harby_tanks(2) # I think Mannhattan can't handle tanks. Need more experimentation.
+		# harby_tanks(2) # Mannhattan can't handle tanks. Hmm. What to do...
