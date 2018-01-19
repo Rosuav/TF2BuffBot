@@ -17,6 +17,14 @@ TEMPLATES = {
 		"WeaponRestrictions": "SecondaryOnly",
 		"Item": ["tf_weapon_minigun", "tf_weapon_shotgun_hwg", "tf_weapon_fists"],
 	},
+	"Wandering_Scout": {
+		"Health": 25,
+		"Name": "Scout",
+		"Class": "Scout",
+		"Skill": "Normal",
+		"WeaponRestrictions": "SecondaryOnly",
+		"Item": ["tf_weapon_scattergun", "mad milk", "tf_weapon_bat"],
+	},
 	"T_TFBot_Heavy": {
 		"Health": 300,
 		"Name": "Heavy",
@@ -288,7 +296,6 @@ with PopFile("mvm_coaltown.pop", starting_money=1511) as pop:
 		subwave("T_TFBot_Demoman_Knight", 50, max_active=10, spawn_count=5)
 		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro_Flaregun")
 
-with PopFile("mvm_mannhattan.pop", starting_money=1501) as pop:
+with PopFile("mvm_decoy.pop", starting_money=1501, tank_speed=50) as pop:
 	with wave:
-		subwave("Anorexic_Heavy", 1, money=500)
-		# harby_tanks(2) # Mannhattan can't handle tanks. Hmm. What to do...
+		subwave("Wandering_Scout", 10, money=10)
