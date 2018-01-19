@@ -118,7 +118,7 @@ def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 		pop.write("WaveSpawn", {
 			"Name": f"Harbinger {i + 1}",
 			"WaitForAllDead": f"Harbinger {i}" if i else None,
-			"TotalCurrency": harby_money * count,
+			"TotalCurrency": harby_money,
 			"TotalCount": 1,
 			"Where": "spawnbot",
 			"WaitBeforeStarting": 30 if i else 0,
@@ -134,7 +134,7 @@ def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 		pop.write("WaveSpawn", {
 			"Name": f"Tank {i + 1}",
 			"WaitForAllDead": f"Harbinger {i + 1}",
-			"TotalCurrency": tank_money * count,
+			"TotalCurrency": tank_money,
 			"TotalCount": 1,
 			"Where": "spawnbot",
 			"WaitBeforeStarting": 0,
@@ -153,7 +153,7 @@ def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 				}
 			}},
 		})
-		wave.money += (harby_money + tank_money) * count
+		wave.money += harby_money + tank_money
 
 def support(*botclasses, money=SUPPORT_MONEY, count=10, max_active=5, spawn_count=2):
 	for botclass in botclasses:
