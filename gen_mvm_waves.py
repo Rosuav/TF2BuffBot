@@ -131,9 +131,9 @@ def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 			"Where": "spawnbot",
 			"WaitBeforeStarting": 0,
 			"Squad": {"Tank": {
-				"Health": 40000,
+				"Health": pop.tank_health,
 				"Name": "Tank",
-				"Speed": 75,
+				"Speed": pop.tank_speed,
 				"StartingPathTrackNode": next(pop.tank_path),
 				"OnKilledOutput": {
 					"Target": "boss_dead_relay",
@@ -181,6 +181,8 @@ class PopFile:
 
 	def __init__(self, fn, **kw):
 		self.fn = fn
+		self.tank_health = 40000
+		self.tank_speed = 75
 		self.__dict__.update(kw)
 		paths = self.TANK_PATHS.get(fn)
 		self.tank_path = cycle(paths) if paths else self
