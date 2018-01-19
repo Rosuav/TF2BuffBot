@@ -17,13 +17,13 @@ TEMPLATES = {
 		"WeaponRestrictions": "SecondaryOnly",
 		"Item": ["tf_weapon_minigun", "tf_weapon_shotgun_hwg", "tf_weapon_fists"],
 	},
-	"Wandering_Scout": {
+	"Milkman": {
 		"Health": 25,
 		"Name": "Scout",
 		"Class": "Scout",
 		"Skill": "Normal",
 		"WeaponRestrictions": "SecondaryOnly",
-		"Item": ["tf_weapon_scattergun", "mad milk", "tf_weapon_bat"],
+		"Item": ["the shortstop", "mad milk", "the holy mackerel", "the milkman", "osx item"],
 	},
 	"T_TFBot_Heavy": {
 		"Health": 300,
@@ -298,4 +298,4 @@ with PopFile("mvm_coaltown.pop", starting_money=1511) as pop:
 
 with PopFile("mvm_decoy.pop", starting_money=1501, tank_speed=50) as pop:
 	with wave:
-		subwave("Wandering_Scout", 10, money=10)
+		subwave("Milkman", 10, money=10)
