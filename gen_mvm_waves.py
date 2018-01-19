@@ -5,7 +5,7 @@ from itertools import cycle
 # Default amounts of money per enemy (can be changed per-wave)
 WAVE_MONEY = 25 # Money for bots from regular waves
 HARBINGER_MONEY = 50 # Money from the harbingers in tank waves
-TANK_MONEY = 200 # Money from the tanks themselves
+TANK_MONEY = 500 # Money from the tanks themselves
 SUPPORT_MONEY = 10 # Money for the first N support bots
 
 TEMPLATES = {
@@ -272,10 +272,10 @@ with PopFile("mvm_coaltown.pop", starting_money=1511) as pop:
 		subwave("T_TFBot_Demoman", 15, money=10)
 		subwave("T_TFBot_Pyro", 5, money=10, chain=True)
 	with wave:
-		harby_tanks(1, tank_money=500)
+		harby_tanks(1)
 		support("T_TFBot_Scout_Scattergun_SlowFire", count=20)
 	with wave:
-		harby_tanks(2, tank_money=300)
+		harby_tanks(2)
 		subwave("T_TFBot_Demoman", 10)
 		subwave("T_TFBot_Heavy", 20, max_active=3)
 		support("T_TFBot_Sniper")
