@@ -189,7 +189,14 @@ public Action Command_RageBox(int client, int args)
 	char player[32];
 	GetCmdArg(1, player, sizeof(player));
 	int target = FindTarget(client, player);
-	if (target == -1) return Plugin_Handled;
+	if (target == -1) {
+		if (ragebox_userid) {
+			PrintToChatAll("The Rage Box departs for another world.");
+			remove_hysteria(ragebox_userid);
+			ragebox_userid = 0;
+		}
+		return Plugin_Handled;
+	}
 	char name[MAX_NAME_LENGTH];
 	GetClientName(target, name, sizeof(name));
 	int userid = GetClientUserId(target);
