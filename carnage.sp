@@ -915,6 +915,11 @@ Action VeryHappyAmmo(Handle timer, any target)
 		if (!IsValidEntity(weapon)) continue;
 		int type = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType", 1);
 		GivePlayerAmmo(target, 999, type, true);
+		//TODO: Query the current clip size and the maximum, and add
+		//25% of max to current clip, respecting the maximum. This
+		//would give a slowly-regenerating clip, without being broken
+		//(as the below code is - consider an Air Strike with 100 clip).
+		//SetEntProp(weapon, Prop_Send, "m_iClip1", 100);
 	}
 	//After thirty regens (approx 30 seconds, but maybe +/- a second or so),
 	//we stop regenerating.
