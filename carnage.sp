@@ -559,11 +559,41 @@ Action returret(Handle timer, any target)
 	return Plugin_Handled;
 }
 
+int swap_player = 0;
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 {
 	//if (event.GetBool("teamonly")) return; //Ignore team chat (not working)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
+	if (!strcmp(msg, "!swap"))
+	{
+		if (!swap_player) return; //Disabled because it crashes stuff. Oh well.
+		int target = GetClientOfUserId(event.GetInt("userid"));
+		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
+		char targetname[MAX_NAME_LENGTH];
+		GetClientName(target, targetname, sizeof(targetname));
+		if (!swap_player)
+		{
+			swap_player = target;
+			PrintToChatAll("%s offers a weapon swap. First in gets it!", targetname);
+			return;
+		}
+		if (!IsClientInGame(swap_player) || !IsPlayerAlive(swap_player))
+		{
+			swap_player = 0;
+			PrintToChatAll("%s tries to accept the weapon swap, but couldn't find a weapon. Try again.", targetname);
+			return;
+		}
+		int weapon1 = GetPlayerWeaponSlot(target, TFWeaponSlot_Primary);
+		int weapon2 = GetPlayerWeaponSlot(swap_player, TFWeaponSlot_Primary);
+		SetEntPropEnt(target, Prop_Send, "m_hActiveWeapon", weapon2);
+		SetEntPropEnt(swap_player, Prop_Send, "m_hActiveWeapon", weapon1);
+		char swapname[MAX_NAME_LENGTH];
+		GetClientName(swap_player, swapname, sizeof(swapname));
+		PrintToChatAll("%s and %s exchange their primary weapons!", swapname, targetname);
+		swap_player = 0;
+		return;
+	}
 	if (!strcmp(msg, "!please"))
 	{
 		int target = GetClientOfUserId(event.GetInt("userid"));
