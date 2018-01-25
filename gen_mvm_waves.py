@@ -297,6 +297,8 @@ with PopFile("mvm_coaltown.pop", starting_money=1511) as pop:
 		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro_Flaregun")
 
 with PopFile("mvm_decoy.pop", starting_money=1501, tank_speed=50) as pop:
+	# TODO: Back down the money across the board. With ten waves,
+	# we need slower progression.
 	with wave:
 		subwave("Milkman", 100, max_active=50, spawn_count=10, money=5)
 		subwave("Anorexic_Heavy", 10)
@@ -319,3 +321,24 @@ with PopFile("mvm_decoy.pop", starting_money=1501, tank_speed=50) as pop:
 	with wave:
 		harby_tanks(6)
 		support("T_TFBot_Scout_Fish", "T_TFBot_Pyro")
+	with wave:
+		subwave("T_TFBot_Heavy", 50)
+		subwave("Milkman", 50)
+	with wave:
+		harby_tanks(8)
+		support("T_TFBot_Sniper_Huntsman")
+	with wave:
+		subwave("T_TFBot_Demoman", 10)
+		subwave("T_TFBot_Demoman_Knight", 10, chain=True)
+		subwave("T_TFBot_Demoman", 10, chain=True)
+		subwave("T_TFBot_Demoman_Knight", 10, chain=True)
+		subwave("T_TFBot_Demoman", 10, chain=True)
+		subwave("T_TFBot_Demoman_Knight", 10, chain=True)
+		subwave("T_TFBot_Demoman", 10, chain=True)
+		subwave("T_TFBot_Demoman_Knight", 10, chain=True)
+		subwave("T_TFBot_Demoman", 10, chain=True)
+		subwave("T_TFBot_Demoman_Knight", 10, chain=True)
+		support("Anorexic_Heavy")
+	with wave:
+		harby_tanks(10)
+		support("Milkman", count=5)
