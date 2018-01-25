@@ -96,7 +96,7 @@ def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, c
 	pop.write("WaveSpawn", {
 		"Name": f"Subwave {wave.subwaves}",
 		"WaitForAllSpawned": f"Subwave {wave.subwaves-1}" if chain else None,
-		"TotalCurrency": money * count,
+		"TotalCurrency": pop.money(money * count),
 		"TotalCount": count,
 		"MaxActive": max_active,
 		"SpawnCount": spawn_count,
@@ -105,7 +105,7 @@ def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, c
 		"WaitBetweenSpawns": 10,
 		"Squad": {"TFBot": {"Template": botclass}},
 	})
-	wave.money += money * count
+	wave.money += pop.money(money * count)
 
 def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 	# NOTE: Calling this function twice within a wave will result in duplicate
@@ -113,6 +113,8 @@ def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 	# harbingers to die before sending BOTH tanks, for instance). It'd be very
 	# confusing to have parallel chains of harbies and tanks anyway, so just
 	# don't do this. It'd be poor UX. :)
+	harby_money = pop.money(harby_money)
+	tank_money = pop.money(tank_money)
 	for i in range(count):
 		# Add the harbinger. The first one is a little bit different.
 		pop.write("WaveSpawn", {
@@ -158,7 +160,7 @@ def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 def support(*botclasses, money=SUPPORT_MONEY, count=10, max_active=5, spawn_count=2):
 	for botclass in botclasses:
 		pop.write("WaveSpawn", {
-			"TotalCurrency": money * count,
+			"TotalCurrency": pop.money(money * count),
 			"TotalCount": count, # With support waves, this controls how many drop money
 			"MaxActive": max_active,
 			"SpawnCount": spawn_count,
@@ -168,7 +170,7 @@ def support(*botclasses, money=SUPPORT_MONEY, count=10, max_active=5, spawn_coun
 			"Support": 1,
 			"Squad": {"TFBot": {"Template": botclass}},
 		})
-		wave.money += money * count
+		wave.money += pop.money(money * count)
 
 class PopFile:
 	"""Context manager to create an entire .pop file"""
@@ -191,6 +193,7 @@ class PopFile:
 		self.fn = fn
 		self.tank_health = 40000
 		self.tank_speed = 75
+		self.money_factor = 1.0 # Affects wave money but not starting money
 		self.__dict__.update(kw)
 		paths = self.TANK_PATHS.get(fn)
 		self.tank_path = cycle(paths) if paths else self
@@ -198,6 +201,9 @@ class PopFile:
 	def __next__(self):
 		"""Abuse self as a raising non-iterable"""
 		raise ValueError("No tank paths on %s, cannot spawn tanks" % self.fn)
+
+	def money(self, amount):
+		return int(amount * self.money_factor + 0.5)
 
 	def __enter__(self):
 		self.file = open(self.fn, "w")
@@ -296,9 +302,7 @@ with PopFile("mvm_coaltown.pop", starting_money=1511) as pop:
 		subwave("T_TFBot_Demoman_Knight", 50, max_active=10, spawn_count=5)
 		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro_Flaregun")
 
-with PopFile("mvm_decoy.pop", starting_money=1501, tank_speed=50) as pop:
-	# TODO: Back down the money across the board. With ten waves,
-	# we need slower progression.
+with PopFile("mvm_decoy.pop", starting_money=1501, tank_speed=50, money_factor=0.5) as pop:
 	with wave:
 		subwave("Milkman", 100, max_active=50, spawn_count=10, money=5)
 		subwave("Anorexic_Heavy", 10)
