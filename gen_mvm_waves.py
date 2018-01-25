@@ -32,7 +32,7 @@ TEMPLATES = {
 		"Skill": "Normal",
 		"Item": ["tf_weapon_minigun", "tf_weapon_shotgun_hwg", "tf_weapon_fists"],
 	},
-	"BOSS_ReflectMe": {
+	"BOSS_ReflectMe_Coaltown": {
 		"Health": 250000,
 		"Name": "Reflect Me",
 		"Class": "Soldier",
@@ -292,7 +292,7 @@ with PopFile("mvm_coaltown.pop", starting_money=1511) as pop:
 		# The big fat boss should never take the bomb, but it's possible for
 		# him to START with it. However, if he waits a few seconds before
 		# spawning, someone else should take the bomb.
-		subwave("BOSS_ReflectMe", 1, delay=5)
+		subwave("BOSS_ReflectMe_Coaltown", 1, delay=5)
 		subwave("T_TFBot_Demoman_Knight", 50, max_active=10, spawn_count=5)
 		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro_Flaregun")
 
