@@ -307,47 +307,47 @@ with PopFile("mvm_coaltown.pop", starting_money=1511) as pop:
 		subwave("T_TFBot_Demoman_Knight", 50, max_active=10, spawn_count=5)
 		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro_Flaregun")
 
-with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, money_factor=0.5) as pop:
+with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25, tank_money=250, support_money=5) as pop:
 	with wave:
-		subwave("Milkman", 100, max_active=50, spawn_count=10, money=5)
-		subwave("Anorexic_Heavy", 10)
+		subwave("Milkman", 100, max_active=50, spawn_count=10, money=2)
+		subwave("Anorexic_Heavy", 10, money=15)
 	with wave:
 		harby_tanks(1)
-		subwave("T_TFBot_Heavy", 5, max_active=1, spawn_count=1)
+		subwave("T_TFBot_Heavy", 5, max_active=1, spawn_count=1, money=15)
 		support("T_TFBot_Sniper_Huntsman", count=25)
 	with wave:
 		harby_tanks(1)
-		subwave("T_TFBot_Demoman", 25)
-		subwave("T_TFBot_Demoman_Knight", 25)
+		subwave("T_TFBot_Demoman", 25, money=10)
+		subwave("T_TFBot_Demoman_Knight", 25, money=10)
 		support("T_TFBot_Scout_Fish")
 	with wave:
 		harby_tanks(3)
 		support("Milkman")
 	with wave:
 		harby_tanks(4)
-		subwave("T_TFBot_Pyro", 15)
+		subwave("T_TFBot_Pyro", 15, money=15)
 		support("Anorexic_Heavy")
 	with wave:
 		harby_tanks(6)
 		support("T_TFBot_Scout_Fish", "T_TFBot_Pyro")
 	with wave:
-		subwave("T_TFBot_Heavy", 50)
-		subwave("Milkman", 50)
+		subwave("T_TFBot_Heavy", 50, money=15)
+		subwave("Milkman", 50, money=5)
 	with wave:
 		harby_tanks(3)
 		harby_tanks(5)
 		support("T_TFBot_Sniper_Huntsman")
 	with wave:
-		subwave("T_TFBot_Demoman", 10)
-		subwave("T_TFBot_Demoman_Knight", 10, chain=True)
-		subwave("T_TFBot_Demoman", 10, chain=True)
-		subwave("T_TFBot_Demoman_Knight", 10, chain=True)
-		subwave("T_TFBot_Demoman", 10, chain=True)
-		subwave("T_TFBot_Demoman_Knight", 10, chain=True)
-		subwave("T_TFBot_Demoman", 10, chain=True)
-		subwave("T_TFBot_Demoman_Knight", 10, chain=True)
-		subwave("T_TFBot_Demoman", 10, chain=True)
-		subwave("T_TFBot_Demoman_Knight", 10, chain=True)
+		subwave("T_TFBot_Demoman", 10, money=10)
+		subwave("T_TFBot_Demoman_Knight", 10, money=10, chain=True)
+		subwave("T_TFBot_Demoman", 10, money=10, chain=True)
+		subwave("T_TFBot_Demoman_Knight", 10, money=10, chain=True)
+		subwave("T_TFBot_Demoman", 10, money=10, chain=True)
+		subwave("T_TFBot_Demoman_Knight", 10, money=10, chain=True)
+		subwave("T_TFBot_Demoman", 10, money=10, chain=True)
+		subwave("T_TFBot_Demoman_Knight", 10, money=10, chain=True)
+		subwave("T_TFBot_Demoman", 10, money=10, chain=True)
+		subwave("T_TFBot_Demoman_Knight", 10, money=10, chain=True)
 		support("Anorexic_Heavy")
 	with wave:
 		harby_tanks(3)
