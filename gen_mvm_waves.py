@@ -122,7 +122,7 @@ def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 			"TotalCurrency": harby_money,
 			"TotalCount": 1,
 			"Where": "spawnbot",
-			"WaitBeforeStarting": 30 if i else wave.subwaves * 5,
+			"WaitBeforeStarting": 30 if i else wave.subwaves * 15,
 			"Squad": {"TFBot": {
 				"Health": 500,
 				"Name": "Soldier",
@@ -306,20 +306,20 @@ with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, money_factor=0
 		subwave("Milkman", 100, max_active=50, spawn_count=10, money=5)
 		subwave("Anorexic_Heavy", 10)
 	with wave:
-		subwave("T_TFBot_Heavy", 5, max_active=1, spawn_count=1)
 		harby_tanks(1)
+		subwave("T_TFBot_Heavy", 5, max_active=1, spawn_count=1)
 		support("T_TFBot_Sniper_Huntsman", count=25)
 	with wave:
+		harby_tanks(1)
 		subwave("T_TFBot_Demoman", 25)
 		subwave("T_TFBot_Demoman_Knight", 25)
-		harby_tanks(1)
 		support("T_TFBot_Scout_Fish")
 	with wave:
 		harby_tanks(3)
 		support("Milkman")
 	with wave:
-		subwave("T_TFBot_Pyro", 15)
 		harby_tanks(4)
+		subwave("T_TFBot_Pyro", 15)
 		support("Anorexic_Heavy")
 	with wave:
 		harby_tanks(6)
