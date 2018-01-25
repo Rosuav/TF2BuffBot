@@ -47,6 +47,7 @@ ConVar sm_ccc_gift_chance_enemy_bot = null; //(1) Chance that each enemy bot has
 //Debug assistants. Not generally useful for server admins who aren't also coding CCC itself.
 ConVar sm_ccc_debug_force_category = null; //(0) Debug - force roulette to give good (1), bad (2), weird (3), or death (4)
 ConVar sm_ccc_debug_force_effect = null; //(0) Debug - force roulette to give the Nth effect in that category (ignored if out of bounds)
+ConVar sm_ccc_debug_cheats_active = null; //(0) Debug - allow cheaty commands
 //More knobs
 ConVar sm_ccc_gravity_modifier = null; //(3) Ratio used for gravity effects - either multiply by this or divide by it
 ConVar sm_ccc_turret_invuln_after_placement = null; //(30) Length of time a turret can remain invulnerable after deployment
@@ -565,6 +566,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	//if (event.GetBool("teamonly")) return; //Ignore team chat (not working)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
+	int cheats_active = GetConVarInt(sm_ccc_debug_cheats_active);
 	if (!strcmp(msg, "!swap"))
 	{
 		if (!swap_player) return; //Disabled because it crashes stuff. Oh well.
@@ -625,7 +627,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		apply_effect(target, view_as<TFCond>(-7));
 		return;
 	}
-	if (!strcmp(msg, "!money"))
+	if (cheats_active && !strcmp(msg, "!money"))
 	{
 		int target = GetClientOfUserId(event.GetInt("userid"));
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
@@ -637,7 +639,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		PrintToChatAll("%s now has $%d.", targetname, money);
 		return;
 	}
-	if (!strcmp(msg, "!turret"))
+	if (cheats_active && !strcmp(msg, "!turret"))
 	{
 		//Turret mode. The first time you use this command, you become a
 		//turret; after that, it toggles between turret and ghost.
