@@ -108,18 +108,17 @@ def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, c
 	wave.money += pop.money(money * count)
 
 def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
-	# NOTE: Calling this function twice within a wave will result in duplicate
-	# harby/tank subwave names, with confusing results (it'll wait for BOTH
-	# harbingers to die before sending BOTH tanks, for instance). It'd be very
-	# confusing to have parallel chains of harbies and tanks anyway, so just
-	# don't do this. It'd be poor UX. :)
+	# NOTE: Calling this function twice within a wave will result in
+	# parallel streams of harbies and tanks. This can be extremely
+	# confusing and should usually be avoided.
+	wave.subwaves += 1
 	harby_money = pop.money(harby_money)
 	tank_money = pop.money(tank_money)
 	for i in range(count):
 		# Add the harbinger. The first one is a little bit different.
 		pop.write("WaveSpawn", {
-			"Name": f"Harbinger {i + 1}",
-			"WaitForAllDead": f"Harbinger {i}" if i else None,
+			"Name": f"Harbinger {wave.subwaves}-{i + 1}",
+			"WaitForAllDead": f"Harbinger {wave.subwaves}-{i}" if i else None,
 			"TotalCurrency": harby_money,
 			"TotalCount": 1,
 			"Where": "spawnbot",
@@ -134,8 +133,8 @@ def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 		})
 		# And add the tank itself.
 		pop.write("WaveSpawn", {
-			"Name": f"Tank {i + 1}",
-			"WaitForAllDead": f"Harbinger {i + 1}",
+			"Name": f"Tank {wave.subwaves}-{i + 1}",
+			"WaitForAllDead": f"Harbinger {wave.subwaves}-{i + 1}",
 			"TotalCurrency": tank_money,
 			"TotalCount": 1,
 			"Where": "spawnbot",
