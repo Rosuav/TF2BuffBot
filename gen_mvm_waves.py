@@ -338,16 +338,9 @@ with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25
 		harby_tanks(5)
 		support("T_TFBot_Sniper_Huntsman")
 	with wave:
-		subwave("T_TFBot_Demoman", 10, money=10)
-		subwave("T_TFBot_Demoman_Knight", 10, money=10, chain=True)
-		subwave("T_TFBot_Demoman", 10, money=10, chain=True)
-		subwave("T_TFBot_Demoman_Knight", 10, money=10, chain=True)
-		subwave("T_TFBot_Demoman", 10, money=10, chain=True)
-		subwave("T_TFBot_Demoman_Knight", 10, money=10, chain=True)
-		subwave("T_TFBot_Demoman", 10, money=10, chain=True)
-		subwave("T_TFBot_Demoman_Knight", 10, money=10, chain=True)
-		subwave("T_TFBot_Demoman", 10, money=10, chain=True)
-		subwave("T_TFBot_Demoman_Knight", 10, money=10, chain=True)
+		for i in range(5):
+			subwave("T_TFBot_Demoman", 10, money=10, chain=(i>0))
+			subwave("T_TFBot_Demoman_Knight", 10, money=10, chain=True)
 		support("Anorexic_Heavy")
 	with wave:
 		harby_tanks(3)
