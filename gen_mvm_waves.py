@@ -2,11 +2,14 @@
 # The actual .pop file has tons of redundancy, which means editing it is tedious.
 from itertools import cycle
 
-# Default amounts of money per enemy (can be changed per-wave)
-WAVE_MONEY = 25 # Money for bots from regular waves
-HARBINGER_MONEY = 50 # Money from the harbingers in tank waves
-TANK_MONEY = 500 # Money from the tanks themselves
-SUPPORT_MONEY = 10 # Money for the first N support bots
+# Global defaults - can be overridden per popfile, and provide the
+# defaults for waves and subwaves.
+DEFAULTS = {
+	"wave_money": 25, # Money for bots from regular waves
+	"harby_money": 50, # Money from the harbingers in tank waves
+	"tank_money": 500, # Money from the tanks themselves
+	"support_money": 10, # Money for the first N support bots
+}
 
 TEMPLATES = {
 	"Anorexic_Heavy": {
@@ -91,7 +94,8 @@ class Wave:
 		print("Wave money:", self.money, "+ 100 ==> cumulative", pop.total_money)
 wave = Wave()
 
-def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, chain=False, delay=0):
+def subwave(botclass, count, *, max_active=5, spawn_count=2, money=None, chain=False, delay=0):
+	if money is None: money = pop.wave_money
 	wave.subwaves += 1
 	pop.write("WaveSpawn", {
 		"Name": f"Subwave {wave.subwaves}",
@@ -107,13 +111,13 @@ def subwave(botclass, count, *, max_active=5, spawn_count=2, money=WAVE_MONEY, c
 	})
 	wave.money += pop.money(money * count)
 
-def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
+def harby_tanks(count, harby_money=None, tank_money=None):
 	# NOTE: Calling this function twice within a wave will result in
 	# parallel streams of harbies and tanks. This can be extremely
 	# confusing and should usually be avoided.
 	wave.subwaves += 1
-	harby_money = pop.money(harby_money)
-	tank_money = pop.money(tank_money)
+	harby_money = pop.money(harby_money or pop.harby_money)
+	tank_money = pop.money(tank_money or pop.tank_money)
 	for i in range(count):
 		# Add the harbinger. The first one is a little bit different.
 		pop.write("WaveSpawn", {
@@ -156,7 +160,8 @@ def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 		})
 		wave.money += harby_money + tank_money
 
-def support(*botclasses, money=SUPPORT_MONEY, count=10, max_active=5, spawn_count=2):
+def support(*botclasses, money=None, count=10, max_active=5, spawn_count=2):
+	if money is None: money = pop.support_money
 	for botclass in botclasses:
 		pop.write("WaveSpawn", {
 			"TotalCurrency": pop.money(money * count),
@@ -193,6 +198,7 @@ class PopFile:
 		self.tank_health = 40000
 		self.tank_speed = 75
 		self.money_factor = 1.0 # Quick-and-dirty way to experiment with scaling the wave money
+		self.__dict__.update(DEFAULTS)
 		self.__dict__.update(kw)
 		paths = self.TANK_PATHS.get(fn)
 		self.tank_path = cycle(paths) if paths else self
