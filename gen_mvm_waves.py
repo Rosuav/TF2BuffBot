@@ -343,5 +343,7 @@ with PopFile("mvm_decoy.pop", starting_money=1501, tank_speed=50, money_factor=0
 		subwave("T_TFBot_Demoman_Knight", 10, chain=True)
 		support("Anorexic_Heavy")
 	with wave:
-		harby_tanks(10)
+		harby_tanks(3)
+		harby_tanks(3)
+		harby_tanks(4)
 		support("Milkman", count=5)
