@@ -5,6 +5,9 @@ from itertools import cycle
 # Global defaults - can be overridden per popfile, and provide the
 # defaults for waves and subwaves.
 DEFAULTS = {
+	"tank_health": 40000,
+	"tank_speed": 75,
+	"money_factor": 1.0, # Quick-and-dirty way to experiment with scaling the wave money
 	"wave_money": 25, # Money for bots from regular waves
 	"harby_money": 50, # Money from the harbingers in tank waves
 	"tank_money": 500, # Money from the tanks themselves
@@ -195,9 +198,6 @@ class PopFile:
 
 	def __init__(self, fn, **kw):
 		self.fn = fn
-		self.tank_health = 40000
-		self.tank_speed = 75
-		self.money_factor = 1.0 # Quick-and-dirty way to experiment with scaling the wave money
 		self.__dict__.update(DEFAULTS)
 		self.__dict__.update(kw)
 		paths = self.TANK_PATHS.get(fn)
