@@ -192,7 +192,7 @@ class PopFile:
 		self.fn = fn
 		self.tank_health = 40000
 		self.tank_speed = 75
-		self.money_factor = 1.0 # Affects wave money but not starting money
+		self.money_factor = 1.0 # Quick-and-dirty way to experiment with scaling the wave money
 		self.__dict__.update(kw)
 		paths = self.TANK_PATHS.get(fn)
 		self.tank_path = cycle(paths) if paths else self
