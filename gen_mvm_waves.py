@@ -122,7 +122,7 @@ def harby_tanks(count, harby_money=HARBINGER_MONEY, tank_money=TANK_MONEY):
 			"TotalCurrency": harby_money,
 			"TotalCount": 1,
 			"Where": "spawnbot",
-			"WaitBeforeStarting": 30 if i else 0,
+			"WaitBeforeStarting": 30 if i else wave.subwaves * 5,
 			"Squad": {"TFBot": {
 				"Health": 500,
 				"Name": "Soldier",
