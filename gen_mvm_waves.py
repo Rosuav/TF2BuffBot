@@ -92,9 +92,13 @@ class Wave:
 		self.money = self.subwaves = 0
 	def __exit__(self, t, v, tb):
 		pop.closeblock()
-		# The maximum possible money after a wave includes a 100-credit bonus.
-		pop.total_money += self.money + 100
-		print("Wave money:", self.money, "+ 100 ==> cumulative", pop.total_money)
+		bonus = ""
+		if self.money:
+			# The maximum possible money after a wave includes a 100-credit bonus.
+			# This bonus is NOT given if no money was picked up, though.
+			pop.total_money += self.money + 100
+			bonus = "+ 100 "
+		print("Wave money:", self.money, bonus + "==> cumulative", pop.total_money)
 wave = Wave()
 
 def subwave(botclass, count, *, max_active=5, spawn_count=2, money=None, chain=False, delay=0):
