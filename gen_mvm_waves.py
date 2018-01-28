@@ -347,3 +347,24 @@ with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25
 		harby_tanks(3)
 		harby_tanks(4)
 		support("Milkman", count=5)
+
+# TODO: Give practically all the money up-front, and basically nothing
+# in each wave. You have been hired, mercs, to defend this facility.
+# Your pay has been given in advance. Now defend this place to the pain!
+with PopFile("mvm_mannworks.pop", starting_money=5001, harby_money=0, tank_money=0, wave_money=0, support_money=0) as pop:
+	# waves lifted from above - need to adjust
+	with wave:
+		subwave("Milkman", 100, max_active=50, spawn_count=10)
+		subwave("Anorexic_Heavy", 10)
+	with wave:
+		harby_tanks(1)
+		subwave("T_TFBot_Heavy", 5, max_active=1, spawn_count=1)
+		support("T_TFBot_Sniper_Huntsman", count=25)
+	with wave:
+		harby_tanks(1)
+		subwave("T_TFBot_Demoman", 25)
+		subwave("T_TFBot_Demoman_Knight", 25)
+		support("T_TFBot_Scout_Fish")
+	with wave:
+		harby_tanks(3)
+		support("Milkman")
