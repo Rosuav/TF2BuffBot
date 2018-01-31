@@ -122,6 +122,11 @@ def harby_tanks(count, harby_money=None, tank_money=None):
 	# NOTE: Calling this function twice within a wave will result in
 	# parallel streams of harbies and tanks. This can be extremely
 	# confusing and should usually be avoided.
+
+	# Note: For game balance purposes, it's best that the tank take
+	# about two minutes from breaking the barrier to destroying the
+	# facility. If it's faster than that, consider either reducing
+	# the tank speed or lowering its health.
 	wave.subwaves += 1
 	harby_money = pop.money(harby_money or pop.harby_money)
 	tank_money = pop.money(tank_money or pop.tank_money)
@@ -355,7 +360,12 @@ with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25
 # TODO: Give practically all the money up-front, and basically nothing
 # in each wave. You have been hired, mercs, to defend this facility.
 # Your pay has been given in advance. Now defend this place to the pain!
-with PopFile("mvm_mannworks.pop", starting_money=5001, harby_money=0, tank_money=0, wave_money=0, support_money=0) as pop:
+
+# Balance note: Every even-numbered tank is running on a slightly longer
+# track (about 30-40% longer than the odd-numbered tanks follow). Running
+# the numbers suggests that 30K health is right for the short path, and
+# 40K for the long path. We split the difference on 2**15-1. Because.
+with PopFile("mvm_mannworks.pop", starting_money=5001, harby_money=0, tank_health=32767, tank_money=0, wave_money=0, support_money=0) as pop:
 	# waves lifted from above - need to adjust
 	with wave:
 		subwave("Milkman", 100, max_active=50, spawn_count=10)
