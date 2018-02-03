@@ -361,8 +361,8 @@ with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25
 # in each wave. You have been hired, mercs, to defend this facility.
 # Your pay has been given in advance. Now defend this place to the pain!
 
-# Balance note: Every even-numbered tank is running on a slightly longer
-# track (about 30-40% longer than the odd-numbered tanks follow). Running
+# Balance note: Every second tank (across waves) is running on a slightly
+# longer track (about 30-40% longer than the other tanks follow). Running
 # the numbers suggests that 30K health is right for the short path, and
 # 40K for the long path. We split the difference on 2**15-1. Because.
 with PopFile("mvm_mannworks.pop", starting_money=5001, harby_money=0, tank_health=32767, tank_money=0, wave_money=0, support_money=0) as pop:
