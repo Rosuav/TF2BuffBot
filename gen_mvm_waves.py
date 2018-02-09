@@ -365,6 +365,12 @@ with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25
 # longer track (about 30-40% longer than the other tanks follow). Running
 # the numbers suggests that 30K health is right for the short path, and
 # 40K for the long path. We split the difference on 2**15-1. Because.
+
+# Wave progression: Start with an easy wave (warmup), but then get harder
+# fairly rapidly. Plateau by about wave 3-4 and keep the waves roughly at
+# the same difficulty, and then have a "boss fight" at the end, either as
+# a single really tough challenge (a tank, or a ReflectMe), or as a long
+# grind with a ton of mooks and no respite.
 with PopFile("mvm_mannworks.pop", starting_money=5001, harby_money=0, tank_health=32767, tank_money=0, wave_money=0, support_money=0) as pop:
 	# waves lifted from above - need to adjust
 	with wave:
