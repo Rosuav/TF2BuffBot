@@ -371,11 +371,11 @@ with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25
 # the same difficulty, and then have a "boss fight" at the end, either as
 # a single really tough challenge (a tank, or a ReflectMe), or as a long
 # grind with a ton of mooks and no respite.
-with PopFile("mvm_mannworks.pop", starting_money=5001, harby_money=0, tank_health=32767, tank_money=0, wave_money=0, support_money=0) as pop:
+with PopFile("mvm_mannworks.pop", starting_money=5002, harby_money=0, tank_health=32767, tank_money=0, wave_money=0, support_money=0) as pop:
 	# waves lifted from above - need to adjust
-	with wave: # TODO: Warmup wave. Not exactly this, but the difficulty is right.
-		subwave("Milkman", 100, max_active=50, spawn_count=10)
-		subwave("Anorexic_Heavy", 10)
+	with wave:
+		subwave("T_TFBot_Scout_Fish", 20)
+		subwave("T_TFBot_Pyro", 10)
 	with wave: # TODO: A bit harder than this
 		harby_tanks(1)
 		subwave("T_TFBot_Heavy", 5, max_active=1, spawn_count=1)
