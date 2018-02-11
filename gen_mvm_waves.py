@@ -376,10 +376,10 @@ with PopFile("mvm_mannworks.pop", starting_money=5002, harby_money=0, tank_healt
 	with wave:
 		subwave("T_TFBot_Scout_Fish", 20)
 		subwave("T_TFBot_Pyro", 10)
-	with wave: # TODO: A bit harder than this
-		harby_tanks(1)
+	with wave:
+		subwave("T_TFBot_Demoman", 25)
+		subwave("T_TFBot_Scout_Scattergun_SlowFire", 20)
 		subwave("T_TFBot_Heavy", 5, max_active=1, spawn_count=1)
-		support("T_TFBot_Sniper_Huntsman", count=25)
 	with wave: # TODO: A little bit harder than this
 		harby_tanks(1)
 		subwave("T_TFBot_Demoman", 25)
