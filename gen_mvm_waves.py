@@ -388,4 +388,6 @@ with PopFile("mvm_mannworks.pop", starting_money=5002, harby_money=0, tank_healt
 		harby_tanks(2)
 		support("T_TFBot_Demoman_Knight")
 	# TODO: Two more waves of about the same difficulty as the above
-	# TODO: Boss fight wave
+	with wave: # Boss fight!
+		# Yes, that's right. Eight tanks... but none but harbies to carry the bomb.
+		for _ in range(4): harby_tanks(2)
