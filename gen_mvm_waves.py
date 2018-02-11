@@ -372,7 +372,6 @@ with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25
 # a single really tough challenge (a tank, or a ReflectMe), or as a long
 # grind with a ton of mooks and no respite.
 with PopFile("mvm_mannworks.pop", starting_money=5002, harby_money=0, tank_health=32767, tank_money=0, wave_money=0, support_money=0) as pop:
-	# waves lifted from above - need to adjust
 	with wave:
 		subwave("T_TFBot_Scout_Fish", 20)
 		subwave("T_TFBot_Pyro", 10)
@@ -380,13 +379,13 @@ with PopFile("mvm_mannworks.pop", starting_money=5002, harby_money=0, tank_healt
 		subwave("T_TFBot_Demoman", 25)
 		subwave("T_TFBot_Scout_Scattergun_SlowFire", 20)
 		subwave("T_TFBot_Heavy", 5, max_active=1, spawn_count=1)
-	with wave: # TODO: A little bit harder than this
+	with wave:
 		harby_tanks(1)
-		subwave("T_TFBot_Demoman", 25)
-		subwave("T_TFBot_Demoman_Knight", 25)
-		support("T_TFBot_Scout_Fish")
-	with wave: # TODO: About this difficulty, but fewer tanks. Don't want to go from 3 tanks to 2, it's inelegant.
-		harby_tanks(3)
-		support("Milkman")
+		subwave("T_TFBot_Pyro_Flaregun", 20)
+		subwave("T_TFBot_Demoman_Boom", 25)
+		support("T_TFBot_Pyro")
+	with wave:
+		harby_tanks(2)
+		support("T_TFBot_Demoman_Knight")
 	# TODO: Two more waves of about the same difficulty as the above
 	# TODO: Boss fight wave
