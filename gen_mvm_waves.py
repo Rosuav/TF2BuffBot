@@ -373,18 +373,20 @@ with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25
 # grind with a ton of mooks and no respite.
 with PopFile("mvm_mannworks.pop", starting_money=5001, harby_money=0, tank_health=32767, tank_money=0, wave_money=0, support_money=0) as pop:
 	# waves lifted from above - need to adjust
-	with wave:
+	with wave: # TODO: Warmup wave. Not exactly this, but the difficulty is right.
 		subwave("Milkman", 100, max_active=50, spawn_count=10)
 		subwave("Anorexic_Heavy", 10)
-	with wave:
+	with wave: # TODO: A bit harder than this
 		harby_tanks(1)
 		subwave("T_TFBot_Heavy", 5, max_active=1, spawn_count=1)
 		support("T_TFBot_Sniper_Huntsman", count=25)
-	with wave:
+	with wave: # TODO: A little bit harder than this
 		harby_tanks(1)
 		subwave("T_TFBot_Demoman", 25)
 		subwave("T_TFBot_Demoman_Knight", 25)
 		support("T_TFBot_Scout_Fish")
-	with wave:
+	with wave: # TODO: About this difficulty, but fewer tanks. Don't want to go from 3 tanks to 2, it's inelegant.
 		harby_tanks(3)
 		support("Milkman")
+	# TODO: Two more waves of about the same difficulty as the above
+	# TODO: Boss fight wave
