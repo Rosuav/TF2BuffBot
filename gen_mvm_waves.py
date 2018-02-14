@@ -390,4 +390,5 @@ with PopFile("mvm_mannworks.pop", starting_money=5002, harby_money=0, tank_healt
 	# TODO: Two more waves of about the same difficulty as the above
 	with wave: # Boss fight!
 		# Yes, that's right. Eight tanks... but none but harbies to carry the bomb.
-		for _ in range(4): harby_tanks(2)
+		subwave("Milkman", 10, max_active=10, spawn_count=10)
+		for _ in range(2): harby_tanks(4)
