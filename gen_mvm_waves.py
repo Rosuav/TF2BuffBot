@@ -394,7 +394,7 @@ with PopFile("mvm_mannworks.pop", starting_money=5002, harby_money=0, tank_healt
 	with wave:
 		harby_tanks(1)
 		subwave("T_TFBot_Pyro_Flaregun", 10)
-		support("T_TFBot_Scout_Fish", 25)
+		support("T_TFBot_Scout_Fish")
 	with wave: # Boss fight!
 		# Yes, that's right. Eight tanks... but none but harbies to carry the bomb.
 		subwave("Milkman", 10, max_active=10, spawn_count=10)
