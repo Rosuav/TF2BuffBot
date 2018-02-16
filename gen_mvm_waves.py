@@ -118,7 +118,7 @@ def subwave(botclass, count, *, max_active=5, spawn_count=2, money=None, chain=F
 	})
 	wave.money += pop.money(money * count)
 
-def harby_tanks(count, harby_money=None, tank_money=None):
+def harby_tanks(count, harby_money=None, tank_money=None, delay=30):
 	# NOTE: Calling this function twice within a wave will result in
 	# parallel streams of harbies and tanks. This can be extremely
 	# confusing and should usually be avoided.
@@ -138,7 +138,7 @@ def harby_tanks(count, harby_money=None, tank_money=None):
 			"TotalCurrency": harby_money,
 			"TotalCount": 1,
 			"Where": "spawnbot",
-			"WaitBeforeStarting": 30 if i else wave.subwaves * 15,
+			"WaitBeforeStarting": delay if i else wave.subwaves * 15,
 			"Squad": {"TFBot": {
 				"Health": 500,
 				"Name": "Soldier",
@@ -395,5 +395,7 @@ with PopFile("mvm_mannworks.pop", starting_money=5002, harby_money=0, tank_healt
 		support("T_TFBot_Scout_Fish")
 	with wave: # Boss fight!
 		# Yes, that's right. Eight tanks... but none but harbies to carry the bomb.
+		for _ in range(2): harby_tanks(4, delay=90)
+		# Bonus: a bit of Air Strike fodder to start things off. Helps if the
+		# wave has to be restarted.
 		subwave("Milkman", 10, max_active=10, spawn_count=10)
-		for _ in range(2): harby_tanks(4)
