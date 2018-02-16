@@ -391,11 +391,15 @@ with PopFile("mvm_mannworks.pop", starting_money=5002, harby_money=0, tank_healt
 		support("T_TFBot_Sniper_Huntsman")
 	with wave:
 		harby_tanks(1)
-		subwave("T_TFBot_Pyro_Flaregun", 10)
+		subwave("Anorexic_Heavy", 10)
+		for _ in range(3):
+			subwave("T_TFBot_Pyro_Flaregun", 10, chain=True)
+			subwave("T_TFBot_Pyro", 10, chain=True)
+		subwave("Anorexic_Heavy", 20)
 		support("T_TFBot_Scout_Fish")
 	with wave: # Boss fight!
 		# Yes, that's right. Eight tanks... but none but harbies to carry the bomb.
-		for _ in range(2): harby_tanks(4, delay=90)
+		for _ in range(2): harby_tanks(4, delay=100)
 		# Bonus: a bit of Air Strike fodder to start things off. Helps if the
 		# wave has to be restarted.
 		subwave("Milkman", 10, max_active=10, spawn_count=10)
