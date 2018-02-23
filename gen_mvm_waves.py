@@ -47,13 +47,14 @@ TEMPLATES = {
 		"Attributes": ["AlwaysCrit", "MiniBoss"],
 		"Item": ["the original", "tf_weapon_shotgun_soldier", "tf_weapon_shovel"],
 		"CharacterAttributes": {
-			"Projectile speed decreased": 0.75,
+			"Projectile speed decreased": 0.40, # Decreased to this proportion of normal speed (so 0.75 == 25% decreased)
 			"damage bonus": 10,
 			"dmg falloff decreased": 1,
-			"move speed penalty": 0.15,
+			"move speed penalty": 0.20,
 			"airblast vulnerability multiplier": 0,
 			"damage force reduction": 0,
 			"cannot pick up intelligence": 1,
+			"mod shovel speed boost": 1, # Give him the Escape Plan effect of increased speed as health decreases
 		}
 	},
 	"T_TFBot_Demoman_Boom": {
