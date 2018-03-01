@@ -38,6 +38,13 @@ TEMPLATES = {
 		"Skill": "Normal",
 		"Item": ["tf_weapon_minigun", "tf_weapon_shotgun_hwg", "tf_weapon_fists"],
 	},
+	"Tomislav_Heavy": {
+		"Health": 300,
+		"Name": "Heavy",
+		"Class": "HeavyWeapons",
+		"Skill": "Normal",
+		"Item": ["tomislav", "tf_weapon_shotgun_hwg", "tf_weapon_fists"],
+	},
 	"BOSS_ReflectMe_Coaltown": {
 		"Health": 250000,
 		"Name": "Reflect Me",
@@ -173,7 +180,7 @@ def harby_tanks(count, harby_money=None, tank_money=None, delay=30):
 		})
 		wave.money += harby_money + tank_money
 
-def support(*botclasses, money=None, count=10, max_active=5, spawn_count=2):
+def support(*botclasses, money=None, count=25, max_active=5, spawn_count=2):
 	if money is None: money = pop.support_money
 	for botclass in botclasses:
 		pop.write("WaveSpawn", {
@@ -284,19 +291,19 @@ class PopFile:
 		print("\t" * self.indentation + "}", file=self.file)
 
 # The starting money also functions as a sort of version number
-with PopFile("mvm_coaltown.pop", starting_money=1511) as pop:
+with PopFile("mvm_coaltown.pop", starting_money=1511, tank_health=30000) as pop:
 	with wave:
-		subwave("T_TFBot_Scout_Fish", 10, money=10)
-		subwave("Anorexic_Heavy", 20, money=10, chain=True)
-		subwave("T_TFBot_Demoman", 15, money=10)
-		subwave("T_TFBot_Pyro", 5, money=10, chain=True)
+		subwave("T_TFBot_Scout_Fish", 10, money=15)
+		subwave("Anorexic_Heavy", 20, money=15, chain=True)
+		subwave("T_TFBot_Demoman", 15, money=15)
+		subwave("T_TFBot_Pyro", 5, money=15, chain=True)
 	with wave:
 		harby_tanks(1)
 		support("T_TFBot_Scout_Scattergun_SlowFire", count=20)
 	with wave:
 		harby_tanks(2)
 		subwave("T_TFBot_Demoman", 10)
-		subwave("T_TFBot_Heavy", 20, max_active=3)
+		subwave("Tomislav_Heavy", 20, max_active=2)
 		support("T_TFBot_Sniper")
 	with wave:
 		harby_tanks(3)
