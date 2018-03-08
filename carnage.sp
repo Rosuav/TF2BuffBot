@@ -24,6 +24,7 @@ public Plugin myinfo =
 ConVar sm_ccc_carnage_initial = null; //(0) Carnage points a player has on first joining or changing team
 ConVar sm_ccc_carnage_per_solo_kill = null; //(2) Carnage points gained for each unassisted kill
 ConVar sm_ccc_carnage_per_kill = null; //(2) Carnage points gained for each kill
+//TODO: Can taunt kills be scored higher? Research me.
 ConVar sm_ccc_carnage_per_assist = null; //(1) Carnage points gained for each assist
 ConVar sm_ccc_carnage_per_death = null; //(3) Carnage points gained when you die
 ConVar sm_ccc_carnage_per_building = null; //(1) Carnage points gained when you destroy a non-gun building (assists ignored here)
@@ -82,7 +83,33 @@ covered by sm_ccc_coop_{gift,roulette}_multiplier, but the first one may be hard
 do you define "number of players" fairly when they can come and go? Does kicking an idle
 player suddenly make the roulette wheel cheaper? Could a griefer enter the server with
 the sole purpose of racking up no kills and thus penalizing the other players?
+
+The target-rich environment is worth roughy a 4:1 ratio on points, based on the way a
+killstreak weapon works (it takes 20 bot kills instead of 5 to get a spree, 80 instead
+of 20 to become godlike). Assume that part carries over to the carnage points.
+
+It is essential that the actual number of players NOT affect the scaling. Otherwise, a
+four-player team might resent a fifth player joining, which is bad for the game as a
+whole. Ideally, the numbers should be aimed at 3-5 players; there is no point playing a
+game with just one player, and then we should aim for the mid-range rather than the
+extremes.
+
+TODO: Currently, the scaling is done on the point *cost*, which effectively rescales
+everything. It would be better, instead, to only rescale SOME parts of it. Or maybe we
+need one multiplier that's given to everything except kills (including costs; effectively
+it's a divisor for kill points), and another one that's applied ONLY to costs, which thus
+compensates for the "points are earned by everyone" aspect (and maybe the "all spins are
+good" aspect as well).
 */
+
+//TODO: What happens when there are six players and another joins? Can we detect the
+//"joining spectators" event and force the player to join defenders?
+//TODO: Bot limit check. One wave. First subwave: 24 enemies that shouldn't kill us.
+//Second subwave: One distinctive enemy. WaitForAllSpawned = first subwave.
+//Then we sit back and watch them all roll in. If we see the distinctive one, there's
+//room for 25 bots. Can this happen when we have a full party of six? What if we have
+//a reduced party? What if we have spectators? Can we increase the padding count and
+//locate the actual limit?
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
 //users connect and disconnect, there will be a collision, and they'll share the slot. I
