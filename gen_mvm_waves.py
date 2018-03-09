@@ -302,7 +302,7 @@ class PopFile:
 		print("\t" * self.indentation + "}", file=self.file)
 
 # The starting money also functions as a sort of version number
-with PopFile("mvm_coaltown.pop", starting_money=1511, tank_health=30000) as pop:
+with PopFile("mvm_coaltown.pop", starting_money=1511, tank_health=25000) as pop:
 	with wave:
 		subwave("T_TFBot_Scout_Fish", 10, money=15)
 		subwave("Anorexic_Heavy", 20, money=15, chain=True)
