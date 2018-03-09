@@ -104,13 +104,12 @@ good" aspect as well).
 */
 
 //TODO: What happens when there are six players and another joins? Can we detect the
-//"joining spectators" event and force the player to join defenders?
-//TODO: Bot limit check. One wave. First subwave: 24 enemies that shouldn't kill us.
-//Second subwave: One distinctive enemy. WaitForAllSpawned = first subwave.
-//Then we sit back and watch them all roll in. If we see the distinctive one, there's
-//room for 25 bots. Can this happen when we have a full party of six? What if we have
-//a reduced party? What if we have spectators? Can we increase the padding count and
-//locate the actual limit?
+//"joining spectators" event and force the player to join defenders? Check InitializePlayer
+//and see what happens when a seventh player joins. TF2_ChangeClientTeam may do the job.
+//TODO: Bot limit check. One wave. Bots only ever seem to spawn up to a max of 22, which
+//ties in with the 22 bot slots assigned (either as spectators or on team BLU). Does
+//this ever change based on the number of currently-connected players? I suspect not;
+//there are enough slots to have 22 bots and 6 players without any issues.
 
 //Rolling array of carnage points per user id. If a user connects, then this many other
 //users connect and disconnect, there will be a collision, and they'll share the slot. I
