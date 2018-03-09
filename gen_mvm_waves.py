@@ -23,6 +23,17 @@ TEMPLATES = {
 		"WeaponRestrictions": "SecondaryOnly",
 		"Item": ["tf_weapon_minigun", "tf_weapon_shotgun_hwg", "tf_weapon_fists"],
 	},
+	"Stroller": {
+		"Health": 100,
+		"Name": "Heavy",
+		"Class": "HeavyWeapons",
+		"Skill": "Normal",
+		"WeaponRestrictions": "MeleeOnly",
+		"Item": ["the holiday punch"],
+		"CharacterAttributes": {
+			"move speed penalty": 0.20,
+		},
+	},
 	"Milkman": {
 		"Health": 25,
 		"Name": "Scout",
