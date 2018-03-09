@@ -24,7 +24,7 @@ public Plugin myinfo =
 ConVar sm_ccc_carnage_initial = null; //(0) Carnage points a player has on first joining or changing team
 ConVar sm_ccc_carnage_per_solo_kill = null; //(2) Carnage points gained for each unassisted kill
 ConVar sm_ccc_carnage_per_kill = null; //(2) Carnage points gained for each kill
-//TODO: Can taunt kills be scored higher? Research me.
+ConVar sm_ccc_carnage_per_taunt_kill = null; //(10) Carnage points gained for a taunt kill (or other special kill)
 ConVar sm_ccc_carnage_per_assist = null; //(1) Carnage points gained for each assist
 ConVar sm_ccc_carnage_per_death = null; //(3) Carnage points gained when you die
 ConVar sm_ccc_carnage_per_building = null; //(1) Carnage points gained when you destroy a non-gun building (assists ignored here)
@@ -62,6 +62,7 @@ ConVar sm_ccc_ignite_chance_on_start_capture = null; //(2) Chance that STARTING 
 ConVar sm_ccc_coop_mode = null; //(2) 0=normal, 1=co-op mode, 2=autodetect (if available)
 ConVar sm_ccc_coop_gift_multiplier = null; //(10) The cost of !gift is multiplied by this.
 ConVar sm_ccc_coop_roulette_multiplier = null; //(20) The cost of !roulette is multiplied by this. Should be significantly higher than the gift multiplier.
+char notable_kills[128][128];
 #include "convars"
 
 /* Co-op mode (eg for MVM)
@@ -451,6 +452,13 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	{
 		//I don't know what causes this, and I'm curious.
 		PrintToChatAll("** Interrupted death, whatever that means **");
+	}
+	int customkill = event.GetInt("customkill");
+	//Some kill types are awarded extra points.
+	if (customkill >= 0 && customkill < 128 && notable_kills[customkill][0])
+	{
+		PrintToChatAll(notable_kills[customkill]);
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_taunt_kill));
 	}
 	if (deathflags & (TF_DEATHFLAG_KILLERDOMINATION | TF_DEATHFLAG_ASSISTERDOMINATION))
 	{

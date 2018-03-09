@@ -66,6 +66,34 @@ effects = {
 		"TFCond_Bonked": "%s opens a chilled can of a radioactive energy drink.",
 	}
 }
+
+# TODO: Make sure none of these have IDs 128 or higher, lest stuff break badly.
+# (It's 2018. Why does SourcePawn have to use fixed array sizes?)
+notable_kills = {
+	# TODO: Put better names on them
+	"TF_CUSTOM_TAUNT_HADOUKEN": "Taunt kill! Hadouken!",
+	"TF_CUSTOM_FLARE_PELLET": "Taunt kill!",
+	"TF_CUSTOM_TAUNT_GRAND_SLAM": "Taunt kill! Knock him out of the park!",
+	"TF_CUSTOM_TAUNT_HIGH_NOON": "Taunt kill! This map ain't big enough for both of us...",
+	"TF_CUSTOM_TAUNT_FENCING": "Taunt kill!",
+	"TF_CUSTOM_TAUNT_GRENADE": "Taunt kill!",
+	"TF_CUSTOM_TAUNT_ARROW_STAB": "Taunt kill! Schtab schtab schtab!",
+	"TF_CUSTOM_TAUNTATK_GASBLAST": "Taunt kill!",
+	"TF_CUSTOM_TAUNT_BARBARIAN_SWING": "Taunt kill!",
+	"TF_CUSTOM_TAUNT_UBERSLICE": "Taunt kill! Dem bones got sawed through...",
+	"TF_CUSTOM_TAUNT_ENGINEER_SMASH": "Taunt kill! That's one jarring guitar riff...",
+	"TF_CUSTOM_TAUNT_ENGINEER_ARM": "Taunt kill!",
+	"TF_CUSTOM_TAUNT_ARMAGEDDON": "Taunt kill! Death by rainbows!",
+	"TF_CUSTOM_TAUNT_ALLCLASS_GUITAR_RIFF": "Taunt kill!",
+	# Some non-taunt kills are also worth bonus points
+	"TF_CUSTOM_TELEFRAG": "Telefrag!",
+	"TF_CUSTOM_COMBO_PUNCH": "That's four gunslingers in a row!", # Gunslinger
+	"TF_CUSTOM_BOOTS_STOMP": "Mantreads stomp!!", # Mantreads
+}
+# Other kill types to check for: TF_CUSTOM_WRENCH_FIX, TF_CUSTOM_PENETRATE_ALL_PLAYERS,
+# TF_CUSTOM_PENETRATE_HEADSHOT, TF_CUSTOM_FLYINGBURN, TF_CUSTOM_AEGIS_ROUND,
+# TF_CUSTOM_PRACTICE_STICKY, TF_CUSTOM_THROWABLE, TF_CUSTOM_THROWABLE_KILL
+
 with open("randeffects.inc", "w") as f:
 	for name, options in effects.items():
 		print("TFCond %s[] = {" % name, file=f)
@@ -83,4 +111,6 @@ with open("carnage.sp") as source, open("convars.inc", "w") as cv:
 		m = re.match(r"^ConVar (sm_ccc_[a-z_]+) = null; //\(([0-9]+)\) (.*)", line)
 		if not m: continue
 		print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0, true, 0.0);".format(*m.groups()), file=cv)
+	for killcode, msg in notable_kills.items():
+		print("\tnotable_kills[%s] = %s;" % (killcode, json.dumps(msg)), file=cv)
 	print("}", file=cv)
