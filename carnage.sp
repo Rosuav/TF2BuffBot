@@ -447,6 +447,11 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	add_turret(event.GetInt("attacker"));
 	add_turret(event.GetInt("assister"));
 	int deathflags = event.GetInt("death_flags");
+	if (deathflags & TF_DEATHFLAG_INTERRUPTED)
+	{
+		//I don't know what causes this, and I'm curious.
+		PrintToChatAll("** Interrupted death, whatever that means **");
+	}
 	if (deathflags & (TF_DEATHFLAG_KILLERDOMINATION | TF_DEATHFLAG_ASSISTERDOMINATION))
 	{
 		//Someone got a domination. Give everyone crits for a few seconds!
