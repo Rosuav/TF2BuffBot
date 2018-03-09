@@ -14,6 +14,9 @@ reasonable to take the buff bot for a spin without changing any of these.
   same as the score gained (two for a kill whether assisted or not, and one for
   an assist); a viable tweak would be for a solo kill to claim all three points
   as if you were both the killer and assister.
+* sm_ccc_carnage_per_taunt_kill: Since taunt kills are hard to get, this
+  defaults to 10, enough to grant you an immediate spin. (Note that some other
+  special kills also qualify, such as telefragging. They give the same points.)
 * sm_ccc_carnage_per_death: 3 by default, but could easily be higher or
   lower. Setting this equal to carnage_required guarantees a roulette spin any
   time you die. Having this higher than the kill score compensates some for the

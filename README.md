@@ -36,7 +36,8 @@ No carnage points are granted for achieving map goals (capturing the flag,
 taking a control point, moving the payload, etc). Such actions may help you
 win, but they don't create death and destruction. Get out there killing stuff!
 Though... the CCC might sometimes take it upon itself to "reward" these actions
-with a bit of a fireball, so take care...
+with a bit of a fireball, so take care... Taunt kills and other special kills
+might get you a more points-y reward, though; have at them.
 
 See [knobs](knobs.md) for a full list of tweakable knobs and some advice on how
 they affect gameplay.
