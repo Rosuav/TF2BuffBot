@@ -606,6 +606,20 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
 	int cheats_active = GetConVarInt(sm_ccc_debug_cheats_active);
+	if (cheats_active && (!strcmp(msg, "!gored") || !strcmp(msg, "!goblue") || !strcmp(msg, "!gospec")))
+	{
+		//In theory, this should let you change team in MVM. In practice, it doesn't.
+		int target = GetClientOfUserId(event.GetInt("userid"));
+		char targetname[MAX_NAME_LENGTH];
+		GetClientName(target, targetname, sizeof(targetname));
+		if (!strcmp(msg, "!gored")) TF2_ChangeClientTeam(target, TFTeam_Red);
+		if (!strcmp(msg, "!goblue")) TF2_ChangeClientTeam(target, TFTeam_Blue);
+		if (!strcmp(msg, "!gospec")) TF2_ChangeClientTeam(target, TFTeam_Spectator);
+		char teamname[64];
+		GetTeamName(GetClientTeam(target), teamname, sizeof(teamname));
+		PrintToChatAll("%s assigned to team %s", teamname);
+		return;
+	}
 	if (!strcmp(msg, "!swap"))
 	{
 		if (!swap_player) return; //Disabled because it crashes stuff. Oh well.
