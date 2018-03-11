@@ -259,6 +259,10 @@ public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 		event.GetInt("oldteam"),
 		playername);
 	carnage_points[event.GetInt("userid") % sizeof(carnage_points)] = GetConVarInt(sm_ccc_carnage_initial);
+	//TODO: If event.GetInt("autoteam") and not event.GetInt("disconnect")
+	//and event.GetInt("team") is "Spectators" and coop_mode:
+	//	TF2_ChangeClientTeam(target, TFTeam_Red);
+	//See what the consequences are of doing that.
 }
 
 int coop_mode = 2;
@@ -389,6 +393,20 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	int player = GetClientOfUserId(event.GetInt("userid"));
 	char playername[MAX_NAME_LENGTH]; GetClientName(player, playername, sizeof(playername));
 	SetEntityGravity(player, 1.0); //Just in case.
+
+	//This is the name of a pyrovision-only "assisted by", such as a Pocket Yeti
+	//char fallback[64]; event.GetString("assister_fallback", fallback, sizeof(fallback));
+
+	//All the relevant killstreak counts are available. (Assist seems to be for medics only.)
+	//TODO: Give extra carnage points for ending a long kill streak? ("High value target")
+	//PrintToChatAll("Streak: tot %d wep %d asst %d vict %d", event.GetInt("kill_streak_total"),
+	//	event.GetInt("kill_streak_wep"), event.GetInt("kill_streak_assist"), event.GetInt("kill_streak_victim"));
+
+	//TODO: If the penetration count is nonzero, maybe give a reward? (cf Machina)
+	//Make sure you can't just engineer this trivially.
+	//int pen = event.GetInt("playerpenetratecount");
+	//if (pen) PrintToChatAll("Penetration count: %d", pen);
+
 	if (event.GetInt("userid") == event.GetInt("attacker"))
 	{
 		//You killed yourself. Good job.
