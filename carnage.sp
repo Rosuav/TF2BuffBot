@@ -60,8 +60,9 @@ ConVar sm_ccc_ignite_chance_on_capture = null; //(15) Percentage chance that a p
 ConVar sm_ccc_ignite_chance_on_start_capture = null; //(2) Chance that STARTING a point capture will set everyone on fire.
 //For Mann vs Machine, and possibly other situations, co-op mode changes the parameters.
 ConVar sm_ccc_coop_mode = null; //(2) 0=normal, 1=co-op mode, 2=autodetect (if available)
-ConVar sm_ccc_coop_gift_multiplier = null; //(10) The cost of !gift is multiplied by this.
-ConVar sm_ccc_coop_roulette_multiplier = null; //(20) The cost of !roulette is multiplied by this. Should be significantly higher than the gift multiplier.
+ConVar sm_ccc_coop_gift_multiplier = null; //(2) The cost of !gift is multiplied by this.
+ConVar sm_ccc_coop_roulette_multiplier = null; //(3) The cost of !roulette is multiplied by this. Should be higher than the gift multiplier.
+ConVar sm_ccc_coop_kill_divisor = null; //(4) It takes this many co-op kills to be worth one regular kill. 4:1 is about right (MVM has a lot of targets available).
 char notable_kills[128][128];
 #include "convars"
 
@@ -95,12 +96,10 @@ whole. Ideally, the numbers should be aimed at 3-5 players; there is no point pl
 game with just one player, and then we should aim for the mid-range rather than the
 extremes.
 
-TODO: Currently, the scaling is done on the point *cost*, which effectively rescales
-everything. It would be better, instead, to only rescale SOME parts of it. Or maybe we
-need one multiplier that's given to everything except kills (including costs; effectively
-it's a divisor for kill points), and another one that's applied ONLY to costs, which thus
-compensates for the "points are earned by everyone" aspect (and maybe the "all spins are
-good" aspect as well).
+Notionally, all points for getting kills are divided by some integer. Internally, though,
+everything's done with integers, so everything EXCEPT kill scores will be multiplied by
+that value. (Only in co-op mode.) Try to ensure that the numbers don't get unexpectedly
+large.
 */
 
 //TODO: What happens when there are six players and another joins? Can we detect the
@@ -258,7 +257,9 @@ public void InitializePlayer(Event event, const char[] name, bool dontBroadcast)
 		event.GetInt("team"),
 		event.GetInt("oldteam"),
 		playername);
-	carnage_points[event.GetInt("userid") % sizeof(carnage_points)] = GetConVarInt(sm_ccc_carnage_initial);
+	int points = GetConVarInt(sm_ccc_carnage_initial);
+	if (in_coop_mode()) points *= GetConVarInt(sm_ccc_coop_kill_divisor);
+	carnage_points[event.GetInt("userid") % sizeof(carnage_points)] = points;
 	//TODO: If event.GetInt("autoteam") and not event.GetInt("disconnect")
 	//and event.GetInt("team") is "Spectators" and coop_mode:
 	//	TF2_ChangeClientTeam(target, TFTeam_Red);
@@ -299,7 +300,7 @@ public void OnMapStart()
 	PrintToServer("[SM] Starting new %smap: %s", mvm_map ? "MVM " : "", mapname);
 }
 
-void add_score(int userid, int score)
+void add_score(int userid, int score, int kill)
 {
 	if (userid <= 0 || score <= 0) return;
 	userid %= sizeof(carnage_points);
@@ -307,9 +308,11 @@ void add_score(int userid, int score)
 	{
 		int self = GetClientOfUserId(userid);
 		int myteam = GetClientTeam(self);
+		int factor = 1;
+		if (!kill) factor = GetConVarInt(sm_ccc_coop_kill_divisor);
 		for (int i = 1; i <= MaxClients; ++i)
 			if (IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == myteam)
-				low_add_score(GetClientUserId(i), score);
+				low_add_score(GetClientUserId(i), score * factor);
 	}
 	else low_add_score(userid, score);
 }
@@ -451,17 +454,17 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	if (event.GetInt("assister") == -1)
 	{
 		//Solo kill - might be given more points than an assisted one
-		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_solo_kill));
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_solo_kill), 1);
 	}
 	else
 	{
 		//Assisted kill - award points to both attacker and assister
-		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_kill));
-		add_score(event.GetInt("assister"), GetConVarInt(sm_ccc_carnage_per_assist));
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_kill), 1);
+		add_score(event.GetInt("assister"), GetConVarInt(sm_ccc_carnage_per_assist), 1);
 	}
 	int slot = event.GetInt("userid") % sizeof(carnage_points);
 	if (carnage_points[slot] < 0) carnage_points[slot] = 0; //Reset everything when you die.
-	add_score(event.GetInt("userid"), GetConVarInt(sm_ccc_carnage_per_death));
+	add_score(event.GetInt("userid"), GetConVarInt(sm_ccc_carnage_per_death), 0);
 	add_turret(event.GetInt("attacker"));
 	add_turret(event.GetInt("assister"));
 	int deathflags = event.GetInt("death_flags");
@@ -475,7 +478,7 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	if (customkill >= 0 && customkill < 128 && notable_kills[customkill][0])
 	{
 		PrintToChatAll(notable_kills[customkill]);
-		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_taunt_kill));
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_taunt_kill), 0);
 	}
 	if (deathflags & (TF_DEATHFLAG_KILLERDOMINATION | TF_DEATHFLAG_ASSISTERDOMINATION))
 	{
@@ -551,20 +554,20 @@ public void BuildingBlownUp(Event event, const char[] name, bool dontBroadcast)
 	Debug("Object blown up! uid %d destroyed %d's building.",
 		event.GetInt("attacker"), event.GetInt("userid"));
 	if (event.GetInt("objecttype") == 2) //TFObject_Sentry
-		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_sentry));
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_sentry), 1);
 	else
-		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_building));
+		add_score(event.GetInt("attacker"), GetConVarInt(sm_ccc_carnage_per_building), 1);
 }
 
 public void Ubered(Event event, const char[] name, bool dontBroadcast)
 {
 	Debug("Ubercharge deployed!");
-	add_score(event.GetInt("userid"), GetConVarInt(sm_ccc_carnage_per_ubercharge));
+	add_score(event.GetInt("userid"), GetConVarInt(sm_ccc_carnage_per_ubercharge), 0);
 }
 public void Upgraded(Event event, const char[] name, bool dontBroadcast)
 {
 	if (GetConVarInt(sm_ccc_carnage_per_upgrade)) Debug("Object upgraded!");
-	add_score(event.GetInt("userid"), GetConVarInt(sm_ccc_carnage_per_upgrade));
+	add_score(event.GetInt("userid"), GetConVarInt(sm_ccc_carnage_per_upgrade), 0);
 }
 
 public void Captured(Event event, const char[] name, bool dontBroadcast)
@@ -719,7 +722,9 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int target = GetClientOfUserId(event.GetInt("userid"));
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
 		int slot = event.GetInt("userid") % sizeof(carnage_points);
-		if (carnage_points[slot] >= 0 && carnage_points[slot] < GetConVarInt(sm_ccc_carnage_required) * 2)
+		int required = GetConVarInt(sm_ccc_carnage_required) * 2;
+		if (in_coop_mode()) required *= GetConVarInt(sm_ccc_coop_kill_divisor);
+		if (carnage_points[slot] >= 0 && carnage_points[slot] < required)
 		{
 			PrintToChat(target, "You'll have to wreak more havoc before you can do that, sorry.");
 			return;
@@ -775,7 +780,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int slot = event.GetInt("userid") % sizeof(carnage_points);
 		int req = GetConVarInt(sm_ccc_carnage_required);
 		int coop = in_coop_mode();
-		if (coop) req *= GetConVarInt(sm_ccc_coop_roulette_multiplier);
+		if (coop) req *= GetConVarInt(sm_ccc_coop_roulette_multiplier) * GetConVarInt(sm_ccc_coop_kill_divisor);
 		if (carnage_points[slot] < req)
 		{
 			PrintToChat(target, "You'll have to wreak more havoc before you can do that, sorry.");
@@ -828,7 +833,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			//Super-secret super buff: if you would get the death effect
 			//but you had ten times the required carnage points, grant a
 			//Mannpower pickup instead of killing the player.
-			if (carnage_points[slot] > 10 * GetConVarInt(sm_ccc_carnage_required))
+			if (carnage_points[slot] > 10 * req)
 			{
 				TFCond runes[] = {
 					TFCond_RuneStrength,
@@ -891,7 +896,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int slot = event.GetInt("userid") % sizeof(carnage_points);
 		int req = GetConVarInt(sm_ccc_carnage_required);
 		int coop = in_coop_mode();
-		if (coop) req *= GetConVarInt(sm_ccc_coop_gift_multiplier);
+		if (coop) req *= GetConVarInt(sm_ccc_coop_gift_multiplier) * GetConVarInt(sm_ccc_coop_kill_divisor);
 		if (carnage_points[slot] < req)
 		{
 			PrintToChat(self, "You'll have to wreak more havoc before you can do that, sorry.");
