@@ -312,10 +312,28 @@ void add_score(int userid, int score, int kill)
 
 void low_add_score(int userid, int score)
 {
+	int client = GetClientOfUserId(userid);
 	userid %= sizeof(carnage_points);
 	if (carnage_points[userid] < 0) return; //Turrets don't gain carnage points.
 	int new_score = carnage_points[userid] += score;
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
+	#if defined Debug
+	int roulette = GetConVarInt(sm_ccc_carnage_required);
+	int gift = roulette;
+	if (in_coop_mode())
+	{
+		if (IsFakeClient(client)) return;
+		roulette *= GetConVarInt(sm_ccc_coop_roulette_multiplier) * GetConVarInt(sm_ccc_coop_kill_divisor);
+		gift *= GetConVarInt(sm_ccc_coop_gift_multiplier) * GetConVarInt(sm_ccc_coop_kill_divisor);
+	}
+	roulette = (score < roulette && new_score >= roulette);
+	gift = (score < gift && new_score >= gift);
+	if (!roulette && !gift) return;
+	char playername[MAX_NAME_LENGTH]; GetClientName(client, playername, sizeof(playername));
+	if (roulette && gift) PrintToChatAll("%s can now pop !roulette or !gift, have at it!", playername);
+	else if (roulette) PrintToChatAll("%s can now pop !roulette, have at it!", playername);
+	else /* if (gift)*/ PrintToChatAll("%s can now pop !gift, have at it!", playername);
+	#endif
 }
 
 //Getting kills (or assists) as a turret extends the length of time you can stay invulnerable.
