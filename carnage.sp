@@ -380,7 +380,8 @@ void class_specific_buff(int target, int duration)
 	I'm currently not entirely happy with the Medic buff. Previously it was MegaHeal
 	(immunity to pushback etc - the Quick Fix effect), but it's now an overheal bonus
 	(a sudden one-shot spike of hitpoints). Neither truly fulfils the goals. Open to
-	further suggestions.
+	further suggestions. (Can a medic get a buff that means his *patient* gets crits?
+	Look into the way canteen sharing works maybe.)
 	*/
 	TFClassType cls = TF2_GetPlayerClass(target);
 	TFCond buffs[] = { //These are in the order of TFClassType, *not* the order on the loading screen
