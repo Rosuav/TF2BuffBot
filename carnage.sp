@@ -297,7 +297,6 @@ public void OnMapStart()
 void add_score(int userid, int score, int kill)
 {
 	if (userid <= 0 || score <= 0) return;
-	userid %= sizeof(carnage_points);
 	if (in_coop_mode())
 	{
 		int self = GetClientOfUserId(userid);
@@ -313,6 +312,7 @@ void add_score(int userid, int score, int kill)
 
 void low_add_score(int userid, int score)
 {
+	userid %= sizeof(carnage_points);
 	if (carnage_points[userid] < 0) return; //Turrets don't gain carnage points.
 	int new_score = carnage_points[userid] += score;
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
