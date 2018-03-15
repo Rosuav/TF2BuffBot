@@ -7,7 +7,7 @@
 //By default, calling Debug() does nothing.
 public void Debug(const char[] fmt, any ...) { }
 //For a full log of carnage score changes, enable this:
-//#define Debug PrintToServer
+#define Debug PrintToServer
 
 #include "randeffects"
 
@@ -94,6 +94,13 @@ four-player team might resent a fifth player joining, which is bad for the game 
 whole. Ideally, the numbers should be aimed at 3-5 players; there is no point playing a
 game with just one player, and then we should aim for the mid-range rather than the
 extremes.
+
+NOTE: The nature of co-op mode means that some dynamics change. For instance, if a solo
+kill is worth the same as an assisted kill (as is the default), a co-op assisted kill is
+actually worth more, since both players (and their entire team) get the points for the
+kill AND the assist (three in total, with default settings). This means, for instance,
+that a medic on a team will tend to mean that more carnage points are scored overall;
+this is not considered a bad thing. Yay for medics!
 */
 
 //TODO: What happens when there are six players and another joins? Can we detect the
