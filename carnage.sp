@@ -7,7 +7,7 @@
 //By default, calling Debug() does nothing.
 public void Debug(const char[] fmt, any ...) { }
 //For a full log of carnage score changes, enable this:
-#define Debug PrintToServer
+//#define Debug PrintToServer
 
 #include "randeffects"
 
