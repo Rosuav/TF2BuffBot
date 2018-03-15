@@ -318,6 +318,7 @@ void low_add_score(int userid, int score)
 	int new_score = carnage_points[userid] += score;
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
 	#if defined Debug
+	int old_score = carnage_points[userid] - score;
 	int roulette = GetConVarInt(sm_ccc_carnage_required);
 	int gift = roulette;
 	if (in_coop_mode())
@@ -326,8 +327,8 @@ void low_add_score(int userid, int score)
 		roulette *= GetConVarInt(sm_ccc_coop_roulette_multiplier) * GetConVarInt(sm_ccc_coop_kill_divisor);
 		gift *= GetConVarInt(sm_ccc_coop_gift_multiplier) * GetConVarInt(sm_ccc_coop_kill_divisor);
 	}
-	roulette = (score < roulette && new_score >= roulette);
-	gift = (score < gift && new_score >= gift);
+	roulette = (old_score < roulette && new_score >= roulette);
+	gift = (old_score < gift && new_score >= gift);
 	if (!roulette && !gift) return;
 	char playername[MAX_NAME_LENGTH]; GetClientName(client, playername, sizeof(playername));
 	if (roulette && gift) PrintToChatAll("%s can now pop !roulette or !gift, have at it!", playername);
