@@ -80,26 +80,20 @@ gets six times as many points as in solo mode (roughly). Additionally, the "two 
 good one third bad" rule of thumb for !gift and !roulette is removed - gifts always go
 to a teammate, and roulette spins are always good. Thirdly, MVM gives you a target-rich
 environment, allowing you to clock up carnage points more rapidly than normal. Carnage
-point costs should be increased for ALL of these. Currently, the second and third are
-covered by sm_ccc_coop_{gift,roulette}_multiplier, but the first one may be harder. How
-do you define "number of players" fairly when they can come and go? Does kicking an idle
-player suddenly make the roulette wheel cheaper? Could a griefer enter the server with
-the sole purpose of racking up no kills and thus penalizing the other players?
+point costs should be increased for ALL of these.
 
-The target-rich environment is worth roughy a 4:1 ratio on points, based on the way a
+The target-rich environment is worth roughly a 4:1 ratio on points, based on the way a
 killstreak weapon works (it takes 20 bot kills instead of 5 to get a spree, 80 instead
-of 20 to become godlike). Assume that part carries over to the carnage points.
+of 20 to become godlike). Assuming that that part carries over to the carnage points, we
+simply divide all kill points by four. (Internally, since everything's done with
+integers, everything EXCEPT kill scores - including costs - gets multiplied by four
+instead. Try to ensure that the numbers don't get unexpectedly large and overflow.)
 
 It is essential that the actual number of players NOT affect the scaling. Otherwise, a
 four-player team might resent a fifth player joining, which is bad for the game as a
 whole. Ideally, the numbers should be aimed at 3-5 players; there is no point playing a
 game with just one player, and then we should aim for the mid-range rather than the
 extremes.
-
-Notionally, all points for getting kills are divided by some integer. Internally, though,
-everything's done with integers, so everything EXCEPT kill scores will be multiplied by
-that value. (Only in co-op mode.) Try to ensure that the numbers don't get unexpectedly
-large.
 */
 
 //TODO: What happens when there are six players and another joins? Can we detect the
