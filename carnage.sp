@@ -1248,6 +1248,11 @@ void apply_effect(int target, TFCond condition, int duration=0)
 		Debug("Applied effect Massive Overheal to %d", target);
 		return;
 	}
+	else if (condition == view_as<TFCond>(-8))
+	{
+		class_specific_buff(target, duration);
+		return;
+	}
 	//Some effects need additional code.
 	else if (condition == TFCond_Plague)
 	{
