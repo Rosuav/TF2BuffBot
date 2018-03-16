@@ -943,12 +943,12 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 				//Is there any way to play TF2 without a Steam account connected? VAC-unsecured
 				//servers? If so, those not Steamy will be considered bots, as I haven't found
 				//a better way to recognize bots.
-				if (GetSteamAccountID(i)) weight = GetConVarInt(sm_ccc_gift_chance_friendly_human);
+				if (!IsFakeClient(i)) weight = GetConVarInt(sm_ccc_gift_chance_friendly_human);
 				else weight = GetConVarInt(sm_ccc_gift_chance_friendly_bot);
 			}
 			else if (!coop) //In co-op mode, players on the opposite team cannot receive gifts.
 			{
-				if (GetSteamAccountID(i)) weight = GetConVarInt(sm_ccc_gift_chance_enemy_human);
+				if (!IsFakeClient(i)) weight = GetConVarInt(sm_ccc_gift_chance_enemy_human);
 				else weight = GetConVarInt(sm_ccc_gift_chance_enemy_bot);
 			}
 			client_weight[i] = weight;
