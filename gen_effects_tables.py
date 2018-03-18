@@ -48,7 +48,9 @@ effects = {
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
 		"view_as<TFCond>(-7)": "%s eats a radioactive ham sandvich.",
 		"view_as<TFCond>(-8)": "%s parties like it's three easy payments of $19.99!", # Class-specific buff
-		# "TFCond_FocusBuff": "Focus, %s. Focus.", # Beneficial only to snipers
+		"view_as<TFCond>(-8) ": "%s celebrates the diversity of classes on the team!", # has multiple entries,
+		"view_as<TFCond>(-8)  ": "%s pretends someone just got dominated! Bahahahaha!", # making it more likely
+		"view_as<TFCond>(-8)   ": "Ooh yes, %s, celebrate, celebrate, celebrate, KILL!", # to come up.
 		# "TFCond_MegaHeal": "%s can't be knocked back.", # Not much on its own but could be good in combination
 	}, "detriments": {
 		"TFCond_Jarated": "%s just got covered in Jarate. Eww.",
