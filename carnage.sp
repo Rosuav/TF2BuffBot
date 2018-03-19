@@ -319,12 +319,12 @@ void add_score(int userid, int score, int kill)
 
 void low_add_score(int userid, int score)
 {
-	int client = GetClientOfUserId(userid);
+	int client = GetClientOfUserId(userid); client += 0; //TODO: Nuke this whole line if announcements aren't being used (then the +=0 isn't necessary)
 	userid %= sizeof(carnage_points);
 	if (carnage_points[userid] < 0) return; //Turrets don't gain carnage points.
 	int new_score = carnage_points[userid] += score;
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
-	#if defined Debug
+	/** Uncomment this to get announcements when you can use the commands
 	int old_score = carnage_points[userid] - score;
 	int roulette = GetConVarInt(sm_ccc_carnage_required);
 	int gift = roulette;
@@ -340,8 +340,8 @@ void low_add_score(int userid, int score)
 	char playername[MAX_NAME_LENGTH]; GetClientName(client, playername, sizeof(playername));
 	if (roulette && gift) PrintToChatAll("%s can now pop !roulette or !gift, have at it!", playername);
 	else if (roulette) PrintToChatAll("%s can now pop !roulette, have at it!", playername);
-	else /* if (gift)*/ PrintToChatAll("%s can now pop !gift, have at it!", playername);
-	#endif
+	else PrintToChatAll("%s can now pop !gift, have at it!", playername);
+	// End of announcements display */
 }
 
 //Getting kills (or assists) as a turret extends the length of time you can stay invulnerable.
