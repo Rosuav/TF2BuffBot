@@ -34,7 +34,7 @@ import re
 effects = {
 	"benefits": {
 		"TFCond_UberchargedOnTakeDamage": "%s's Uber driver just arrived",
-		"TFCond_CritOnDamage": "%s is critical of everyone!",
+		# "TFCond_CritOnDamage": "%s is critical of everyone!", # Subsumed into (-8) below
 		"TFCond_CritCola": "%s types IDKFA and downs a can of Cola!",
 		"TFCond_BulletImmune": "%s is bulletprooooooof!",
 		"TFCond_BlastImmune": "%s is bombprooooooof!",
@@ -44,7 +44,6 @@ effects = {
 		"TFCond_SpeedBuffAlly": "Get in, get the job done, and get out. Got it, %s?",
 		"TFCond_RegenBuffed": "%s turns into a Time Lord and starts regenerating...",
 		"view_as<TFCond>(-1)": "%s becomes as light as a feather!",
-		"TFCond_DisguisedAsDispenser": "%s can run, but... well, actually, can hide too.",
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
 		"view_as<TFCond>(-7)": "%s eats a radioactive ham sandvich.",
 		"view_as<TFCond>(-8)": "%s parties like it's three easy payments of $19.99!", # Class-specific buff
@@ -67,6 +66,7 @@ effects = {
 		"view_as<TFCond>(-5)": "%s goes into a blind rage!!!",
 		"view_as<TFCond>(-6)": "%s roars 'YOU SHALL NOT PASS!'",
 		"TFCond_Bonked": "%s opens a chilled can of a radioactive energy drink.",
+		"TFCond_DisguisedAsDispenser": "%s can run, but... well, actually, can hide too.",
 	}
 }
 
