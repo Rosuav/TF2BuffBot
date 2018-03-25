@@ -63,8 +63,8 @@ ConVar sm_ccc_coop_mode = null; //(2) 0=normal, 1=co-op mode, 2=autodetect (if a
 ConVar sm_ccc_coop_gift_multiplier = null; //(2) The cost of !gift is multiplied by this.
 ConVar sm_ccc_coop_roulette_multiplier = null; //(3) The cost of !roulette is multiplied by this. Should be higher than the gift multiplier.
 ConVar sm_ccc_coop_kill_divisor = null; //(4) It takes this many co-op kills to be worth one regular kill. 4:1 is about right (MVM has a lot of targets available).
-ConVar sm_ccc_test_heal_amount = null; //(20) TEST: Building heal hitpoints per tick
-ConVar sm_ccc_test_heal_percent = null; //(0) TEST: Building heal % of max hp per tick
+ConVar sm_ccc_domheal_amount = null; //(20) Domination building heal hitpoints per tick
+ConVar sm_ccc_domheal_percent = null; //(0) Domination building heal percent of max hp per tick
 char notable_kills[128][128];
 #include "convars"
 
@@ -1083,7 +1083,7 @@ Action heal_buildings(Handle timer, any target)
 
 		int max = GetEntProp(i, Prop_Send, "m_iMaxHealth");
 		int cur = GetEntProp(i, Prop_Send, "m_iHealth");
-		int goal = cur + GetConVarInt(sm_ccc_test_heal_amount) + max * GetConVarInt(sm_ccc_test_heal_percent) / 100;
+		int goal = cur + GetConVarInt(sm_ccc_domheal_amount) + max * GetConVarInt(sm_ccc_domheal_percent) / 100;
 		if (goal > max) goal = max;
 		if (cur < goal)
 		{

@@ -57,6 +57,12 @@ reasonable to take the buff bot for a spin without changing any of these.
   this duration, or other buffs. See the source code for details. Don't set
   this to high, or dominations will simply cascade, letting one team utterly
   crush and, well, dominate.
+* sm_ccc_domheal_amount and sm_ccc_domheal_percent: 20 and 0% by default. When
+  domination crits trigger, medics instead receive a spike of overheal plus a
+  short duration ability to repair friendly buildings by being near them. Each
+  second, all buildings within 450HU of the medic will gain *_amount hitpoints
+  and *_percent of their max hitpoints. Recommend using one or the other, not
+  both, as it would be potentially confusing (though it will work correctly).
 
 Note that using !roulette or !gift will always consume ALL of your carnage
 points (unless you don't have enough). Having triple the required points does
