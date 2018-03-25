@@ -63,6 +63,8 @@ ConVar sm_ccc_coop_mode = null; //(2) 0=normal, 1=co-op mode, 2=autodetect (if a
 ConVar sm_ccc_coop_gift_multiplier = null; //(2) The cost of !gift is multiplied by this.
 ConVar sm_ccc_coop_roulette_multiplier = null; //(3) The cost of !roulette is multiplied by this. Should be higher than the gift multiplier.
 ConVar sm_ccc_coop_kill_divisor = null; //(4) It takes this many co-op kills to be worth one regular kill. 4:1 is about right (MVM has a lot of targets available).
+ConVar sm_ccc_test_heal_amount = null; //(20) TEST: Building heal hitpoints per tick
+ConVar sm_ccc_test_heal_percent = null; //(0) TEST: Building heal % of max hp per tick
 char notable_kills[128][128];
 #include "convars"
 
@@ -409,6 +411,21 @@ void class_specific_buff(int target, int duration)
 		2, //Engineer
 	};
 	apply_effect(target, buffs[cls], duration * scales[cls]);
+	//Special case: Medics heal buildings for a while.
+	if (cls == TFClass_Medic)
+	{
+		PrintToChatAll("Granting building heal to medic");
+		if (!ticking_down[target])
+		{
+			//If you're already ticking anything down, don't stack, just reset the timer
+			CreateTimer(1.0, heal_buildings, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+			Debug("Applied effect Building Healer to %d", target);
+		}
+		//NOTE: If you're already ticking something _else_ down, this just messes with things
+		//I honestly don't care; it's a pretty narrow edge case I think. If it's a problem,
+		//might need to create a new way of doing the ticks.
+		ticking_down[target] = duration * 3;
+	}
 }
 
 public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
@@ -1022,6 +1039,59 @@ Action VeryHappyAmmo(Handle timer, any target)
 	}
 	//After thirty regens (approx 30 seconds, but maybe +/- a second or so),
 	//we stop regenerating.
+	if (--ticking_down[target] <= 0) return Plugin_Stop;
+	return Plugin_Handled;
+}
+
+Action heal_buildings(Handle timer, any target)
+{
+	ignore(timer);
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
+
+	int team = GetClientTeam(target);
+	int maxentities = GetMaxEntities();
+	float yourpos[3]; GetEntPropVector(target, Prop_Send, "m_vecOrigin", yourpos);
+	for (int i = GetMaxClients() + 1; i <= maxentities; i++) if (IsValidEntity(i))
+	{
+		char cls[32];
+		GetEntityNetClass(i, cls, sizeof(cls));
+		if (strcmp(cls, "CObjectSentrygun") && strcmp(cls, "CObjectTeleporter") && strcmp(cls, "CObjectDispenser"))
+			//Not an engineer building
+			continue;
+		if (GetEntProp(i, Prop_Send, "m_iTeamNum") != team)
+			//Not one of ours
+			continue;
+		if (GetEntProp(i, Prop_Send, "m_bHasSapper") ||
+			GetEntProp(i, Prop_Send, "m_bBuilding") ||
+			GetEntProp(i, Prop_Send, "m_bPlacing") || //Also includes carried buildings
+			GetEntProp(i, Prop_Send, "m_bDisposableBuilding")) //Only happens in MVM (does NOT apply to a Gunslinger minisentry)
+		{
+			Debug("%s not healed:%s%s%s%s", cls,
+				GetEntProp(i, Prop_Send, "m_bHasSapper") ? " has-sapper" : "",
+				GetEntProp(i, Prop_Send, "m_bBuilding") ? " building" : "",
+				GetEntProp(i, Prop_Send, "m_bPlacing") ? " placing" : "",
+				GetEntProp(i, Prop_Send, "m_bDisposableBuilding") ? " disposable" : "");
+			continue;
+		}
+		float buildingpos[3]; GetEntPropVector(i, Prop_Send, "m_vecOrigin", buildingpos);
+		float dist = GetVectorDistance(yourpos, buildingpos, true);
+		if (dist > 202500) //450^2 hammer units
+		{
+			Debug("%s not healed - too far away (%f hu^2)", cls, dist);
+			continue;
+		}
+
+		int max = GetEntProp(i, Prop_Send, "m_iMaxHealth");
+		int cur = GetEntProp(i, Prop_Send, "m_iHealth");
+		int goal = cur + GetConVarInt(sm_ccc_test_heal_amount) + max * GetConVarInt(sm_ccc_test_heal_percent) / 100;
+		if (goal > max) goal = max;
+		if (cur < goal)
+		{
+			PrintToChatAll("Healing %s from %d to %d (max %d)", cls, cur, goal, max);
+			SetVariantInt(goal - cur);
+			AcceptEntityInput(i, "AddHealth");
+		}
+	}
 	if (--ticking_down[target] <= 0) return Plugin_Stop;
 	return Plugin_Handled;
 }
