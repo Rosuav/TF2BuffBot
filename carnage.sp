@@ -811,6 +811,17 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		}
 		return;
 	}
+	if (!strcmp(msg, "!tp"))
+	{
+		//Penalize people who try to get into third-person view. Muahahaha.
+		int target = GetClientOfUserId(event.GetInt("userid"));
+		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
+		char targetname[MAX_NAME_LENGTH];
+		GetClientName(target, targetname, sizeof(targetname));
+		int sel = RoundToFloor(sizeof(detriments)*GetURandomFloat());
+		apply_effect(target, detriments[sel]);
+		PrintToChatAll(detriments_desc[sel], targetname);
+	}
 	if (!strcmp(msg, "!roulette"))
 	{
 		int target = GetClientOfUserId(event.GetInt("userid"));
