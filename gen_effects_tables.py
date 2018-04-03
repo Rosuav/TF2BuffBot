@@ -117,3 +117,14 @@ with open("carnage.sp") as source, open("convars.inc", "w") as cv:
 	for killcode, msg in notable_kills.items():
 		print("\tnotable_kills[%s] = %s;" % (killcode, json.dumps(msg)), file=cv)
 	print("}", file=cv)
+
+
+# TODO: Migrate all gravity shifts into Weird.
+# This requires that each of them be potentially both good and bad, or else
+# so bizarre that you can't declare it clearly either of the above. "Chaotic
+# Gravity" already counts. All else being equal, lower grav is better than
+# higher grav, as you can jump higher and (I think) will take less falling
+# damage. So increased grav + knockback prevention would be a perfect Weird
+# effect - it makes sense, and is simultaneously good and bad. What would be
+# a corresponding effect to go with reduced grav? Has to be minorly annoying
+# or detrimental, and has to "feel right" (yes, that's fuzzy) with low grav.
