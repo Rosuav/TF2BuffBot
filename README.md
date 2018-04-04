@@ -84,9 +84,12 @@ Strategy:
 ### Co-op mode
 
 Designed for Mann vs Machine, co-op mode removes the "might be good, might be
-bad" risk, instead increasing the carnage point requirements. Enable it by
-setting sm_ccc_coop_mode to 1; setting it to 2 will autodetect (not currently
-implemented, and will always leave co-op mode inactive).
+bad" risk, instead increasing the carnage point requirements. This is normally
+autodetected (based on MvM mode), but can be forcibly enabled or disabled with
+the sm_ccc_coop_mode cvar (0=disable, 1=enable, 2=autodetect). In co-op mode,
+carnage points are gained by the entire team, and spent individually. Explore
+the source code for more details.
+
 
 Bot Control
 -----------
