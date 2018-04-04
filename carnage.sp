@@ -1018,6 +1018,39 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 //Silence the warning "unused parameter"
 any ignore(any ignoreme) {return ignoreme;}
 
+void schweetz(int client)
+{
+	/*
+	Glitch a player randomly like Vanellope's superpower.
+	This function handles one single glitch - one motion from a source location
+	to a random nearby target. To fully create a glitch effect, this needs to be
+	called randomly, and needs to chain.
+
+	During a glitching period, tick up once per second. Increment a counter, then
+	take that many chances out of 10 (so on the first tick, 10% chance, then 20%,
+	and it's guaranteed to succeed within ten tries). When this hits, reset the
+	base counter to zero and start glitching. Half the time, you glitch once and
+	that's it; otherwise, roll d5 and that's the chain length (so there's a 60%
+	total chance of a single glitch with no effective chain). Chained glitches
+	happen after 0.25 second delay. If chain length would be 4 or greater, set
+	base counter to -1, preventing a glitch next second (so they can't stack).
+
+	So what's a glitch anyway?
+	1) Pick a random distance, up to 450 HUs. Probably a minimum of 100 HUs? Or
+	maybe a higher minimum. Tinker, test.
+	2) Pick a random direction vector. Its X and Y range from -2 to +2, and its
+	Z ranges from 0 to 1 (or maybe 0.5). Normalize this vector to unit length,
+	then multiply it by the random distance.
+	3) Trace a ray through that direction and distance from the player's current
+	location. If it impacts something, shorten the vector accordingly.
+	4) Optionally repeat steps 2 and 3 once or twice more, picking the longest
+	such vector. That'll tend to avoid the "oops I tried to glitch into a wall"
+	problem, where you otherwise would get disappointing glitches.
+	5) Fooomp the player to that location, preferably with cool visual effects.
+	*/
+	PrintToChatAll("Foomp! [%d]", client);
+}
+
 Action regenerate(Handle timer, any target)
 {
 	//When you die, you stop regenerating.
@@ -1360,15 +1393,20 @@ void apply_effect(int target, TFCond condition, int duration=0)
 	}
 	else if (condition == view_as<TFCond>(-9))
 	{
-		int r,g,b,a;
+		/*int r,g,b,a;
 		SetEntityRenderColor(target, 255, 0, 128, 64);
 		RenderMode cycle = GetEntityRenderMode(target) + RENDER_TRANSCOLOR; // == +1
 		if (cycle > RENDER_NONE) cycle = RENDER_NORMAL;
 		SetEntityRenderMode(target, cycle);
 		GetEntityRenderColor(target, r, g, b, a);
-		PrintToChatAll("Render color: %d-%d-%d-%d", r,g,b,a);
-		/*RenderFx mode = RENDERFX_NONE;
+		PrintToChatAll("Render color: %d-%d-%d-%d", r,g,b,a);*/
+		/*
+		//Toggle:
+		RenderFx mode = RENDERFX_RAGDOLL;
 		if (GetEntityRenderFx(target) == mode) mode = RENDERFX_NONE;
+		//Cycle:
+		//RenderFx mode = GetEntityRenderFx(target) + RENDERFX_PULSE_SLOW; // == +1
+		//if (mode >= RENDERFX_MAX) mode = RENDERFX_NONE;
 		SetEntityRenderFx(target, mode);
 		for (int slot = 0; slot < 6; ++slot)
 		{
@@ -1379,11 +1417,13 @@ void apply_effect(int target, TFCond condition, int duration=0)
 			if (extra != -1) SetEntityRenderFx(extra, mode);
 			extra = GetEntPropEnt(weap, Prop_Send, "m_hExtraWearableViewModel");
 			if (extra != -1) SetEntityRenderFx(extra, mode);
-		}*/
+		}
 		PrintToChatAll("Render mode: %d", GetEntityRenderMode(target));
-		PrintToChatAll("Render fx: %d", GetEntityRenderFx(target));
+		PrintToChatAll("Render fx: %d", GetEntityRenderFx(target));*/
 		lastbuttons = -1;
-		CreateTimer(0.25, buttoncheck, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		if (target < 0) //Ignore buttoncheck
+			CreateTimer(0.25, buttoncheck, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		schweetz(target);
 		return;
 	}
 	//Some effects need additional code.
