@@ -1173,6 +1173,18 @@ Action beacon(Handle timer, int target)
 	return Plugin_Handled;
 }
 
+int lastbuttons = -1;
+Action buttoncheck(Handle timer, int target)
+{
+	ignore(timer);
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
+	int btn = GetClientButtons(target);
+	if (btn == lastbuttons) return Plugin_Handled;
+	lastbuttons = btn;
+	PrintToChatAll("Buttons currently held: %X", btn);
+	return Plugin_Handled;
+}
+
 int blinded[MAXPLAYERS + 1];
 void blind(int target, int amount)
 {
@@ -1344,6 +1356,34 @@ void apply_effect(int target, TFCond condition, int duration=0)
 	else if (condition == view_as<TFCond>(-8))
 	{
 		class_specific_buff(target, duration);
+		return;
+	}
+	else if (condition == view_as<TFCond>(-9))
+	{
+		int r,g,b,a;
+		SetEntityRenderColor(target, 255, 0, 128, 64);
+		RenderMode cycle = GetEntityRenderMode(target) + RENDER_TRANSCOLOR; // == +1
+		if (cycle > RENDER_NONE) cycle = RENDER_NORMAL;
+		SetEntityRenderMode(target, cycle);
+		GetEntityRenderColor(target, r, g, b, a);
+		PrintToChatAll("Render color: %d-%d-%d-%d", r,g,b,a);
+		/*RenderFx mode = RENDERFX_NONE;
+		if (GetEntityRenderFx(target) == mode) mode = RENDERFX_NONE;
+		SetEntityRenderFx(target, mode);
+		for (int slot = 0; slot < 6; ++slot)
+		{
+			int weap = GetPlayerWeaponSlot(target, slot);
+			if (weap == -1) continue;
+			SetEntityRenderFx(weap, mode);
+			int extra = GetEntPropEnt(weap, Prop_Send, "m_hExtraWearable");
+			if (extra != -1) SetEntityRenderFx(extra, mode);
+			extra = GetEntPropEnt(weap, Prop_Send, "m_hExtraWearableViewModel");
+			if (extra != -1) SetEntityRenderFx(extra, mode);
+		}*/
+		PrintToChatAll("Render mode: %d", GetEntityRenderMode(target));
+		PrintToChatAll("Render fx: %d", GetEntityRenderFx(target));
+		lastbuttons = -1;
+		CreateTimer(0.25, buttoncheck, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		return;
 	}
 	//Some effects need additional code.
