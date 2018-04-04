@@ -1018,6 +1018,11 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 //Silence the warning "unused parameter"
 any ignore(any ignoreme) {return ignoreme;}
 
+bool collision_check(int entity, int mask, int client)
+{
+	PrintToChatAll("collcheck: %d - %x - %d ==> %d", entity, mask, client, entity != client);
+	if (entity != client) return true; else return false;
+}
 void schweetz(int client)
 {
 	/*
@@ -1048,7 +1053,48 @@ void schweetz(int client)
 	problem, where you otherwise would get disappointing glitches.
 	5) Fooomp the player to that location, preferably with cool visual effects.
 	*/
-	PrintToChatAll("Foomp! [%d]", client);
+	float pos[3]; GetClientAbsOrigin(client, pos);
+	float angle[3];
+	angle[0] = GetURandomFloat() * -30.0; //Max 30 degrees up
+	angle[1] = GetURandomFloat() * 360.0 - 180.0; //Any orientation
+	angle[2] = 0.0; //Doesn't seem to do anything???
+	//GetClientEyeAngles(client, angle); //Or go the way you're looking (for testing)
+	//if (angle[0] > 0.0) angle[0] = 0.0; //Don't move down - you'll collide with the ground instantly.
+	PrintToChatAll("Client angles: %f down, %f from north", angle[0], angle[1]);
+	float dir[3];
+	GetAngleVectors(angle, dir, NULL_VECTOR, NULL_VECTOR);
+	float dist = GetURandomFloat() * 350 + 100;
+	ScaleVector(dir, dist);
+	float dest[3];
+	AddVectors(dir, pos, dest);
+	float mins[3], maxs[3];
+	GetClientMins(client, mins);
+	GetClientMaxs(client, maxs);
+
+	Handle trace = TR_TraceHullFilterEx(pos, dest, mins, maxs, MASK_PLAYERSOLID, collision_check, client);
+	if (TR_DidHit(trace))
+	{
+		float hitpos[3];
+		TR_GetEndPosition(hitpos, trace);
+		float tmp[3];
+		SubtractVectors(dest, pos, tmp);
+		float req = NormalizeVector(tmp, tmp);
+		SubtractVectors(hitpos, pos, tmp);
+		float got = NormalizeVector(tmp, tmp);
+		PrintToChatAll("Wanted %f, requested %f, got %f [%f%%]",
+			dist, req, got, TR_GetFraction(trace) * 100);
+		TeleportEntity(client, hitpos, NULL_VECTOR, NULL_VECTOR);
+	}
+	else
+	{
+		float tmp[3];
+		SubtractVectors(dest, pos, tmp);
+		float req = NormalizeVector(tmp, tmp);
+		PrintToChatAll("Wanted %f, requested %f, got it all [%f%%]",
+			dist, req, TR_GetFraction(trace) * 100);
+		TeleportEntity(client, dest, NULL_VECTOR, NULL_VECTOR);
+	}
+	CloseHandle(trace);
 }
 
 Action regenerate(Handle timer, any target)
