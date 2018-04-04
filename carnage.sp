@@ -1227,6 +1227,18 @@ Action unblind(Handle timer, any target)
 	return Plugin_Stop;
 }
 
+public void TF2_OnConditionAdded(int client, TFCond cond)
+{
+	Debug("%d added cond %d", client, cond);
+	if (cond == TFCond_Plague) SetEntityRenderColor(client, 148, 178, 28, 255);
+}
+
+public void TF2_OnConditionRemoved(int client, TFCond cond)
+{
+	Debug("%d removed cond %d", client, cond);
+	if (cond == TFCond_Plague) SetEntityRenderColor(client, 255, 255, 255, 255);
+}
+
 void apply_effect(int target, TFCond condition, int duration=0)
 {
 	if (!duration) duration = GetConVarInt(sm_ccc_buff_duration);
