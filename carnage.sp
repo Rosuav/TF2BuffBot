@@ -1066,7 +1066,7 @@ void schweetz(int client)
 	for (int attempt = 0; attempt < 3; ++attempt)
 	{
 		float angle[3];
-		angle[0] = GetURandomFloat() * -30.0; //Max 30 degrees up
+		angle[0] = GetURandomFloat() * -5.0; //Max 5 degrees up, and never down
 		angle[1] = GetURandomFloat() * 360.0 - 180.0; //Any orientation
 		angle[2] = 0.0; //Doesn't seem to do anything???
 		//GetClientEyeAngles(client, angle); //Or go the way you're looking (for testing)
@@ -1093,6 +1093,16 @@ void schweetz(int client)
 		CloseHandle(trace);
 	}
 	TeleportEntity(client, target, NULL_VECTOR, NULL_VECTOR);
+}
+
+int glitch_chain_count;
+Action vanellope(Handle timer, any target)
+{
+	ignore(timer);
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
+	if (!--glitch_chain_count) return Plugin_Stop;
+	schweetz(target);
+	return Plugin_Handled;
 }
 
 Action regenerate(Handle timer, any target)
@@ -1467,7 +1477,8 @@ void apply_effect(int target, TFCond condition, int duration=0)
 		lastbuttons = -1;
 		if (target < 0) //Ignore buttoncheck
 			CreateTimer(0.25, buttoncheck, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
-		schweetz(target);
+		glitch_chain_count = 4;
+		CreateTimer(0.333, vanellope, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		return;
 	}
 	//Some effects need additional code.
