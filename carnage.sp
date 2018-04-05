@@ -1059,7 +1059,7 @@ void schweetz(int client)
 	float maxs[3]; GetClientMaxs(client, maxs);
 	float best_frac = 0.0;
 	float target[3];
-	float dist = GetURandomFloat() * 350 + 100;
+	float dist = GetURandomFloat() * 200 + 100;
 	//Pick a random direction and try to go the distance. If we can't, fine, but
 	//we want to go as far as we can. This means that we'll generally NOT go
 	//towards a wall, since we could go further by going away from it.
@@ -1095,13 +1095,43 @@ void schweetz(int client)
 	TeleportEntity(client, target, NULL_VECTOR, NULL_VECTOR);
 }
 
-int glitch_chain_count;
+//Note: If more than one player glitches simultaneously, they'll share the chain
+//count. Not much of an issue and highly unlikely. (It's fine for two players to
+//have the "glitching state" at the same time.)
+int glitch_status[MAXPLAYERS + 1];
 Action vanellope(Handle timer, any target)
 {
 	ignore(timer);
-	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
-	if (!--glitch_chain_count) return Plugin_Stop;
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) {SetEntityRenderFx(target, RENDERFX_NONE); return Plugin_Stop;}
+	if (glitch_status[target] >= 0) {SetEntityRenderFx(target, RENDERFX_NONE); return Plugin_Stop;}
 	schweetz(target);
+	if (++glitch_status[target] >= 0) {SetEntityRenderFx(target, RENDERFX_NONE); return Plugin_Stop;}
+	return Plugin_Handled;
+}
+
+Action appension(Handle timer, any target) //the... Infinite Glitch? Not infinite here.
+{
+	ignore(timer);
+	if (glitch_status[target] == 100)
+	{
+		//Concentrate... and.... GLITCH!
+		if (!IsClientInGame(target) || !IsPlayerAlive(target)) {SetEntityRenderFx(target, RENDERFX_NONE); return Plugin_Stop;}
+		int chain = RoundToFloor(GetURandomFloat() * 10 + 1);
+		if (chain > 5) chain = 1;
+		glitch_status[target] = -chain;
+		CreateTimer(0.333, vanellope, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+	}
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
+	if (glitch_status[target] >= 0)
+	{
+		if (GetURandomFloat() * 10 < ++glitch_status[target])
+		{
+			glitch_status[target] = 100; //Glitch *next* second.
+			SetEntityRenderFx(target, RENDERFX_FLICKER_FAST); //or RENDERFX_HOLOGRAM?
+			return Plugin_Handled; //Without decrementing the counter. So you get one more second on the clock.
+		}
+	}
+	if (--ticking_down[target] <= 0) return Plugin_Stop;
 	return Plugin_Handled;
 }
 
@@ -1477,8 +1507,13 @@ void apply_effect(int target, TFCond condition, int duration=0)
 		lastbuttons = -1;
 		if (target < 0) //Ignore buttoncheck
 			CreateTimer(0.25, buttoncheck, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
-		glitch_chain_count = 4;
-		CreateTimer(0.333, vanellope, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		return;
+	}
+	else if (condition == view_as<TFCond>(-10))
+	{
+		ticking_down[target] = duration;
+		CreateTimer(1.0, appension, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		Debug("Turned %d into Vanellope", target);
 		return;
 	}
 	//Some effects need additional code.

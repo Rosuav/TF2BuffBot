@@ -68,6 +68,7 @@ effects = {
 		"TFCond_Bonked": "%s opens a chilled can of a radioactive energy drink.",
 		"TFCond_DisguisedAsDispenser": "%s can run, but... well, actually, can hide too.",
 		# "view_as<TFCond>(-9)": "%s begins testing stuff for the devs",
+		"view_as<TFCond>(-10)": "%s screams 'I am NOT a GLITCH!!'",
 	}
 }
 
