@@ -61,13 +61,13 @@ effects = {
 		"view_as<TFCond>(-2)": "%s becomes as heavy as... well, a Heavy?",
 		"view_as<TFCond>(-4)": "Blood clouds %s's vision...",
 	}, "weird": {
+		# "view_as<TFCond>(-9)": "%s begins testing stuff for the devs", # Will always be [3,1] when active
 		"TFCond_HalloweenGhostMode": "%s is pining for the fjords...",
 		"view_as<TFCond>(-3)": "Chaotic gravity waves surround %s.",
 		"view_as<TFCond>(-5)": "%s goes into a blind rage!!!",
 		"view_as<TFCond>(-6)": "%s roars 'YOU SHALL NOT PASS!'",
 		"TFCond_Bonked": "%s opens a chilled can of a radioactive energy drink.",
 		"TFCond_DisguisedAsDispenser": "%s can run, but... well, actually, can hide too.",
-		# "view_as<TFCond>(-9)": "%s begins testing stuff for the devs",
 		"view_as<TFCond>(-10)": "%s screams 'I am NOT a GLITCH!!'",
 	}
 }

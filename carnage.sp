@@ -1312,10 +1312,21 @@ Action beacon(Handle timer, int target)
 }
 
 int lastbuttons = -1;
+float lastmax[3], lastmin[3];
 Action buttoncheck(Handle timer, int target)
 {
 	ignore(timer);
 	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
+	float mins[3]; GetClientMins(target, mins);
+	float maxs[3]; GetClientMaxs(target, maxs);
+	if (mins[0] != lastmin[0] || mins[1] != lastmin[1] || mins[2] != lastmin[2] || 
+		maxs[0] != lastmax[0] || maxs[1] != lastmax[1] || maxs[2] != lastmax[2])
+	{
+		PrintToChatAll("Bounding box: %.1f,%.1f,%.1f - %.1f,%.1f,%.1f",
+			mins[0], mins[1], mins[2], maxs[0], maxs[1], maxs[2]);
+		GetClientMins(target, lastmin);
+		GetClientMaxs(target, lastmax);
+	}
 	int btn = GetClientButtons(target);
 	if (btn == lastbuttons) return Plugin_Handled;
 	lastbuttons = btn;
@@ -1526,8 +1537,7 @@ void apply_effect(int target, TFCond condition, int duration=0)
 		PrintToChatAll("Render mode: %d", GetEntityRenderMode(target));
 		PrintToChatAll("Render fx: %d", GetEntityRenderFx(target));*/
 		lastbuttons = -1;
-		if (target < 0) //Ignore buttoncheck
-			CreateTimer(0.25, buttoncheck, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.25, buttoncheck, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		return;
 	}
 	else if (condition == view_as<TFCond>(-10))
