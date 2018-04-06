@@ -1066,7 +1066,7 @@ void schweetz(int client)
 	for (int attempt = 0; attempt < 3; ++attempt)
 	{
 		float angle[3];
-		angle[0] = GetURandomFloat() * -5.0; //Max 5 degrees up, and never down
+		angle[0] = GetURandomFloat() * -20.0; //Max 20 degrees up, and never down
 		angle[1] = GetURandomFloat() * 360.0 - 180.0; //Any orientation
 		angle[2] = 0.0; //Doesn't seem to do anything???
 		//GetClientEyeAngles(client, angle); //Or go the way you're looking (for testing)
