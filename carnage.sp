@@ -1095,9 +1095,6 @@ void schweetz(int client)
 	TeleportEntity(client, target, NULL_VECTOR, NULL_VECTOR);
 }
 
-//Note: If more than one player glitches simultaneously, they'll share the chain
-//count. Not much of an issue and highly unlikely. (It's fine for two players to
-//have the "glitching state" at the same time.)
 int glitch_status[MAXPLAYERS + 1];
 Action vanellope(Handle timer, any target)
 {
