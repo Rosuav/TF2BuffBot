@@ -1099,11 +1099,14 @@ void show_glitch(int client)
 {
 	//Begin the "I'm glitching" effect, which starts one second before the
 	//first actual movement in a chain, and ends upon the last movement
-	SetEntityRenderFx(client, RENDERFX_FLICKER_FAST); //or RENDERFX_HOLOGRAM?
+	//Ideally, this should set Hologram mode on cosmetics as well as weapons,
+	//but this is costly and may be messy. The player gets Strobe rather than
+	//Hologram to prevent invisibility.
+	SetEntityRenderFx(client, RENDERFX_STROBE_FASTER);
 	for (int slot = 0; slot < 6; ++slot)
 	{
 		int weap = GetPlayerWeaponSlot(client, slot);
-		if (weap != -1) SetEntityRenderFx(weap, RENDERFX_FLICKER_FAST);
+		if (weap != -1) SetEntityRenderFx(weap, RENDERFX_HOLOGRAM);
 	}
 }
 void show_nonglitch(int client)
