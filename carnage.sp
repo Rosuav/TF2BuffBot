@@ -414,7 +414,6 @@ void class_specific_buff(int target, int duration)
 	//Special case: Medics heal buildings for a while.
 	if (cls == TFClass_Medic)
 	{
-		PrintToChatAll("Granting building heal to medic");
 		if (!ticking_down[target])
 		{
 			//If you're already ticking anything down, don't stack, just reset the timer
@@ -1534,6 +1533,7 @@ void apply_effect(int target, TFCond condition, int duration=0)
 	else if (condition == view_as<TFCond>(-10))
 	{
 		ticking_down[target] = duration;
+		glitch_status[target] = 0;
 		CreateTimer(1.0, appension, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		Debug("Turned %d into Vanellope", target);
 		return;
