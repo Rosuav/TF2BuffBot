@@ -1095,14 +1095,26 @@ void schweetz(int client)
 	TeleportEntity(client, target, NULL_VECTOR, NULL_VECTOR);
 }
 
+void show_glitch(int client)
+{
+	//Begin the "I'm glitching" effect, which starts one second before the
+	//first actual movement in a chain, and ends upon the last movement
+	SetEntityRenderFx(client, RENDERFX_FLICKER_FAST); //or RENDERFX_HOLOGRAM?
+}
+void show_nonglitch(int client)
+{
+	//Reset the "I'm glitching" effect
+	SetEntityRenderFx(client, RENDERFX_NONE);
+}
+
 int glitch_status[MAXPLAYERS + 1];
 Action vanellope(Handle timer, any target)
 {
 	ignore(timer);
-	if (!IsClientInGame(target) || !IsPlayerAlive(target)) {SetEntityRenderFx(target, RENDERFX_NONE); return Plugin_Stop;}
-	if (glitch_status[target] >= 0) {SetEntityRenderFx(target, RENDERFX_NONE); return Plugin_Stop;}
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) {show_nonglitch(target); return Plugin_Stop;}
+	if (glitch_status[target] >= 0) {show_nonglitch(target); return Plugin_Stop;}
 	schweetz(target);
-	if (++glitch_status[target] >= 0) {SetEntityRenderFx(target, RENDERFX_NONE); return Plugin_Stop;}
+	if (++glitch_status[target] >= 0) {show_nonglitch(target); return Plugin_Stop;}
 	return Plugin_Handled;
 }
 
@@ -1112,7 +1124,7 @@ Action appension(Handle timer, any target) //the... Infinite Glitch? Not infinit
 	if (glitch_status[target] == 100)
 	{
 		//Concentrate... and.... GLITCH!
-		if (!IsClientInGame(target) || !IsPlayerAlive(target)) {SetEntityRenderFx(target, RENDERFX_NONE); return Plugin_Stop;}
+		if (!IsClientInGame(target) || !IsPlayerAlive(target)) {show_nonglitch(target); return Plugin_Stop;}
 		int chain = RoundToFloor(GetURandomFloat() * 10 + 1);
 		if (chain > 5) chain = 1;
 		glitch_status[target] = -chain;
@@ -1124,7 +1136,7 @@ Action appension(Handle timer, any target) //the... Infinite Glitch? Not infinit
 		if (GetURandomFloat() * 10 < ++glitch_status[target])
 		{
 			glitch_status[target] = 100; //Glitch *next* second.
-			SetEntityRenderFx(target, RENDERFX_FLICKER_FAST); //or RENDERFX_HOLOGRAM?
+			show_glitch(target);
 			return Plugin_Handled; //Without decrementing the counter. So you get one more second on the clock.
 		}
 	}
