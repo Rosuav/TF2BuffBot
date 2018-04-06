@@ -1057,7 +1057,7 @@ void schweetz(int client)
 	float pos[3]; GetClientAbsOrigin(client, pos);
 	float mins[3]; GetClientMins(client, mins);
 	float maxs[3]; GetClientMaxs(client, maxs);
-	float best_frac = 0.0;
+	float best_frac = -1.0;
 	float target[3];
 	float dist = GetURandomFloat() * 200 + 100;
 	//Pick a random direction and try to go the distance. If we can't, fine, but
