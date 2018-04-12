@@ -51,6 +51,7 @@ ConVar sm_ccc_debug_force_effect = null; //(0) Debug - force roulette to give th
 ConVar sm_ccc_debug_cheats_active = null; //(0) Debug - allow cheaty commands
 //More knobs
 ConVar sm_ccc_gravity_modifier = null; //(3) Ratio used for gravity effects - either multiply by this or divide by it
+ConVar sm_ccc_turret_allowed = null; //(0) Set to 1 to allow the !turret command
 ConVar sm_ccc_turret_invuln_after_placement = null; //(30) Length of time a turret can remain invulnerable after deployment
 ConVar sm_ccc_turret_invuln_per_kill = null; //(1) Additional time a turret gains each time it gets a kill
 ConVar sm_ccc_turret_max_invuln = null; //(60) Maximum 'banked' invulnerability a turret can have
@@ -750,7 +751,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		PrintToChatAll("%s now has $%d.", targetname, money);
 		return;
 	}
-	if (cheats_active && !strcmp(msg, "!turret"))
+	if (!strcmp(msg, "!turret"))
 	{
 		//Turret mode. The first time you use this command, you become a
 		//turret; after that, it toggles between turret and ghost.
@@ -758,6 +759,11 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		//you are a ghost, you cannot shoot, but can move.
 		int target = GetClientOfUserId(event.GetInt("userid"));
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
+		if (!GetConVarInt(sm_ccc_turret_allowed))
+		{
+			PrintToChat(target, "Turreting is currently disabled by convar");
+			return;
+		}
 		int slot = event.GetInt("userid") % sizeof(carnage_points);
 		int required = GetConVarInt(sm_ccc_carnage_required) * 2;
 		if (in_coop_mode()) required *= GetConVarInt(sm_ccc_coop_kill_divisor);
@@ -1236,7 +1242,7 @@ Action heal_buildings(Handle timer, any target)
 		if (goal > max) goal = max;
 		if (cur < goal)
 		{
-			PrintToChatAll("Healing %s from %d to %d (max %d)", cls, cur, goal, max);
+			Debug("Healing %s from %d to %d (max %d)", cls, cur, goal, max);
 			SetVariantInt(goal - cur);
 			AcceptEntityInput(i, "AddHealth");
 		}
