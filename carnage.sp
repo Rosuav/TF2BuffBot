@@ -130,6 +130,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_grant_bonkvich", Command_Bonkvich, ADMFLAG_SLAY);
 	RegAdminCmd("sm_ccc_effects", Command_Effects, ADMFLAG_SLAY);
 	RegAdminCmd("sm_rage_box", Command_RageBox, ADMFLAG_SLAY);
+	RegAdminCmd("chat", Command_Chat, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("player_team", InitializePlayer);
 	HookEvent("player_death", PlayerDied);
@@ -211,6 +212,16 @@ public Action Command_Bonkvich(int client, int args)
 	int userid = GetClientUserId(target);
 	bonkvich_userid = userid;
 	ReplyToCommand(client, "[SM] %s is granted the Box of Bonkvich.", name);
+	return Plugin_Handled;
+}
+
+public Action Command_Chat(int client, int args)
+{
+	char text[512];
+	GetCmdArgString(text, sizeof(text));
+	ReplyToCommand(client, "Rosuav: %s", text);
+	//PrintToChatAll("\x07FE0000Rosuav\x01 :  %s", text); //Chat as if red team
+	PrintToChatAll("\x079ACDFFRosuav\x01 :  %s", text); //Chat as if blue team
 	return Plugin_Handled;
 }
 
