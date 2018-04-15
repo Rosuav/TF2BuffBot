@@ -984,9 +984,6 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 				weight = 0; //Turrets can't receive buffs
 			else if (GetClientTeam(i) == myteam)
 			{
-				//Is there any way to play TF2 without a Steam account connected? VAC-unsecured
-				//servers? If so, those not Steamy will be considered bots, as I haven't found
-				//a better way to recognize bots.
 				if (!IsFakeClient(i)) weight = GetConVarInt(sm_ccc_gift_chance_friendly_human);
 				else weight = GetConVarInt(sm_ccc_gift_chance_friendly_bot);
 			}
