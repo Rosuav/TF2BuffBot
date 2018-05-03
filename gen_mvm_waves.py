@@ -374,7 +374,7 @@ with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25
 		harby_tanks(4)
 		support("Milkman", count=5)
 
-# TODO: Give practically all the money up-front, and basically nothing
+# All or practically all the money is given up-front, and basically nothing
 # in each wave. You have been hired, mercs, to defend this facility.
 # Your pay has been given in advance. Now defend this place to the pain!
 
