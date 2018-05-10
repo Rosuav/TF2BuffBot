@@ -114,8 +114,8 @@ with open("carnage.sp") as source, open("convars.inc", "w") as cv:
 	print("void CreateConVars() {", file=cv)
 	for line in source:
 		m = re.match(r"^ConVar (sm_ccc_[a-z_]+) = null; //\(([0-9]+)\) (.*)", line)
-		if not m: continue
-		print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0, true, 0.0);".format(*m.groups()), file=cv)
+		if m:
+			print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0, true, 0.0);".format(*m.groups()), file=cv)
 	for killcode, msg in notable_kills.items():
 		print("\tnotable_kills[%s] = %s;" % (killcode, json.dumps(msg)), file=cv)
 	print("}", file=cv)
