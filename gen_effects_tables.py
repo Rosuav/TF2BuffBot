@@ -116,7 +116,7 @@ with open("carnage.sp") as source, open("convars.inc", "w") as cv:
 		m = re.match(r"^ConVar (sm_ccc_[a-z_]+) = null; //\(([0-9]+)\) (.*)", line)
 		if m: # Numeric cvar
 			print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0, true, 0.0);".format(*m.groups()), file=cv)
-		m = re.match(r'^ConVar (sm_ccc_[a-z_]+) = null; //\("([^"]+)"\) (.*)', line)
+		m = re.match(r'^ConVar (sm_ccc_[a-z_]+) = null; //\("([^"]*)"\) (.*)', line)
 		if m: # String cvar (default value may not contain nested quotes)
 			print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0);".format(*m.groups()), file=cv)
 	for killcode, msg in notable_kills.items():
