@@ -43,7 +43,7 @@ effects = {
 		"TFCond_DefenseBuffed": "%s erects a personal-sized banner and toots a little bugle.",
 		"TFCond_SpeedBuffAlly": "Get in, get the job done, and get out. Got it, %s?",
 		"TFCond_RegenBuffed": "%s turns into a Time Lord and starts regenerating...",
-		"view_as<TFCond>(-1)": "%s becomes as light as a feather!",
+		# "view_as<TFCond>(-1)": "%s becomes as light as a feather!",
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
 		"view_as<TFCond>(-7)": "%s eats a radioactive ham sandvich.",
 		"view_as<TFCond>(-8)":    "%s parties like it's three easy payments of $19.99!", # Class-specific buff
@@ -58,12 +58,12 @@ effects = {
 		"TFCond_HalloweenKartCage": "%s has been naughty and is now imprisoned.", # Likely a death sentence
 		"TFCond_Plague": "A rat bites %s and inflicts a non-contagious form of the Bubonic Plague.",
 		"TFCond_RestrictToMelee": "Time for %s to start bashing some heads in!",
-		"view_as<TFCond>(-2)": "%s becomes as heavy as... well, a Heavy?",
+		# "view_as<TFCond>(-2)": "%s becomes as heavy as... well, a Heavy?",
 		"view_as<TFCond>(-4)": "Blood clouds %s's vision...",
 	}, "weird": {
 		# "view_as<TFCond>(-9)": "%s begins testing stuff for the devs", # Will always be [3,1] when active
 		"TFCond_HalloweenGhostMode": "%s is pining for the fjords...",
-		"view_as<TFCond>(-3)": "Chaotic gravity waves surround %s.",
+		# "view_as<TFCond>(-3)": "Chaotic gravity waves surround %s.",
 		"view_as<TFCond>(-5)": "%s goes into a blind rage!!!",
 		"view_as<TFCond>(-6)": "%s roars 'YOU SHALL NOT PASS!'",
 		"TFCond_Bonked": "%s opens a chilled can of a radioactive energy drink.",
