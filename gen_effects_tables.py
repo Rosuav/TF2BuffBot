@@ -77,19 +77,19 @@ effects = {
 notable_kills = {
 	# TODO: Put better names on them
 	"TF_CUSTOM_TAUNT_HADOUKEN": "Taunt kill! Hadouken!",
-	"TF_CUSTOM_FLARE_PELLET": "Taunt kill!",
+	"TF_CUSTOM_FLARE_PELLET": "Taunt kill! [FLARE_PELLET]",
 	"TF_CUSTOM_TAUNT_GRAND_SLAM": "Taunt kill! Knock him out of the park!",
 	"TF_CUSTOM_TAUNT_HIGH_NOON": "Taunt kill! This map ain't big enough for both of us...",
-	"TF_CUSTOM_TAUNT_FENCING": "Taunt kill!",
-	"TF_CUSTOM_TAUNT_GRENADE": "Taunt kill!",
+	"TF_CUSTOM_TAUNT_FENCING": "Taunt kill! [FENCING]",
+	"TF_CUSTOM_TAUNT_GRENADE": "Taunt kill! [GRENADE]",
 	"TF_CUSTOM_TAUNT_ARROW_STAB": "Taunt kill! Schtab schtab schtab!",
-	"TF_CUSTOM_TAUNTATK_GASBLAST": "Taunt kill!",
-	"TF_CUSTOM_TAUNT_BARBARIAN_SWING": "Taunt kill!",
+	"TF_CUSTOM_TAUNTATK_GASBLAST": "Taunt kill! [GASBLAST]",
+	"TF_CUSTOM_TAUNT_BARBARIAN_SWING": "Taunt kill! [BARBARIAN]",
 	"TF_CUSTOM_TAUNT_UBERSLICE": "Taunt kill! Dem bones got sawed through...",
 	"TF_CUSTOM_TAUNT_ENGINEER_SMASH": "Taunt kill! That's one jarring guitar riff...",
-	"TF_CUSTOM_TAUNT_ENGINEER_ARM": "Taunt kill!",
+	"TF_CUSTOM_TAUNT_ENGINEER_ARM": "Taunt kill! You got killed by a lawnmower...",
 	"TF_CUSTOM_TAUNT_ARMAGEDDON": "Taunt kill! Death by rainbows!",
-	"TF_CUSTOM_TAUNT_ALLCLASS_GUITAR_RIFF": "Taunt kill!",
+	"TF_CUSTOM_TAUNT_ALLCLASS_GUITAR_RIFF": "Taunt kill! [GUITAR_RIFF]",
 	# Some non-taunt kills are also worth bonus points
 	"TF_CUSTOM_TELEFRAG": "Telefrag!",
 	"TF_CUSTOM_COMBO_PUNCH": "That's four gunslingers in a row!", # Gunslinger
