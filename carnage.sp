@@ -66,9 +66,8 @@ ConVar sm_ccc_coop_roulette_multiplier = null; //(3) The cost of !roulette is mu
 ConVar sm_ccc_coop_kill_divisor = null; //(4) It takes this many co-op kills to be worth one regular kill. 4:1 is about right (MVM has a lot of targets available).
 ConVar sm_ccc_domheal_amount = null; //(20) Domination building heal hitpoints per tick
 ConVar sm_ccc_domheal_percent = null; //(0) Domination building heal percent of max hp per tick
+ConVar sm_ccc_admin_chat_name = null; //("") Name of admin for chat purposes
 char notable_kills[128][128];
-//TODO: String convars ('//("")' ?)
-//TODO: Remove all reference to my name, and have a cvar instead
 //TODO: Echo commands, where pre-written text gets spammed to chat (eg "Server going down yada yada")
 #include "convars"
 
@@ -220,11 +219,11 @@ public Action Command_Bonkvich(int client, int args)
 
 public Action Command_Chat(int client, int args)
 {
-	char text[512];
-	GetCmdArgString(text, sizeof(text));
-	ReplyToCommand(client, "Rosuav: %s", text);
-	//PrintToChatAll("\x07FE0000Rosuav\x01 :  %s", text); //Chat as if red team
-	PrintToChatAll("\x079ACDFFRosuav\x01 :  %s", text); //Chat as if blue team
+	char text[512]; GetCmdArgString(text, sizeof(text));
+	char admin[32]; GetConVarString(sm_ccc_admin_chat_name, admin, sizeof(admin));
+	ReplyToCommand(client, "%s: %s", admin, text);
+	//PrintToChatAll("\x07FE0000%s\x01 :  %s", admin, text); //Chat as if red team
+	PrintToChatAll("\x079ACDFF%s\x01 :  %s", admin, text); //Chat as if blue team
 	return Plugin_Handled;
 }
 
