@@ -67,6 +67,9 @@ ConVar sm_ccc_coop_kill_divisor = null; //(4) It takes this many co-op kills to 
 ConVar sm_ccc_domheal_amount = null; //(20) Domination building heal hitpoints per tick
 ConVar sm_ccc_domheal_percent = null; //(0) Domination building heal percent of max hp per tick
 char notable_kills[128][128];
+//TODO: String convars ('//("")' ?)
+//TODO: Remove all reference to my name, and have a cvar instead
+//TODO: Echo commands, where pre-written text gets spammed to chat (eg "Server going down yada yada")
 #include "convars"
 
 /* Co-op mode (eg for MVM)
