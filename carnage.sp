@@ -60,7 +60,7 @@ ConVar sm_ccc_crits_on_domination = null; //(5) Number of seconds to crit-boost 
 ConVar sm_ccc_ignite_chance_on_capture = null; //(15) Percentage chance that a point/flag capture will set everyone on fire.
 ConVar sm_ccc_ignite_chance_on_start_capture = null; //(2) Chance that STARTING a point capture will set everyone on fire.
 //For Mann vs Machine, and possibly other situations, co-op mode changes the parameters.
-ConVar sm_ccc_coop_mode = null; //(2) 0=normal, 1=co-op mode, 2=autodetect (if available)
+ConVar sm_ccc_coop_mode = null; //(2) 0=normal, 1=co-op mode, 2=autodetect (by map name)
 ConVar sm_ccc_coop_gift_multiplier = null; //(2) The cost of !gift is multiplied by this.
 ConVar sm_ccc_coop_roulette_multiplier = null; //(3) The cost of !roulette is multiplied by this. Should be higher than the gift multiplier.
 ConVar sm_ccc_coop_kill_divisor = null; //(4) It takes this many co-op kills to be worth one regular kill. 4:1 is about right (MVM has a lot of targets available).
