@@ -1396,6 +1396,7 @@ void blind(int target, int amount)
 Action unblind(Handle timer, any target)
 {
 	if (--blinded[target]) return Plugin_Stop; //Still blinded by something else
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
 	char targetname[MAX_NAME_LENGTH];
 	GetClientName(target, targetname, sizeof(targetname));
 	PrintToChatAll("%s's vision returns to normal.", targetname);
