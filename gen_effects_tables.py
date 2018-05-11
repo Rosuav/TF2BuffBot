@@ -80,7 +80,7 @@ notable_kills = {
 	"TF_CUSTOM_FLARE_PELLET": "Taunt kill! [FLARE_PELLET]",
 	"TF_CUSTOM_TAUNT_GRAND_SLAM": "Taunt kill! Knock him out of the park!",
 	"TF_CUSTOM_TAUNT_HIGH_NOON": "Taunt kill! This map ain't big enough for both of us...",
-	"TF_CUSTOM_TAUNT_FENCING": "Taunt kill! [FENCING]",
+	"TF_CUSTOM_TAUNT_FENCING": "Taunt kill! Someone just got turned into a Cornish game hen.",
 	"TF_CUSTOM_TAUNT_GRENADE": "Taunt kill! [GRENADE]",
 	"TF_CUSTOM_TAUNT_ARROW_STAB": "Taunt kill! Schtab schtab schtab!",
 	"TF_CUSTOM_TAUNTATK_GASBLAST": "Taunt kill! [GASBLAST]",
