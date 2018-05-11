@@ -1133,6 +1133,13 @@ void show_nonglitch(int client)
 		int weap = GetPlayerWeaponSlot(client, slot);
 		if (weap != -1) SetEntityRenderFx(weap, RENDERFX_NONE);
 	}
+	//While you're glitching, you don't fall. Start falling again normally
+	//once you finish a chain. (If you had a low grav or high grav effect,
+	//this will cancel it. Interaction of continuous effects is not *ever*
+	//guaranteed, mainly because I just don't have the tools to make it an
+	//interesting problem to solve.)
+	PrintToChatAll("Resetting gravity.");
+	SetEntityGravity(client, 1.0);
 }
 
 int glitch_status[MAXPLAYERS + 1];
@@ -1156,6 +1163,7 @@ Action appension(Handle timer, any target) //the... Infinite Glitch? Not infinit
 		int chain = RoundToFloor(GetURandomFloat() * 10 + 1);
 		if (chain > 5) chain = 1;
 		glitch_status[target] = -chain;
+		SetEntityGravity(target, 0.0001); //Setting gravity to 0.0 doesn't seem to work
 		CreateTimer(0.333, vanellope, target, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 	}
 	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
