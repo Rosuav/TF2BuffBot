@@ -1138,7 +1138,6 @@ void show_nonglitch(int client)
 	//this will cancel it. Interaction of continuous effects is not *ever*
 	//guaranteed, mainly because I just don't have the tools to make it an
 	//interesting problem to solve.)
-	PrintToChatAll("Resetting gravity.");
 	SetEntityGravity(client, 1.0);
 }
 
