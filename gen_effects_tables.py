@@ -33,7 +33,7 @@ import re
 # course read the source code.
 effects = {
 	"benefits": {
-		"TFCond_UberchargedOnTakeDamage": "%s's Uber driver just arrived",
+		"TFCond_UberchargedOnTakeDamage": "%s's Uber driver just arrived.",
 		# "TFCond_CritOnDamage": "%s is critical of everyone!", # Subsumed into (-8) below
 		"TFCond_CritCola": "%s types IDKFA and downs a can of Cola!",
 		"TFCond_BulletImmune": "%s is bulletprooooooof!",
