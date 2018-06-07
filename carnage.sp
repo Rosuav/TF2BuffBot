@@ -681,6 +681,21 @@ Action returret(Handle timer, any target)
 	return Plugin_Handled;
 }
 
+void GetColoredName(int client, char[] name, int maxlen)
+{
+	int team = GetClientTeam(client);
+	if (team != 2 && team != 3)
+	{
+		//Spectators etc get uncolored names
+		GetClientName(client, name, maxlen);
+		return;
+	}
+	if (team == 2) strcopy(name, maxlen, "\x07FE0000");
+	if (team == 3) strcopy(name, maxlen, "\x079ACDFF");
+	GetClientName(client, name[7], maxlen - 8);
+	StrCat(name, maxlen, "\x01");
+}
+
 void spin_roulette_wheel(int userid)
 {
 	int target = GetClientOfUserId(userid);
@@ -697,8 +712,8 @@ void spin_roulette_wheel(int userid)
 	//Give a random effect to self, more of which are beneficial than not. Also,
 	//there's a small chance of death (since this is Russian Roulette after all).
 	TFCond condition;
-	char targetname[MAX_NAME_LENGTH];
-	GetClientName(target, targetname, sizeof(targetname));
+	char targetname[MAX_NAME_LENGTH + 8];
+	GetColoredName(target, targetname, sizeof(targetname));
 	int prob_good = GetConVarInt(sm_ccc_roulette_chance_good);
 	int prob_bad = GetConVarInt(sm_ccc_roulette_chance_bad);
 	int prob_weird = GetConVarInt(sm_ccc_roulette_chance_weird);
@@ -963,8 +978,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			PrintToChatAll("Gifts for all!");
 			for (int i = 1; i <= MaxClients; ++i) if (IsClientInGame(i) && IsPlayerAlive(i))
 			{
-				char targetname[MAX_NAME_LENGTH];
-				GetClientName(i, targetname, sizeof(targetname));
+				char targetname[MAX_NAME_LENGTH + 8];
+				GetColoredName(i, targetname, sizeof(targetname));
 				int sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
 				PrintToChatAll(benefits_desc[sel], targetname);
 				apply_effect(i, benefits[sel]);
@@ -986,8 +1001,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int client_weight[100]; //Assumes MaxClients never exceeds 99. Dynamic arrays don't seem to work as documented.
 		if (MaxClients >= sizeof(client_weight)) {PrintToServer("oops, >99 clients"); return;}
 		int tot_weight = 0;
-		char selfname[MAX_NAME_LENGTH];
-		GetClientName(self, selfname, sizeof(selfname));
+		char selfname[MAX_NAME_LENGTH + 8];
+		GetColoredName(self, selfname, sizeof(selfname));
 		for (int i = 1; i <= MaxClients; ++i) if (IsClientInGame(i) && IsPlayerAlive(i))
 		{
 			int weight;
@@ -1026,8 +1041,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		{
 			if (sel < client_weight[i])
 			{
-				char targetname[MAX_NAME_LENGTH];
-				GetClientName(i, targetname, sizeof(targetname));
+				char targetname[MAX_NAME_LENGTH + 8];
+				GetColoredName(i, targetname, sizeof(targetname));
 				if (GetClientTeam(i) == myteam)
 					PrintToChatAll("%s offered a random gift, which was gratefully accepted by %s!", selfname, targetname);
 				else
