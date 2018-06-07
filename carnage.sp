@@ -34,7 +34,7 @@ ConVar sm_ccc_carnage_per_upgrade = null; //(0) Carnage points gained by an engi
 //No carnage points are granted for achieving map goals (capturing the flag, taking a control point, moving the
 //payload, etc). Such actions may help you win, but they don't create death and destruction.
 ConVar sm_ccc_carnage_required = null; //(10) Carnage points required to use !roulette or !gift
-ConVar sm_ccc_bot_roulette_chance = null; //(0) Percentage chance that a bot will !roulette upon gaining enough points
+ConVar sm_ccc_bot_roulette_chance = null; //(20) Percentage chance that a bot will !roulette upon gaining enough points
 ConVar sm_ccc_buff_duration = null; //(30) Length of time that each buff/debuff lasts
 //When you spin the !roulette wheel, you have these odds of getting different buff categories.
 //There will always be exactly one chance that you will die, so scale these numbers accordingly.
