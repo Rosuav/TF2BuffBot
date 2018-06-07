@@ -335,13 +335,13 @@ void add_score(int userid, int score, int kill)
 
 void low_add_score(int userid, int score)
 {
-	int client = GetClientOfUserId(userid); client += 0; //TODO: Nuke this whole line if announcements aren't being used (then the +=0 isn't necessary)
-	userid %= sizeof(carnage_points);
-	if (carnage_points[userid] < 0) return; //Turrets don't gain carnage points.
-	int new_score = carnage_points[userid] += score;
+	int slot = userid % sizeof(carnage_points);
+	if (carnage_points[slot] < 0) return; //Turrets don't gain carnage points.
+	int new_score = carnage_points[slot] += score;
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
 	/** Uncomment this to get announcements when you can use the commands
-	int old_score = carnage_points[userid] - score;
+	int client = GetClientOfUserId(userid);
+	int old_score = carnage_points[slot] - score;
 	int roulette = GetConVarInt(sm_ccc_carnage_required);
 	int gift = roulette;
 	if (in_coop_mode())
