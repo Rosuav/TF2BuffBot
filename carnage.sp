@@ -339,8 +339,16 @@ void low_add_score(int userid, int score)
 	if (carnage_points[slot] < 0) return; //Turrets don't gain carnage points.
 	int new_score = carnage_points[slot] += score;
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
-	/** Uncomment this to get announcements when you can use the commands
+
 	int client = GetClientOfUserId(userid);
+	if (IsFakeClient(client) && !in_coop_mode() && new_score >= GetConVarInt(sm_ccc_carnage_required))
+	{
+		//It's a bot (and not an MVM enemy) with enough carnage to pop a roulette.
+		//TODO: Make this probablistic
+		spin_roulette_wheel(userid);
+	}
+	
+	/** Uncomment this to get announcements when you can use the commands
 	int old_score = carnage_points[slot] - score;
 	int roulette = GetConVarInt(sm_ccc_carnage_required);
 	int gift = roulette;
