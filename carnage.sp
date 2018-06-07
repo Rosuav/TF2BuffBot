@@ -671,6 +671,97 @@ Action returret(Handle timer, any target)
 	return Plugin_Handled;
 }
 
+void spin_roulette_wheel(int userid)
+{
+	int target = GetClientOfUserId(userid);
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
+	int slot = userid % sizeof(carnage_points);
+	int req = GetConVarInt(sm_ccc_carnage_required);
+	int coop = in_coop_mode();
+	if (coop) req *= GetConVarInt(sm_ccc_coop_roulette_multiplier) * GetConVarInt(sm_ccc_coop_kill_divisor);
+	if (carnage_points[slot] < req)
+	{
+		PrintToChat(target, "You'll have to wreak more havoc before you can do that, sorry.");
+		return;
+	}
+	//Give a random effect to self, more of which are beneficial than not. Also,
+	//there's a small chance of death (since this is Russian Roulette after all).
+	TFCond condition;
+	char targetname[MAX_NAME_LENGTH];
+	GetClientName(target, targetname, sizeof(targetname));
+	int prob_good = GetConVarInt(sm_ccc_roulette_chance_good);
+	int prob_bad = GetConVarInt(sm_ccc_roulette_chance_bad);
+	int prob_weird = GetConVarInt(sm_ccc_roulette_chance_weird);
+	int category = RoundToFloor((prob_good + prob_bad + prob_weird + 1) * GetURandomFloat());
+	int sel = GetConVarInt(sm_ccc_debug_force_effect);
+	//The below three lines could be collapsed down to a boolean Or, except
+	//that SourcePawn is a hamstrung language.
+	int force = coop; //In co-op mode, force to Good
+	if (!force) force = GetConVarInt(sm_ccc_debug_force_category);
+	switch (force)
+	{
+		case 1: category = 0; //Force to Good
+		case 2: category = prob_good; //Force to Bad
+		case 3: category = prob_good + prob_bad; //Force to Weird
+		case 4: category = prob_good + prob_bad + prob_weird; //Force to death
+	}
+	if ((category -= prob_good) < 0)
+	{
+		if (sel > 0 && sel <= sizeof(benefits)) --sel; //Forced selection (1-based)
+		else sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
+		condition = benefits[sel];
+		PrintToChatAll(benefits_desc[sel], targetname);
+	}
+	else if ((category -= prob_bad) < 0)
+	{
+		if (sel > 0 && sel <= sizeof(detriments)) --sel; //Forced selection (1-based)
+		else sel = RoundToFloor(sizeof(detriments)*GetURandomFloat());
+		condition = detriments[sel];
+		PrintToChatAll(detriments_desc[sel], targetname);
+	}
+	else if ((category -= prob_weird) < 0)
+	{
+		if (sel > 0 && sel <= sizeof(weird)) --sel; //Forced selection (1-based)
+		else sel = RoundToFloor(sizeof(weird)*GetURandomFloat());
+		condition = weird[sel];
+		PrintToChatAll(weird_desc[sel], targetname);
+	}
+	else //One chance of death, always.
+	{
+		//Super-secret super buff: if you would get the death effect
+		//but you had ten times the required carnage points, grant a
+		//Mannpower pickup instead of killing the player.
+		if (carnage_points[slot] > 10 * req)
+		{
+			TFCond runes[] = {
+				TFCond_RuneStrength,
+				TFCond_RuneHaste,
+				TFCond_RuneRegen,
+				TFCond_RuneResist,
+				TFCond_RuneWarlock,
+				TFCond_RunePrecision,
+				TFCond_RuneAgility,
+				TFCond_KingRune,
+			};
+			TFCond rune = runes[RoundToFloor(sizeof(runes)*GetURandomFloat())];
+			TF2_AddCondition(target, rune, TFCondDuration_Infinite, 0);
+			PrintToChatAll("%s now carries something special...", targetname);
+		}
+		else
+		{
+			//Kill the person. Slap! Bam!
+			//TODO: Remove any invulnerabilities first, just in case.
+			PrintToChatAll("%s begs for something amazing...", targetname);
+			SlapPlayer(target, 1000); //1000hp of damage should kill anyone.
+		}
+		carnage_points[slot] = 0;
+		return;
+	}
+
+	apply_effect(target, condition);
+	carnage_points[slot] = 0;
+}
+
 int swap_player = 0;
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 {
@@ -840,96 +931,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		apply_effect(target, detriments[sel]);
 		PrintToChatAll(detriments_desc[sel], targetname);
 	}
-	if (!strcmp(msg, "!roulette"))
-	{
-		int target = GetClientOfUserId(event.GetInt("userid"));
-		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
-		int slot = event.GetInt("userid") % sizeof(carnage_points);
-		int req = GetConVarInt(sm_ccc_carnage_required);
-		int coop = in_coop_mode();
-		if (coop) req *= GetConVarInt(sm_ccc_coop_roulette_multiplier) * GetConVarInt(sm_ccc_coop_kill_divisor);
-		if (carnage_points[slot] < req)
-		{
-			PrintToChat(target, "You'll have to wreak more havoc before you can do that, sorry.");
-			return;
-		}
-		//Give a random effect to self, more of which are beneficial than not. Also,
-		//there's a small chance of death (since this is Russian Roulette after all).
-		TFCond condition;
-		char targetname[MAX_NAME_LENGTH];
-		GetClientName(target, targetname, sizeof(targetname));
-		int prob_good = GetConVarInt(sm_ccc_roulette_chance_good);
-		int prob_bad = GetConVarInt(sm_ccc_roulette_chance_bad);
-		int prob_weird = GetConVarInt(sm_ccc_roulette_chance_weird);
-		int category = RoundToFloor((prob_good + prob_bad + prob_weird + 1) * GetURandomFloat());
-		int sel = GetConVarInt(sm_ccc_debug_force_effect);
-		//The below three lines could be collapsed down to a boolean Or, except
-		//that SourcePawn is a hamstrung language.
-		int force = coop; //In co-op mode, force to Good
-		if (!force) force = GetConVarInt(sm_ccc_debug_force_category);
-		switch (force)
-		{
-			case 1: category = 0; //Force to Good
-			case 2: category = prob_good; //Force to Bad
-			case 3: category = prob_good + prob_bad; //Force to Weird
-			case 4: category = prob_good + prob_bad + prob_weird; //Force to death
-		}
-		if ((category -= prob_good) < 0)
-		{
-			if (sel > 0 && sel <= sizeof(benefits)) --sel; //Forced selection (1-based)
-			else sel = RoundToFloor(sizeof(benefits)*GetURandomFloat());
-			condition = benefits[sel];
-			PrintToChatAll(benefits_desc[sel], targetname);
-		}
-		else if ((category -= prob_bad) < 0)
-		{
-			if (sel > 0 && sel <= sizeof(detriments)) --sel; //Forced selection (1-based)
-			else sel = RoundToFloor(sizeof(detriments)*GetURandomFloat());
-			condition = detriments[sel];
-			PrintToChatAll(detriments_desc[sel], targetname);
-		}
-		else if ((category -= prob_weird) < 0)
-		{
-			if (sel > 0 && sel <= sizeof(weird)) --sel; //Forced selection (1-based)
-			else sel = RoundToFloor(sizeof(weird)*GetURandomFloat());
-			condition = weird[sel];
-			PrintToChatAll(weird_desc[sel], targetname);
-		}
-		else //One chance of death, always.
-		{
-			//Super-secret super buff: if you would get the death effect
-			//but you had ten times the required carnage points, grant a
-			//Mannpower pickup instead of killing the player.
-			if (carnage_points[slot] > 10 * req)
-			{
-				TFCond runes[] = {
-					TFCond_RuneStrength,
-					TFCond_RuneHaste,
-					TFCond_RuneRegen,
-					TFCond_RuneResist,
-					TFCond_RuneWarlock,
-					TFCond_RunePrecision,
-					TFCond_RuneAgility,
-					TFCond_KingRune,
-				};
-				TFCond rune = runes[RoundToFloor(sizeof(runes)*GetURandomFloat())];
-				TF2_AddCondition(target, rune, TFCondDuration_Infinite, 0);
-				PrintToChatAll("%s now carries something special...", targetname);
-			}
-			else
-			{
-				//Kill the person. Slap! Bam!
-				//TODO: Remove any invulnerabilities first, just in case.
-				PrintToChatAll("%s begs for something amazing...", targetname);
-				SlapPlayer(target, 1000); //1000hp of damage should kill anyone.
-			}
-			carnage_points[slot] = 0;
-			return;
-		}
-
-		apply_effect(target, condition);
-		carnage_points[slot] = 0;
-	}
+	if (!strcmp(msg, "!roulette")) spin_roulette_wheel(event.GetInt("userid"));
 	if (!strcmp(msg, "!milk") && event.GetInt("userid") == bonkvich_userid)
 	{
 		PrintToChatAll("The clouds unleash life-giving rain...");
