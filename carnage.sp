@@ -34,6 +34,7 @@ ConVar sm_ccc_carnage_per_upgrade = null; //(0) Carnage points gained by an engi
 //No carnage points are granted for achieving map goals (capturing the flag, taking a control point, moving the
 //payload, etc). Such actions may help you win, but they don't create death and destruction.
 ConVar sm_ccc_carnage_required = null; //(10) Carnage points required to use !roulette or !gift
+ConVar sm_ccc_bot_roulette_chance = null; //(0) Percentage chance that a bot will !roulette upon gaining enough points
 ConVar sm_ccc_buff_duration = null; //(30) Length of time that each buff/debuff lasts
 //When you spin the !roulette wheel, you have these odds of getting different buff categories.
 //There will always be exactly one chance that you will die, so scale these numbers accordingly.
@@ -341,12 +342,12 @@ void low_add_score(int userid, int score)
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
 
 	int client = GetClientOfUserId(userid);
-	if (IsFakeClient(client) && IsPlayerAlive(target) && !in_coop_mode()
+	if (IsFakeClient(client) && IsPlayerAlive(client) && !in_coop_mode()
 		&& new_score >= GetConVarInt(sm_ccc_carnage_required))
 	{
 		//It's a bot (and not an MVM enemy) with enough carnage to pop a roulette.
-		//TODO: Make this probablistic
-		spin_roulette_wheel(userid);
+		if (100 * GetURandomFloat() < GetConVarInt(sm_ccc_bot_roulette_chance))
+			spin_roulette_wheel(userid);
 	}
 	
 	/** Uncomment this to get announcements when you can use the commands
