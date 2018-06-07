@@ -690,7 +690,7 @@ void GetColoredName(int client, char[] name, int maxlen)
 		GetClientName(client, name, maxlen);
 		return;
 	}
-	if (team == 2) strcopy(name, maxlen, "\x07FE0000");
+	if (team == 2) strcopy(name, maxlen, "\x07FF4646");
 	if (team == 3) strcopy(name, maxlen, "\x079ACDFF");
 	GetClientName(client, name[7], maxlen - 8);
 	StrCat(name, maxlen, "\x01");

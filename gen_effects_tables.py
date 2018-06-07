@@ -107,7 +107,12 @@ with open("randeffects.inc", "w") as f:
 		print("};", file=f)
 		print("char %s_desc[][] = {" % name, file=f)
 		for desc in options.values(): # Will iterate in the same order as options above
-			print("\t%s," % json.dumps(desc), file=f)
+			# Color codes work only if there's a color code right at the start of the
+			# message. For something that starts "%s", that's fine, but for others,
+			# toss in a null color code just to make color codes work. Thaaaaanks.
+			desc = json.dumps(desc)
+			if not desc.startswith('"%s'): desc = r'"\x079ACDFF\x01' + desc[1:]
+			print("\t%s," % desc, file=f)
 		print("};\n", file=f)
 
 with open("carnage.sp") as source, open("convars.inc", "w") as cv:
