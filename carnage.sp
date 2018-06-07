@@ -341,7 +341,8 @@ void low_add_score(int userid, int score)
 	Debug("Score: uid %d +%d now %d points", userid, score, new_score);
 
 	int client = GetClientOfUserId(userid);
-	if (IsFakeClient(client) && !in_coop_mode() && new_score >= GetConVarInt(sm_ccc_carnage_required))
+	if (IsFakeClient(client) && IsPlayerAlive(target) && !in_coop_mode()
+		&& new_score >= GetConVarInt(sm_ccc_carnage_required))
 	{
 		//It's a bot (and not an MVM enemy) with enough carnage to pop a roulette.
 		//TODO: Make this probablistic
