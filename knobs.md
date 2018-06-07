@@ -63,6 +63,12 @@ reasonable to take the buff bot for a spin without changing any of these.
   second, all buildings within 450HU of the medic will gain *_amount hitpoints
   and *_percent of their max hitpoints. Recommend using one or the other, not
   both, as it would be potentially confusing (though it will work correctly).
+* sm_ccc_bot_roulette_chance: 20% by default. Since humans are notoriously bad
+  at noticing when they can pop !roulette but bots can perfectly track their
+  points, it's unfair to have the bots automatically roulette the instant they
+  can. Every time a bot gains points, it has this chance of popping a roulette
+  (if it doesn't, it keeps the points for next time). Setting this to 0 will
+  prevent bots from using the roulette wheel at all.
 
 Note that using !roulette or !gift will always consume ALL of your carnage
 points (unless you don't have enough). Having triple the required points does
