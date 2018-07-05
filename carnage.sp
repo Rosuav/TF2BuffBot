@@ -230,10 +230,11 @@ public Action Command_Chat(int client, int args)
 }
 
 int ragebox_userid = 0;
+int ragebox_lastteam;
 void set_ragebox(int userid)
 {
 	//Remove rage from the current ragebox holder (if any)
-	if (ragebox_userid)
+	if (ragebox_userid > 0)
 	{
 		int target = GetClientOfUserId(ragebox_userid);
 		TF2_RemoveCondition(target, TFCond_CritOnDamage);
@@ -241,12 +242,37 @@ void set_ragebox(int userid)
 	}
 	ragebox_userid = userid;
 	//Add rage to the new ragebox holder (if any - set_ragebox(0) will remove all)
-	if (ragebox_userid)
+	//Setting to -1 means "remember the team, but nobody actually has it".
+	if (ragebox_userid > 0)
 	{
 		int target = GetClientOfUserId(ragebox_userid);
+		//Record the team on arrival, in case you change teams (it belonged to your previous team)
+		ragebox_lastteam = GetClientTeam(target);
 		TF2_AddCondition(target, TFCond_CritOnDamage, TFCondDuration_Infinite, 0);
 		blind(target, 192);
 	}
+}
+
+void randomize_ragebox(int nonrecip)
+{
+	//Randomly assign the rage box to a living member of the last team that got it
+	//If there are no such members, leave the box with its current holder (even if dead).
+	//TODO: On spawn, if you have rage, reapply effects.
+	int recip = 0, count = 0;
+	for (int i = 1; i <= MaxClients; ++i)
+		if (i != nonrecip && IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == ragebox_lastteam)
+			if (GetURandomFloat() * ++count < 1) recip = i;
+	if (!recip)
+	{
+		if (ragebox_userid != -1) PrintToChatAll("The Rage Box floats in limbo. Help it find a new host...");
+		set_ragebox(-1);
+		return;
+	}
+	char name[MAX_NAME_LENGTH];
+	GetClientName(recip, name, sizeof(name));
+	set_ragebox(GetClientUserId(recip));
+	PrintToChatAll("The Rage Box is collected by %s.", name);
+	return;
 }
 
 public Action Command_RageBox(int client, int args)
@@ -487,6 +513,7 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	int player = GetClientOfUserId(event.GetInt("userid"));
 	char playername[MAX_NAME_LENGTH]; GetClientName(player, playername, sizeof(playername));
 	SetEntityGravity(player, 1.0); //Just in case.
+	if (ragebox_userid == -1) randomize_ragebox(0); //When the box is in limbo, people can re-claim it by scoring a kill, sometimes.
 
 	//This is the name of a pyrovision-only "assisted by", such as a Pocket Yeti
 	//char fallback[64]; event.GetString("assister_fallback", fallback, sizeof(fallback));
@@ -512,8 +539,7 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		//award no points. And to maximize the humiliation, we'll announce
 		//this to everyone in chat. Muahahaha.
 		PrintToChatAll("%s is awarded no points for self-destruction. May God have mercy on your soul.", playername);
-		if (event.GetInt("userid") == ragebox_userid)
-			set_ragebox(0); //Suicide destroys the rage box. (Should it be reassigned randomly?)
+		if (event.GetInt("userid") == ragebox_userid) randomize_ragebox(player);
 		return;
 	}
 	if (event.GetInt("userid") == event.GetInt("assister"))
@@ -532,13 +558,13 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	{
 		int recipient = event.GetInt("attacker");
 		int target = GetClientOfUserId(recipient);
-		if (target && IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target))
+		if (target && IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target) && !in_coop_mode())
 		{
 			char recipname[MAX_NAME_LENGTH]; GetClientName(target, recipname, sizeof(recipname));
 			PrintToChatAll("The Rage Box has been conquered by %s!", recipname);
 			set_ragebox(recipient);
 		}
-		else set_ragebox(0);
+		else randomize_ragebox(player);
 	}
 	if (event.GetInt("assister") == -1)
 	{
