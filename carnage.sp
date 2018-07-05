@@ -229,6 +229,15 @@ public Action Command_Chat(int client, int args)
 }
 
 int ragebox_userid = 0;
+void set_ragebox(int userid)
+{
+	//Remove rage from the current ragebox holder (if any)
+	if (ragebox_userid) remove_hysteria(GetClientOfUserId(ragebox_userid));
+	ragebox_userid = userid;
+	//Add rage to the new ragebox holder (if any - set_ragebox(0) will remove all)
+	if (ragebox_userid) add_hysteria(GetClientOfUserId(ragebox_userid), 224);
+}
+
 public Action Command_RageBox(int client, int args)
 {
 	char player[32];
@@ -237,16 +246,13 @@ public Action Command_RageBox(int client, int args)
 	if (target == -1) {
 		if (ragebox_userid) {
 			PrintToChatAll("The Rage Box departs for another world.");
-			remove_hysteria(ragebox_userid);
-			ragebox_userid = 0;
+			set_ragebox(0);
 		}
 		return Plugin_Handled;
 	}
 	char name[MAX_NAME_LENGTH];
 	GetClientName(target, name, sizeof(name));
-	int userid = GetClientUserId(target);
-	ragebox_userid = userid;
-	add_hysteria(target, 224);
+	set_ragebox(GetClientUserId(target));
 	PrintToChatAll("A Rage Box has entered the game! %s holds it.", name);
 	return Plugin_Handled;
 }
@@ -483,7 +489,7 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		//this to everyone in chat. Muahahaha.
 		PrintToChatAll("%s is awarded no points for self-destruction. May God have mercy on your soul.", playername);
 		if (event.GetInt("userid") == ragebox_userid)
-			ragebox_userid = 0; //Suicide destroys the rage box. (Should it be reassigned randomly?)
+			set_ragebox(0); //Suicide destroys the rage box. (Should it be reassigned randomly?)
 		return;
 	}
 	if (event.GetInt("userid") == event.GetInt("assister"))
@@ -500,17 +506,15 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 		playername, event.GetInt("userid"), event.GetInt("attacker"), event.GetInt("assister"));
 	if (event.GetInt("userid") == ragebox_userid)
 	{
-		ragebox_userid = 0;
 		int recipient = event.GetInt("attacker");
 		int target = GetClientOfUserId(recipient);
 		if (target && IsClientConnected(target) && IsClientInGame(target) && IsPlayerAlive(target))
 		{
 			char recipname[MAX_NAME_LENGTH]; GetClientName(target, recipname, sizeof(recipname));
 			PrintToChatAll("The Rage Box has been conquered by %s!", recipname);
-			ragebox_userid = recipient;
-			add_hysteria(target, 224);
-			remove_hysteria(player); //In case it's a Dead Ringer or something
+			set_ragebox(recipient);
 		}
+		else set_ragebox(0);
 	}
 	if (event.GetInt("assister") == -1)
 	{
