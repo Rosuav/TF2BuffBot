@@ -1,4 +1,5 @@
 #include <sourcemod>
+#include <sdkhooks>
 #include <tf2_stocks>
 
 #pragma newdecls required
@@ -231,18 +232,11 @@ public Action Command_Chat(int client, int args)
 int ragebox_userid = 0;
 void set_ragebox(int userid)
 {
-	TFCond effects[] = {
-		TFCond_CritOnDamage,
-		TFCond_UberBulletResist,
-		TFCond_UberBlastResist,
-		TFCond_UberFireResist,
-	};
 	//Remove rage from the current ragebox holder (if any)
 	if (ragebox_userid)
 	{
 		int target = GetClientOfUserId(ragebox_userid);
-		for (int i = 0; i < sizeof(effects); ++i)
-			TF2_RemoveCondition(target, effects[i]);
+		TF2_RemoveCondition(target, TFCond_CritOnDamage);
 		blind(target, 0);
 	}
 	ragebox_userid = userid;
@@ -250,8 +244,7 @@ void set_ragebox(int userid)
 	if (ragebox_userid)
 	{
 		int target = GetClientOfUserId(ragebox_userid);
-		for (int i = 0; i < sizeof(effects); ++i)
-			TF2_AddCondition(target, effects[i], TFCondDuration_Infinite, 0);
+		TF2_AddCondition(target, TFCond_CritOnDamage, TFCondDuration_Infinite, 0);
 		blind(target, 192);
 	}
 }
@@ -273,6 +266,19 @@ public Action Command_RageBox(int client, int args)
 	set_ragebox(GetClientUserId(target));
 	PrintToChatAll("A Rage Box has entered the game! %s holds it.", name);
 	return Plugin_Handled;
+}
+
+public void OnClientPutInServer(int client)
+{
+	SDKHook(client, SDKHook_OnTakeDamage, PlayerTookDamage);
+}
+public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
+{
+	Debug("Player %d took %f damage (t %d a %d i %d)", victim, damage, damagetype, attacker, inflictor);
+	if (GetClientUserId(victim) != ragebox_userid || !attacker) return Plugin_Continue;
+	if (damage > 4.0) damage /= 4.0;
+	Debug("Damage reduced to %f", damage);
+	return Plugin_Changed;
 }
 
 public Action Command_Effects(int client, int args)
