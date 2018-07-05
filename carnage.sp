@@ -228,7 +228,7 @@ public Action Command_Chat(int client, int args)
 	return Plugin_Handled;
 }
 
-int ragebox_userid = -1;
+int ragebox_userid = 0;
 public Action Command_RageBox(int client, int args)
 {
 	char player[32];
