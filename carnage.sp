@@ -231,11 +231,29 @@ public Action Command_Chat(int client, int args)
 int ragebox_userid = 0;
 void set_ragebox(int userid)
 {
+	TFCond effects[] = {
+		TFCond_CritOnDamage,
+		TFCond_UberBulletResist,
+		TFCond_UberBlastResist,
+		TFCond_UberFireResist,
+	};
 	//Remove rage from the current ragebox holder (if any)
-	if (ragebox_userid) remove_hysteria(GetClientOfUserId(ragebox_userid));
+	if (ragebox_userid)
+	{
+		int target = GetClientOfUserId(ragebox_userid);
+		for (int i = 0; i < sizeof(effects); ++i)
+			TF2_RemoveCondition(target, effects[i]);
+		blind(target, 0);
+	}
 	ragebox_userid = userid;
 	//Add rage to the new ragebox holder (if any - set_ragebox(0) will remove all)
-	if (ragebox_userid) add_hysteria(GetClientOfUserId(ragebox_userid), 224);
+	if (ragebox_userid)
+	{
+		int target = GetClientOfUserId(ragebox_userid);
+		for (int i = 0; i < sizeof(effects); ++i)
+			TF2_AddCondition(target, effects[i], TFCondDuration_Infinite, 0);
+		blind(target, 192);
+	}
 }
 
 public Action Command_RageBox(int client, int args)
