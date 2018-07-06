@@ -264,6 +264,8 @@ void randomize_ragebox(int nonrecip)
 			if (GetURandomFloat() * ++count < 1) recip = i;
 	if (!recip)
 	{
+		//With the RB in limbo, we'll be called periodically to rerandomize.
+		//Eventually it'll succeed... hopefully.
 		if (ragebox_userid != -1) PrintToChatAll("The Rage Box floats in limbo. Help it find a new host...");
 		set_ragebox(-1);
 		return;
