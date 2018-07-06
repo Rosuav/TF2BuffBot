@@ -234,11 +234,14 @@ int ragebox_lastteam;
 void set_ragebox(int userid)
 {
 	//Remove rage from the current ragebox holder (if any)
-	if (ragebox_userid > 0)
+	if (ragebox_userid > 0 && ragebox_userid != userid)
 	{
 		int target = GetClientOfUserId(ragebox_userid);
-		TF2_RemoveCondition(target, TFCond_CritOnDamage);
-		blind(target, 0);
+		if (target)
+		{
+			TF2_RemoveCondition(target, TFCond_CritOnDamage);
+			blind(target, 0);
+		}
 	}
 	ragebox_userid = userid;
 	//Add rage to the new ragebox holder (if any - set_ragebox(0) will remove all)
@@ -304,8 +307,8 @@ public void OnClientPutInServer(int client)
 public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
 {
 	Debug("Player %d took %f damage (t %d a %d i %d)", victim, damage, damagetype, attacker, inflictor);
-	if (GetClientUserId(victim) != ragebox_userid || !attacker) return Plugin_Continue;
-	if (damage > 4.0) damage /= 4.0;
+	if (GetClientUserId(victim) != ragebox_userid || !attacker || attacker == victim) return Plugin_Continue;
+	if (damage > 2.0) damage /= 2.0;
 	Debug("Damage reduced to %f", damage);
 	return Plugin_Changed;
 }
@@ -516,7 +519,10 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	int player = GetClientOfUserId(event.GetInt("userid"));
 	char playername[MAX_NAME_LENGTH]; GetClientName(player, playername, sizeof(playername));
 	SetEntityGravity(player, 1.0); //Just in case.
-	if (ragebox_userid == -1) randomize_ragebox(0); //When the box is in limbo, people can re-claim it by scoring a kill, sometimes.
+
+	//When the box is in limbo, people can re-claim it by scoring a kill, sometimes.
+	if (ragebox_userid == -1 || !GetClientOfUserId(ragebox_userid)) {ragebox_userid = -1; randomize_ragebox(player);}
+	else if (ragebox_userid > 0) set_ragebox(ragebox_userid);
 
 	//This is the name of a pyrovision-only "assisted by", such as a Pocket Yeti
 	//char fallback[64]; event.GetString("assister_fallback", fallback, sizeof(fallback));
