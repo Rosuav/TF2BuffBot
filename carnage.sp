@@ -260,11 +260,10 @@ void randomize_ragebox(int nonrecip)
 {
 	//Randomly assign the rage box to a living member of the last team that got it
 	//If there are no such members, leave the box with its current holder (even if dead).
-	//TODO: On spawn, if you have rage, reapply effects.
 	//int recip = random.choice([client for client in clients if yada yada])
-	int recip = 0, count = 0;
+	int recip = 0, count = 0, coop = in_coop_mode();
 	for (int i = 1; i <= MaxClients; ++i)
-		if (i != nonrecip && IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == ragebox_lastteam)
+		if (i != nonrecip && IsClientInGame(i) && IsPlayerAlive(i) && (!coop || GetClientTeam(i) == ragebox_lastteam))
 			if (GetURandomFloat() * ++count < 1) recip = i;
 	if (!recip)
 	{
@@ -303,14 +302,78 @@ public Action Command_RageBox(int client, int args)
 public void OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_OnTakeDamage, PlayerTookDamage);
+	//SDKHook(client, SDKHook_GetMaxHealth, maxhealthcheck);
+	SDKHook(client, SDKHook_SpawnPost, respawncheck);
+}
+public Action maxhealthcheck(int entity, int &maxhealth)
+{
+	/* TODO: Redefine the Bonkvich such that, for its duration, your
+	max health is increased. (And also insta-heal you.) Then, when it
+	expires, it'll quietly stop adjusting, so you revert to normal max
+	health, and any extra health will become overheal. */
+	if (entity > MaxClients || GetClientUserId(entity) != ragebox_userid) return Plugin_Continue;
+	maxhealth *= 10;
+	return Plugin_Changed;
 }
 public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
 {
-	Debug("Player %d took %f damage (t %d a %d i %d)", victim, damage, damagetype, attacker, inflictor);
+	/* TODO: If the ragebox is held by a medic, and that medic is healing the attacker,
+	add to the damage. Possibly also replace the crits effect with a damage bonus, so
+	the two forms are done the same way.
+
+	index = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if(GetEntProp(index, Prop_Send, "m_bHealing") == 1)
+	{
+		return GetEntPropEnt(index, Prop_Send, "m_hHealingTarget");
+	}
+
+	TODO: If attacker has the ragebox, but the inflictor isn't the attacker, it might
+	be an engie with a sentry, so add more damage.
+	*/
+	#if 0
+	PrintToChatAll("Player %d took %f damage (t %d a %d i %d)", victim, damage, damagetype, attacker, inflictor);
+	if (damagetype&DMG_CRUSH) PrintToChatAll("--> DMG_CRUSH: crushed by falling or moving object.");
+	if (damagetype&DMG_BULLET) PrintToChatAll("--> DMG_BULLET: shot");
+	if (damagetype&DMG_SLASH) PrintToChatAll("--> DMG_SLASH: cut, clawed, stabbed");
+	if (damagetype&DMG_BURN) PrintToChatAll("--> DMG_BURN: heat burned");
+	if (damagetype&DMG_VEHICLE) PrintToChatAll("--> DMG_VEHICLE: hit by a vehicle");
+	if (damagetype&DMG_FALL) PrintToChatAll("--> DMG_FALL: fell too far");
+	if (damagetype&DMG_BLAST) PrintToChatAll("--> DMG_BLAST: explosive blast damage");
+	if (damagetype&DMG_CLUB) PrintToChatAll("--> DMG_CLUB: crowbar, punch, headbutt");
+	if (damagetype&DMG_SHOCK) PrintToChatAll("--> DMG_SHOCK: electric shock");
+	if (damagetype&DMG_SONIC) PrintToChatAll("--> DMG_SONIC: sound pulse shockwave");
+	if (damagetype&DMG_ENERGYBEAM) PrintToChatAll("--> DMG_ENERGYBEAM: laser or other high energy beam ");
+	if (damagetype&DMG_PREVENT_PHYSICS_FORCE) PrintToChatAll("--> DMG_PREVENT_PHYSICS_FORCE: Prevent a physics force ");
+	if (damagetype&DMG_NEVERGIB) PrintToChatAll("--> DMG_NEVERGIB: with this bit OR'd in, no damage type will be able to gib victims upon death");
+	if (damagetype&DMG_ALWAYSGIB) PrintToChatAll("--> DMG_ALWAYSGIB: with this bit OR'd in, any damage type can be made to gib victims upon death.");
+	if (damagetype&DMG_DROWN) PrintToChatAll("--> DMG_DROWN: Drowning");
+	if (damagetype&DMG_PARALYZE) PrintToChatAll("--> DMG_PARALYZE: slows affected creature down");
+	if (damagetype&DMG_NERVEGAS) PrintToChatAll("--> DMG_NERVEGAS: nerve toxins, very bad");
+	if (damagetype&DMG_POISON) PrintToChatAll("--> DMG_POISON: blood poisoning - heals over time like drowning damage");
+	if (damagetype&DMG_RADIATION) PrintToChatAll("--> DMG_RADIATION: radiation exposure");
+	if (damagetype&DMG_DROWNRECOVER) PrintToChatAll("--> DMG_DROWNRECOVER: drowning recovery");
+	if (damagetype&DMG_ACID) PrintToChatAll("--> DMG_ACID: toxic chemicals or acid burns");
+	if (damagetype&DMG_SLOWBURN) PrintToChatAll("--> DMG_SLOWBURN: in an oven");
+	if (damagetype&DMG_REMOVENORAGDOLL) PrintToChatAll("--> DMG_REMOVENORAGDOLL: with this bit OR'd in, no ragdoll will be created, and the target will be quietly removed.");
+	if (damagetype&DMG_PHYSGUN) PrintToChatAll("--> DMG_PHYSGUN: Hit by manipulator. Usually doesn't do any damage.");
+	if (damagetype&DMG_PLASMA) PrintToChatAll("--> DMG_PLASMA: Shot by Cremator");
+	if (damagetype&DMG_AIRBOAT) PrintToChatAll("--> DMG_AIRBOAT: Hit by the airboat's gun");
+	if (damagetype&DMG_DISSOLVE) PrintToChatAll("--> DMG_DISSOLVE: Dissolving!");
+	if (damagetype&DMG_BLAST_SURFACE) PrintToChatAll("--> DMG_BLAST_SURFACE: A blast on the surface of water that cannot harm things underwater");
+	if (damagetype&DMG_DIRECT) PrintToChatAll("--> DMG_DIRECT: ??");
+	if (damagetype&DMG_BUCKSHOT) PrintToChatAll("--> DMG_BUCKSHOT: not quite a bullet. Little, rounder, different.");
+	#endif
 	if (GetClientUserId(victim) != ragebox_userid || !attacker || attacker == victim) return Plugin_Continue;
 	if (damage > 2.0) damage /= 2.0;
 	Debug("Damage reduced to %f", damage);
 	return Plugin_Changed;
+}
+
+public void respawncheck(int entity)
+{
+	PrintToChatAll("Respawn check: entity %d", entity);
+	if (entity <= MaxClients && GetClientUserId(entity) == ragebox_userid) set_ragebox(ragebox_userid);
+	if (ragebox_userid == -1) randomize_ragebox(0);
 }
 
 public Action Command_Effects(int client, int args)
