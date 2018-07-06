@@ -258,6 +258,7 @@ void randomize_ragebox(int nonrecip)
 	//Randomly assign the rage box to a living member of the last team that got it
 	//If there are no such members, leave the box with its current holder (even if dead).
 	//TODO: On spawn, if you have rage, reapply effects.
+	//int recip = random.choice([client for client in clients if yada yada])
 	int recip = 0, count = 0;
 	for (int i = 1; i <= MaxClients; ++i)
 		if (i != nonrecip && IsClientInGame(i) && IsPlayerAlive(i) && GetClientTeam(i) == ragebox_lastteam)
