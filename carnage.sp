@@ -584,8 +584,11 @@ public void PlayerDied(Event event, const char[] name, bool dontBroadcast)
 	SetEntityGravity(player, 1.0); //Just in case.
 
 	//When the box is in limbo, people can re-claim it by scoring a kill, sometimes.
-	if (ragebox_userid == -1 || !GetClientOfUserId(ragebox_userid)) {ragebox_userid = -1; randomize_ragebox(player);}
-	else if (ragebox_userid > 0) set_ragebox(ragebox_userid);
+	if (ragebox_userid)
+	{
+		if (ragebox_userid == -1 || !GetClientOfUserId(ragebox_userid)) {ragebox_userid = -1; randomize_ragebox(player);}
+		else set_ragebox(ragebox_userid);
+	}
 
 	//This is the name of a pyrovision-only "assisted by", such as a Pocket Yeti
 	//char fallback[64]; event.GetString("assister_fallback", fallback, sizeof(fallback));
