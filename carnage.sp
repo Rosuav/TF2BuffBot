@@ -241,6 +241,7 @@ void set_ragebox(int userid)
 		{
 			TF2_RemoveCondition(target, TFCond_CritOnDamage);
 			blind(target, 0);
+			SetEntityRenderColor(target, 255, 255, 255, 255);
 		}
 	}
 	ragebox_userid = userid;
@@ -253,6 +254,7 @@ void set_ragebox(int userid)
 		ragebox_lastteam = GetClientTeam(target);
 		TF2_AddCondition(target, TFCond_CritOnDamage, TFCondDuration_Infinite, 0);
 		blind(target, 192);
+		SetEntityRenderColor(target, 255, 32, 32, 255);
 	}
 }
 
@@ -371,7 +373,6 @@ public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float 
 
 public void respawncheck(int entity)
 {
-	PrintToChatAll("Respawn check: entity %d", entity);
 	if (entity <= MaxClients && GetClientUserId(entity) == ragebox_userid) set_ragebox(ragebox_userid);
 	if (ragebox_userid == -1) randomize_ragebox(0);
 }
