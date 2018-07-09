@@ -239,7 +239,6 @@ void set_ragebox(int userid)
 		int target = GetClientOfUserId(ragebox_userid);
 		if (target)
 		{
-			TF2_RemoveCondition(target, TFCond_CritOnDamage);
 			blind(target, 0);
 			SetEntityRenderColor(target, 255, 255, 255, 255);
 		}
@@ -252,7 +251,6 @@ void set_ragebox(int userid)
 		int target = GetClientOfUserId(ragebox_userid);
 		//Record the team on arrival, in case you change teams (it belonged to your previous team)
 		ragebox_lastteam = GetClientTeam(target);
-		TF2_AddCondition(target, TFCond_CritOnDamage, TFCondDuration_Infinite, 0);
 		blind(target, 192);
 		SetEntityRenderColor(target, 255, 32, 32, 255);
 	}
@@ -304,7 +302,7 @@ public Action Command_RageBox(int client, int args)
 public void OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_OnTakeDamage, PlayerTookDamage);
-	//SDKHook(client, SDKHook_GetMaxHealth, maxhealthcheck);
+	SDKHook(client, SDKHook_GetMaxHealth, maxhealthcheck);
 	SDKHook(client, SDKHook_SpawnPost, respawncheck);
 }
 public Action maxhealthcheck(int entity, int &maxhealth)
@@ -314,24 +312,11 @@ public Action maxhealthcheck(int entity, int &maxhealth)
 	expires, it'll quietly stop adjusting, so you revert to normal max
 	health, and any extra health will become overheal. */
 	if (entity > MaxClients || GetClientUserId(entity) != ragebox_userid) return Plugin_Continue;
-	maxhealth *= 10;
+	maxhealth += maxhealth / 2;
 	return Plugin_Changed;
 }
 public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
 {
-	/* TODO: If the ragebox is held by a medic, and that medic is healing the attacker,
-	add to the damage. Possibly also replace the crits effect with a damage bonus, so
-	the two forms are done the same way.
-
-	index = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-	if(GetEntProp(index, Prop_Send, "m_bHealing") == 1)
-	{
-		return GetEntPropEnt(index, Prop_Send, "m_hHealingTarget");
-	}
-
-	TODO: If attacker has the ragebox, but the inflictor isn't the attacker, it might
-	be an engie with a sentry, so add more damage.
-	*/
 	#if 0
 	PrintToChatAll("Player %d took %f damage (t %d a %d i %d)", victim, damage, damagetype, attacker, inflictor);
 	if (damagetype&DMG_CRUSH) PrintToChatAll("--> DMG_CRUSH: crushed by falling or moving object.");
@@ -365,10 +350,39 @@ public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float 
 	if (damagetype&DMG_DIRECT) PrintToChatAll("--> DMG_DIRECT: ??");
 	if (damagetype&DMG_BUCKSHOT) PrintToChatAll("--> DMG_BUCKSHOT: not quite a bullet. Little, rounder, different.");
 	#endif
-	if (GetClientUserId(victim) != ragebox_userid || !attacker || attacker == victim) return Plugin_Continue;
-	if (damage > 2.0) damage /= 2.0;
-	Debug("Damage reduced to %f", damage);
-	return Plugin_Changed;
+	if (ragebox_userid <= 0) return Plugin_Continue;
+	int ragebox_holder = GetClientOfUserId(ragebox_userid);
+	if (ragebox_holder == victim)
+	{
+		if (attacker == victim) return Plugin_Continue; //Self-damage isn't affected (to permit blast jumping)
+		if (!attacker) return Plugin_Continue; //Environmental damage isn't affected (falling to your death still kills you)
+		Debug("Hurting the ragebox holder; 25%% damage reduction");
+		damage *= 0.75;
+		return Plugin_Changed;
+	}
+	if (TF2_GetPlayerClass(ragebox_holder) == TFClass_Medic)
+	{
+		int index = GetEntPropEnt(ragebox_holder, Prop_Send, "m_hActiveWeapon");
+		char cls[32]; GetEdictClassname(index, cls, sizeof(cls));
+		if (!strcmp(cls, "tf_weapon_medigun") && GetEntProp(index, Prop_Send, "m_bHealing") == 1)
+		{
+			int patient = GetEntPropEnt(index, Prop_Send, "m_hHealingTarget");
+			char patientname[MAX_NAME_LENGTH];
+			GetClientName(patient, patientname, sizeof(patientname));
+			char medicname[MAX_NAME_LENGTH];
+			GetClientName(ragebox_holder, medicname, sizeof(medicname));
+			Debug("Medic %s is healing %s", medicname, patientname);
+			ragebox_holder = patient; //Pass the damage bonus (but not the reduction to incoming damage) to the patient
+		}
+		else return Plugin_Continue; //Medics cannot get damage buffed at all.
+	}
+	if (ragebox_holder == attacker)
+	{
+		Debug("Ragebox holder dealing damage; 100%% damage bonus");
+		damage *= 2.0;
+		return Plugin_Changed;
+	}
+	return Plugin_Continue;
 }
 
 public void respawncheck(int entity)
