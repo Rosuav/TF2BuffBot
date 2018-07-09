@@ -90,6 +90,12 @@ the sm_ccc_coop_mode cvar (0=disable, 1=enable, 2=autodetect). In co-op mode,
 carnage points are gained by the entire team, and spent individually. Explore
 the source code for more details.
 
+### Market Gardening mode
+
+Set sm_ccc_market_gardening to 1 and everyone is restricted to market garden
+techniques. All damage is negated unless it is self-damage or environmental,
+or it is melee damage from someone who is blast jumping.
+
 
 Bot Control
 -----------

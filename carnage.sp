@@ -69,6 +69,7 @@ ConVar sm_ccc_coop_kill_divisor = null; //(4) It takes this many co-op kills to 
 ConVar sm_ccc_domheal_amount = null; //(20) Domination building heal hitpoints per tick
 ConVar sm_ccc_domheal_percent = null; //(0) Domination building heal percent of max hp per tick
 ConVar sm_ccc_admin_chat_name = null; //("") Name of admin for chat purposes
+ConVar sm_ccc_market_gardening = null; //(0) If 1, we're market gardening all the way!
 char notable_kills[128][128];
 //TODO: Echo commands, where pre-written text gets spammed to chat (eg "Server going down yada yada")
 #include "convars"
@@ -317,6 +318,24 @@ public Action maxhealthcheck(int entity, int &maxhealth)
 }
 public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
 {
+	if (GetConVarInt(sm_ccc_market_gardening)) //Market Gardening mode
+	{
+		if (damagetype&DMG_FALL) {damage = 0.0; return Plugin_Changed;} //Disable all fall damage
+		if (attacker == victim) return Plugin_Continue; //Permit all blast jumping
+		if (!attacker) return Plugin_Continue; //Permit all environmental damage (drowning etc)
+		if (!TF2_IsPlayerInCondition(attacker, TFCond_BlastJumping))
+		{
+			damage = 0.0;
+			PrintToChatAll("Damage negated! You weren't blast jumping.");
+			return Plugin_Changed;
+		}
+		if (!(damagetype&DMG_CLUB))
+		{
+			damage = 0.0;
+			PrintToChatAll("Damage negated! Melee only.");
+			return Plugin_Changed;
+		}
+	}
 	#if 0
 	PrintToChatAll("Player %d took %f damage (t %d a %d i %d)", victim, damage, damagetype, attacker, inflictor);
 	if (damagetype&DMG_CRUSH) PrintToChatAll("--> DMG_CRUSH: crushed by falling or moving object.");
@@ -1587,12 +1606,24 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 {
 	Debug("%d added cond %d", client, cond);
 	if (cond == TFCond_Plague) SetEntityRenderColor(client, 148, 178, 28, 255);
+	/*if (cond == TFCond_BlastJumping)
+	{
+		char targetname[MAX_NAME_LENGTH];
+		GetClientName(client, targetname, sizeof(targetname));
+		PrintToChatAll("%s is now blast jumping", targetname);
+	}*/
 }
 
 public void TF2_OnConditionRemoved(int client, TFCond cond)
 {
 	Debug("%d removed cond %d", client, cond);
 	if (cond == TFCond_Plague) SetEntityRenderColor(client, 255, 255, 255, 255);
+	/*if (cond == TFCond_BlastJumping)
+	{
+		char targetname[MAX_NAME_LENGTH];
+		GetClientName(client, targetname, sizeof(targetname));
+		PrintToChatAll("%s stops blast jumping", targetname);
+	}*/
 }
 
 void apply_effect(int target, TFCond condition, int duration=0)
