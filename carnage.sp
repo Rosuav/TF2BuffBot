@@ -323,8 +323,11 @@ public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float 
 		if (damagetype&DMG_FALL) {damage = 0.0; return Plugin_Changed;} //Disable all fall damage
 		if (attacker == victim) return Plugin_Continue; //Permit all blast jumping
 		if (!attacker) return Plugin_Continue; //Permit all environmental damage (drowning etc)
-		if (!TF2_IsPlayerInCondition(attacker, TFCond_BlastJumping))
+		if (attacker <= MAXPLAYERS && !TF2_IsPlayerInCondition(attacker, TFCond_BlastJumping))
 		{
+			//I've been seeing some console crashes involving "entity 320/trigger_hurt" dealing
+			//damage. Not sure what this is, and whether it should get a complete whitelisting
+			//(like environmental damage), or just ignore this one check.
 			damage = 0.0;
 			PrintToChatAll("Damage negated! You weren't blast jumping.");
 			return Plugin_Changed;
