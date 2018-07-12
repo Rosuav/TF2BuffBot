@@ -300,6 +300,70 @@ public Action Command_RageBox(int client, int args)
 	return Plugin_Handled;
 }
 
+bool medigun_active[2048]; //Maps an entity to whether it's ticking or not
+public void OnEntityCreated(int entity, const char[] cls)
+{
+	if (entity >= 0 && entity < 2048 && !strcmp(cls, "tf_weapon_medigun"))
+	{
+		/* I really want to just hook SDKHook_Think, but I can't get that to work.
+		So instead, we create a timer for every medigun, and destroy that when the
+		medigun is removed.
+		SetEntProp(entity, Prop_Data, "m_nNextThinkTick", GetGameTickCount() + 3);
+		//SetEntProp(entity, Prop_Data, "m_nNextThinkTick", 1);
+		SDKHook(entity, SDKHook_Think, medigun_think); //Never gets called
+		*/
+		if (medigun_active[entity]) PrintToChatAll("Assertion failed! Duplicate timer!");
+		//Temporarily disabled (since the primary purpose of this isn't working) - will insta-unset.
+		//medigun_active[entity] = true;
+		CreateTimer(0.5, medigun_check, entity, TIMER_REPEAT);
+	}
+}
+public void OnEntityDestroyed(int entity) {if (entity >= 0 && entity < 2048) medigun_active[entity] = false;}
+//char last_msg[2048][2048];
+int last_healing_target[2048];
+Action medigun_check(Handle timer, any entity)
+{
+	ignore(timer);
+	if (!medigun_active[entity]) return Plugin_Stop;
+	int patient = last_healing_target[entity];
+	if (patient > 0 //If you were previously healing someone...
+		&& !GetEntProp(entity, Prop_Send, "m_bHealing") //... and you currently have no patient...
+		&& GetEntProp(entity, Prop_Send, "m_bAttacking") //... and you're trying to find one (mouse-1 is active)...
+		&& IsClientInGame(patient) && IsPlayerAlive(patient) //... and your last patient is alive and active...
+		&& GetClientTeam(patient) == GetEntProp(entity, Prop_Send, "m_iTeamNumber") //... and on your team...
+	)
+	{
+		//... then grab them again!
+		//TODO: Also check that the patient is within field of view.
+		//Doesn't actually make the medigun start healing though. hmm.
+		//May need to trigger it in some more direct way - AcceptEntityInput?
+		SetEntPropEnt(entity, Prop_Send, "m_hHealingTarget", patient);
+		SetEntProp(entity, Prop_Send, "m_bHealing", 1);
+		PrintToChatAll("Setting heal target!");
+	}
+	if (GetEntProp(entity, Prop_Send, "m_bHealing"))
+	{
+		patient = GetEntPropEnt(entity, Prop_Send, "m_hHealingTarget");
+		if (patient != -1) last_healing_target[entity] = patient;
+	}
+	#if 0
+	char msg[2048];
+	Format(msg, sizeof(msg), "Medigun %d: %s/%s/%s/%s targ %d last %d resist %d", entity,
+		GetEntProp(entity, Prop_Send, "m_bHealing") ? "healing": "idle",
+		GetEntProp(entity, Prop_Send, "m_bAttacking") ? "attacking": "benign",
+		GetEntProp(entity, Prop_Send, "m_bChargeRelease") ? "ubering": "normal",
+		GetEntProp(entity, Prop_Send, "m_bHolstered") ? "holstered": "unholstered",
+		GetEntPropEnt(entity, Prop_Send, "m_hHealingTarget"),
+		GetEntPropEnt(entity, Prop_Send, "m_hLastHealingTarget"),
+		GetEntProp(entity, Prop_Send, "m_nChargeResistType")
+	);
+	if (!strcmp(msg, last_msg[entity])) return Plugin_Handled;
+	strcopy(last_msg[entity], 2048, msg);
+	PrintToChatAll("[%d] %s", GetGameTickCount(), msg);
+	#endif
+	return Plugin_Handled;
+}
+
 public void OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_OnTakeDamage, PlayerTookDamage);
