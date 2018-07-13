@@ -70,6 +70,7 @@ ConVar sm_ccc_domheal_amount = null; //(20) Domination building heal hitpoints p
 ConVar sm_ccc_domheal_percent = null; //(0) Domination building heal percent of max hp per tick
 ConVar sm_ccc_admin_chat_name = null; //("") Name of admin for chat purposes
 ConVar sm_ccc_market_gardening = null; //(0) If 1, we're market gardening all the way!
+ConVar sm_ccc_koth_override_timers = null; //(0) If nonzero, KOTH maps will start with this many seconds on the clock
 char notable_kills[128][128];
 //TODO: Echo commands, where pre-written text gets spammed to chat (eg "Server going down yada yada")
 #include "convars"
@@ -300,9 +301,22 @@ public Action Command_RageBox(int client, int args)
 	return Plugin_Handled;
 }
 
+Action koth_set_timers(Handle timer, any entity)
+{
+	ignore(timer);
+	int time = GetConVarInt(sm_ccc_koth_override_timers);
+	if (time <= 0) return Plugin_Stop;
+	SetVariantInt(time);
+	AcceptEntityInput(entity, "SetRedTimer", -1, -1, 0);
+	SetVariantInt(time);
+	AcceptEntityInput(entity, "SetBlueTimer", -1, -1, 0);
+	return Plugin_Stop;
+}
+
 bool medigun_active[2048]; //Maps an entity to whether it's ticking or not
 public void OnEntityCreated(int entity, const char[] cls)
 {
+	if (!strcmp(cls, "tf_logic_koth")) CreateTimer(0.0, koth_set_timers, entity);
 	if (entity >= 0 && entity < 2048 && !strcmp(cls, "tf_weapon_medigun"))
 	{
 		/* I really want to just hook SDKHook_Think, but I can't get that to work.
@@ -1016,6 +1030,13 @@ void spin_roulette_wheel(int userid)
 	apply_effect(target, condition);
 	carnage_points[slot] = 0;
 }
+
+/*
+//Send the MVM bomb back to the start
+//If you want this in CTF, be aware that there may be multiple flags, so use a loop
+int flag = FindEntityByClassname(-1, "item_teamflag");
+if (flag != -1) AcceptEntityInput(flag, "ForceReset", -1, -1, 0);
+*/
 
 int swap_player = 0;
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)

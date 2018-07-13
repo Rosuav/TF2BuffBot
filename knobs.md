@@ -69,6 +69,8 @@ reasonable to take the buff bot for a spin without changing any of these.
   can. Every time a bot gains points, it has this chance of popping a roulette
   (if it doesn't, it keeps the points for next time). Setting this to 0 will
   prevent bots from using the roulette wheel at all.
+* sm_ccc_koth_override_timers: Normally unset (0); if set to any positive
+  value, will force KOTH maps to start with that much time on each clock.
 
 Note that using !roulette or !gift will always consume ALL of your carnage
 points (unless you don't have enough). Having triple the required points does
