@@ -317,6 +317,15 @@ bool medigun_active[2048]; //Maps an entity to whether it's ticking or not
 public void OnEntityCreated(int entity, const char[] cls)
 {
 	if (!strcmp(cls, "tf_logic_koth")) CreateTimer(0.0, koth_set_timers, entity);
+	if (!strcmp(cls, "tank_boss"))
+	{
+		//A tank has entered the arena!
+		//Useful inputs: SetSpeed(float)
+		//Useful outputs: OnHealthBelow[70]Percent for any multiple of 10%; OnKilled
+		//TODO: Adjust the tank's speed once it gets below a certain health.
+		//Does it make sense to start fast and slow down when it gets damaged, or to
+		//start slower and then speed up as stuff gets kicked off it?
+	}
 	if (entity >= 0 && entity < 2048 && !strcmp(cls, "tf_weapon_medigun"))
 	{
 		/* I really want to just hook SDKHook_Think, but I can't get that to work.
