@@ -363,7 +363,11 @@ Action medigun_check(Handle timer, any entity)
 		//May need to trigger it in some more direct way - AcceptEntityInput?
 		SetEntPropEnt(entity, Prop_Send, "m_hHealingTarget", patient);
 		SetEntProp(entity, Prop_Send, "m_bHealing", 1);
-		PrintToChatAll("Setting heal target!");
+		TF2_AddCondition(patient, TFCond_Healing, -1.0, 0);
+		/* This doesn't start the patient being healed either.
+		int healers = GetEntProp(patient, Prop_Send, "m_nNumHealers") + 1;
+		SetEntProp(patient, Prop_Send, "m_nNumHealers", healers);
+		PrintToChatAll("Setting heal target! %d healers.", healers);*/
 	}
 	if (GetEntProp(entity, Prop_Send, "m_bHealing"))
 	{
@@ -1704,7 +1708,7 @@ Action unblind(Handle timer, any target)
 
 public void TF2_OnConditionAdded(int client, TFCond cond)
 {
-	Debug("%d added cond %d", client, cond);
+	//PrintToChatAll("%d added cond %d", client, cond);
 	if (cond == TFCond_Plague) SetEntityRenderColor(client, 148, 178, 28, 255);
 	/*if (cond == TFCond_BlastJumping)
 	{
@@ -1716,7 +1720,7 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 
 public void TF2_OnConditionRemoved(int client, TFCond cond)
 {
-	Debug("%d removed cond %d", client, cond);
+	//PrintToChatAll("%d removed cond %d", client, cond);
 	if (cond == TFCond_Plague) SetEntityRenderColor(client, 255, 255, 255, 255);
 	/*if (cond == TFCond_BlastJumping)
 	{
