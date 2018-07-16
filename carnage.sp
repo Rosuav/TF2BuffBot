@@ -400,6 +400,8 @@ public Action maxhealthcheck(int entity, int &maxhealth)
 	max health is increased. (And also insta-heal you.) Then, when it
 	expires, it'll quietly stop adjusting, so you revert to normal max
 	health, and any extra health will become overheal. */
+	/* TODO: GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxBuffedHealth", _, entity)
+	returns the "max buffed health" which may affect overheal. Change that too?? */
 	if (entity > MaxClients || GetClientUserId(entity) != ragebox_userid) return Plugin_Continue;
 	maxhealth += maxhealth / 2;
 	return Plugin_Changed;
