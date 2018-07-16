@@ -568,6 +568,7 @@ void CoopModeChanged(ConVar convar, const char[] old, const char[] val)
 
 public void OnMapStart()
 {
+	//Alternatively, look for an entity of class tf_logic_mann_vs_machine?
 	char mapname[64];
 	GetCurrentMap(mapname, sizeof(mapname));
 	mvm_map = !strncmp(mapname, "mvm_", 4);
@@ -1060,6 +1061,10 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	//if (event.GetBool("teamonly")) return; //Ignore team chat (not working)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
+	/* TODO: Have a way for a player to relinquish the KOTH timer.
+	This would find that player's team's timer (GameRules_GetPropEnt("m_hRedKothTimer") or BlueKoth),
+	and if its m_bTimerPaused is 0, set it to 1. This is a bit buggy though and may have unforeseen
+	consequences. I'm not sure where the actual clock countdown is processed. */
 	int cheats_active = GetConVarInt(sm_ccc_debug_cheats_active);
 	if (cheats_active && (!strcmp(msg, "!gored") || !strcmp(msg, "!goblue") || !strcmp(msg, "!gospec")))
 	{
