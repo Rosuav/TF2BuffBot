@@ -341,6 +341,7 @@ public void OnEntityCreated(int entity, const char[] cls)
 		CreateTimer(0.5, medigun_check, entity, TIMER_REPEAT);
 	}
 }
+//void medigun_think(int entity) {PrintToChatAll("Medigun %d is thinking...", entity);}
 public void OnEntityDestroyed(int entity) {if (entity >= 0 && entity < 2048) medigun_active[entity] = false;}
 //char last_msg[2048][2048];
 int last_healing_target[2048];
