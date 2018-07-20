@@ -46,5 +46,11 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int price = GetConVarInt(sm_drzed_heal_price);
 		//TODO: if (!price) healing is disabled. Silent? Noisy?
 		PrintToChatAll("Welcome to Dr Zed's Mobile Clinic. Healing costs $%d.", price);
+		int target = GetClientOfUserId(event.GetInt("userid"));
+		//if (your_money < price) bail;
+		//your_money -= price;
+		int max_health = 100; //TODO: Should this be queried from somewhere?
+		if (GetClientHealth(target) < max_health)
+			SetEntityHealth(target, max_health);
 	}
 }
