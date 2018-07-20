@@ -115,10 +115,11 @@ with open("randeffects.inc", "w") as f:
 			print("\t%s," % desc, file=f)
 		print("};\n", file=f)
 
-def parse_convars(fn):
+def parse_convars(fn, **mappings):
 	"""Parse out cvar definitions and create an include file
 
-	parse_convars("X") parses X.sp and creates convars_X.inc
+	parse_convars("X") parses X.sp and creates convars_X.inc; any
+	keyword arguments will become mappings mapped into arrays.
 	"""
 	with open(fn + ".sp") as source, open("convars_%s.inc" % fn, "w") as cv:
 		print("void CreateConVars() {", file=cv)
@@ -129,10 +130,11 @@ def parse_convars(fn):
 			m = re.match(r'^ConVar (sm_ccc_[a-z_]+) = null; //\("([^"]*)"\) (.*)', line)
 			if m: # String cvar (default value may not contain nested quotes)
 				print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0);".format(*m.groups()), file=cv)
-		for killcode, msg in notable_kills.items():
-			print("\tnotable_kills[%s] = %s;" % (killcode, json.dumps(msg)), file=cv)
+		for name, values in mappings.items():
+			for code, value in values.items():
+				print("\t%s[%s] = %s;" % (name, code, json.dumps(value)), file=cv)
 		print("}", file=cv)
-parse_convars("carnage")
+parse_convars("carnage", notable_kills=notable_kills)
 
 # TODO: Migrate all gravity shifts into Weird.
 # This requires that each of them be potentially both good and bad, or else
