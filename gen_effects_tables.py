@@ -124,10 +124,10 @@ def parse_convars(fn, **mappings):
 	with open(fn + ".sp") as source, open("convars_%s.inc" % fn, "w") as cv:
 		print("void CreateConVars() {", file=cv)
 		for line in source:
-			m = re.match(r"^ConVar (sm_ccc_[a-z_]+) = null; //\(([0-9]+)\) (.*)", line)
+			m = re.match(r"^ConVar (sm_[a-z_]+) = null; //\(([0-9]+)\) (.*)", line)
 			if m: # Numeric cvar
 				print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0, true, 0.0);".format(*m.groups()), file=cv)
-			m = re.match(r'^ConVar (sm_ccc_[a-z_]+) = null; //\("([^"]*)"\) (.*)', line)
+			m = re.match(r'^ConVar (sm_[a-z_]+) = null; //\("([^"]*)"\) (.*)', line)
 			if m: # String cvar (default value may not contain nested quotes)
 				print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0);".format(*m.groups()), file=cv)
 		for name, values in mappings.items():
