@@ -135,6 +135,7 @@ def parse_convars(fn, **mappings):
 				print("\t%s[%s] = %s;" % (name, code, json.dumps(value)), file=cv)
 		print("}", file=cv)
 parse_convars("carnage", notable_kills=notable_kills)
+parse_convars("drzed")
 
 # TODO: Migrate all gravity shifts into Weird.
 # This requires that each of them be potentially both good and bad, or else
