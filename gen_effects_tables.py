@@ -115,19 +115,24 @@ with open("randeffects.inc", "w") as f:
 			print("\t%s," % desc, file=f)
 		print("};\n", file=f)
 
-with open("carnage.sp") as source, open("convars.inc", "w") as cv:
-	print("void CreateConVars() {", file=cv)
-	for line in source:
-		m = re.match(r"^ConVar (sm_ccc_[a-z_]+) = null; //\(([0-9]+)\) (.*)", line)
-		if m: # Numeric cvar
-			print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0, true, 0.0);".format(*m.groups()), file=cv)
-		m = re.match(r'^ConVar (sm_ccc_[a-z_]+) = null; //\("([^"]*)"\) (.*)', line)
-		if m: # String cvar (default value may not contain nested quotes)
-			print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0);".format(*m.groups()), file=cv)
-	for killcode, msg in notable_kills.items():
-		print("\tnotable_kills[%s] = %s;" % (killcode, json.dumps(msg)), file=cv)
-	print("}", file=cv)
+def parse_convars(fn):
+	"""Parse out cvar definitions and create an include file
 
+	parse_convars("X") parses X.sp and creates convars_X.inc
+	"""
+	with open(fn + ".sp") as source, open("convars_%s.inc" % fn, "w") as cv:
+		print("void CreateConVars() {", file=cv)
+		for line in source:
+			m = re.match(r"^ConVar (sm_ccc_[a-z_]+) = null; //\(([0-9]+)\) (.*)", line)
+			if m: # Numeric cvar
+				print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0, true, 0.0);".format(*m.groups()), file=cv)
+			m = re.match(r'^ConVar (sm_ccc_[a-z_]+) = null; //\("([^"]*)"\) (.*)', line)
+			if m: # String cvar (default value may not contain nested quotes)
+				print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0);".format(*m.groups()), file=cv)
+		for killcode, msg in notable_kills.items():
+			print("\tnotable_kills[%s] = %s;" % (killcode, json.dumps(msg)), file=cv)
+		print("}", file=cv)
+parse_convars("carnage")
 
 # TODO: Migrate all gravity shifts into Weird.
 # This requires that each of them be potentially both good and bad, or else

@@ -8,7 +8,7 @@ carnage.smx: carnage.sp randeffects.inc
 botcontrol.smx: botcontrol.sp
 	~/tf2server/steamcmd_linux/tf2/tf/addons/sourcemod/scripting/spcomp botcontrol.sp
 
-randeffects.inc convars.inc: carnage.sp gen_effects_tables.py
+randeffects.inc convars_carnage.inc: carnage.sp gen_effects_tables.py
 	python3 gen_effects_tables.py
 
 mvm_coaltown.pop: gen_mvm_waves.py

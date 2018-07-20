@@ -1,4 +1,4 @@
 *.smx
 *.pop
 randeffects.inc
-convars.inc
+convars*.inc

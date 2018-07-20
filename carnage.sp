@@ -73,7 +73,7 @@ ConVar sm_ccc_market_gardening = null; //(0) If 1, we're market gardening all th
 ConVar sm_ccc_koth_override_timers = null; //(0) If nonzero, KOTH maps will start with this many seconds on the clock
 char notable_kills[128][128];
 //TODO: Echo commands, where pre-written text gets spammed to chat (eg "Server going down yada yada")
-#include "convars"
+#include "convars_carnage"
 
 /* Co-op mode (eg for MVM)
 - Gifts always land on your team
