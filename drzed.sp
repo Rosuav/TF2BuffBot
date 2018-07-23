@@ -81,6 +81,7 @@ The chat MUST be per-team. (Except maybe the "notable weapon" part.)
 
 public Action CS_OnCSWeaponDrop(int client, int weapon)
 {
+	if (!GameRules_GetProp("m_bFreezePeriod")) return; //Announce only during freeze time.
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
 	char netcls[64]; GetEntityNetClass(weapon, netcls, sizeof(netcls));
@@ -121,8 +122,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	event.GetString("text", msg, sizeof(msg));
 	if (!strcmp(msg, "!drop"))
 	{
-		//TODO: Allow this only if the bot is in the buy zone, or if in freeze time
 		//The wealthiest bot on your team will (1) drop primary weapon, then (2) buy M4A1.
+		if (!GameRules_GetProp("m_bFreezePeriod")) return; //Can only be done during freeze
 		int self = GetClientOfUserId(event.GetInt("userid"));
 		int team = GetClientTeam(self);
 		int bot = -1, topmoney = team == 2 ? 2700 : 3100;
