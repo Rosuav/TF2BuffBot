@@ -118,6 +118,39 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	//if (!event.GetBool("teamonly")) return; //Require team chat (not working)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
+	if (!strcmp(msg, "!drop"))
+	{
+		//TODO: Allow this only if the bot is in the buy zone, or if in freeze time
+		//The wealthiest bot on your team will (1) drop primary weapon, then (2) buy M4A1.
+		int self = GetClientOfUserId(event.GetInt("userid"));
+		int team = GetClientTeam(self);
+		int bot = -1, topmoney = team == 2 ? 2700 : 3100;
+		for (int client = 1; client < MaxClients; ++client)
+		{
+			if (!IsClientInGame(client) || !IsPlayerAlive(client) || !IsFakeClient(client) || GetClientTeam(client) != team) continue;
+			int money = GetEntProp(client, Prop_Send, "m_iAccount");
+			if (money >= topmoney) {topmoney = money; bot = client;}
+		}
+		if (bot == -1)
+		{
+			//TODO: PrintToChatTeam (which doesn't exist)
+			PrintToChatAll("No bots on your team have enough money to help");
+			return;
+		}
+		char botname[64]; GetClientName(bot, botname, sizeof(botname));
+		int weap = GetPlayerWeaponSlot(bot, 0);
+		if (!weap)
+		{
+			//I have no idea if this could possibly ever happen.
+			PrintToChatAll("BOT %s doesn't have a weapon to drop (????)", botname);
+			return;
+		}
+		char cls[64]; GetEntityClassname(weap, cls, sizeof(cls));
+		CS_DropWeapon(bot, weap, true);
+		FakeClientCommandEx(bot, "buy m4a1");
+		PrintToChatAll("BOT %s dropped his %s", botname, cls[7]);
+		return;
+	}
 	if (!strcmp(msg, "!heal"))
 	{
 		int target = GetClientOfUserId(event.GetInt("userid"));
