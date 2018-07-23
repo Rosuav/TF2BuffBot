@@ -161,7 +161,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
 		int price = GetConVarInt(sm_drzed_heal_price);
 		if (!price) return; //Healing not available on this map/game mode/etc
-		int max_health = 100; //TODO: Should this be queried from somewhere? Increase it if wearing hvy suit?
+		int max_health = 100; //TODO: Should this be queried from somewhere? Increase it if wearing hvy suit? m_bHasHeavyArmor netprop
 		if (GetClientHealth(target) >= max_health)
 		{
 			//Healing not needed. (Don't waste the player's money.)
