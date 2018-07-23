@@ -155,6 +155,60 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		PrintToChatAll("BOT %s dropped his %s", botname, cls[7]);
 		return;
 	}
+	if (!strcmp(msg, "!jayne"))
+	{
+		//It'd sure be nice if we had more grenades on the team!
+		if (!GameRules_GetProp("m_bFreezePeriod")) return; //Can only be done during freeze
+		int self = GetClientOfUserId(event.GetInt("userid"));
+		int team = GetClientTeam(self);
+		for (int client = 1; client < MaxClients; ++client)
+		{
+			if (!IsClientInGame(client) || !IsPlayerAlive(client) || !IsFakeClient(client) || GetClientTeam(client) != team) continue;
+			int money = GetEntProp(client, Prop_Send, "m_iAccount");
+			int have_he = GetEntProp(client, Prop_Data, "m_iAmmo", _, 14);
+			int have_flash = GetEntProp(client, Prop_Data, "m_iAmmo", _, 15);
+			int have_smoke = GetEntProp(client, Prop_Data, "m_iAmmo", _, 16);
+			int have_molly = GetEntProp(client, Prop_Data, "m_iAmmo", _, 17);
+			//And decoys are in array position 18, but we don't care about them
+			int molly_price = team == 2 ? 400 : 600; //Incendiary grenades are overpriced for CTs
+			money -= 1000; //Ensure that the bots don't spend below $1000 this way (just in case).
+			int bought = 0;
+			for (int i = 0; i < 7; ++i)
+			{
+				switch (RoundToFloor(7*GetURandomFloat()))
+				{
+					case 0: i = 10; //Chance to end purchases immediately
+					case 1: if (!have_flash && money > 200)
+					{
+						FakeClientCommandEx(client, "buy flashbang");
+						money -= 200;
+						++bought;
+					}
+					case 2: if (!have_smoke && money > 300)
+					{
+						FakeClientCommandEx(client, "buy smoke");
+						money -= 300;
+						++bought;
+					}
+					case 3: if (!have_molly && money > molly_price)
+					{
+						FakeClientCommandEx(client, "buy molotov");
+						money -= molly_price;
+						++bought;
+					}
+					default: if (!have_he && money > 300)
+					{
+						FakeClientCommandEx(client, "buy hegrenade");
+						money -= 300;
+						++bought;
+					}
+				}
+			}
+			char botname[64]; GetClientName(client, botname, sizeof(botname));
+			if (bought) PrintToChatAll("BOT %s bought %d grenades.", botname, bought);
+		}
+		return;
+	}
 	if (!strcmp(msg, "!heal"))
 	{
 		int target = GetClientOfUserId(event.GetInt("userid"));
