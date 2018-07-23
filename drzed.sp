@@ -41,7 +41,7 @@ public void OnPluginStart()
 
 	interesting_weapons = CreateTrie();
 	int i = 0;
-	SetTrieValue(interesting_weapons, "weapon_ak47", i, false); weapon_msgs[i++] = "There's an AK in the game!";
+	SetTrieValue(interesting_weapons, "weapon_ak47", i, false); seen_weapon[i] = false; weapon_msgs[i++] = "There's an AK in the game!";
 	num_interesting_weapons = i;
 }
 
