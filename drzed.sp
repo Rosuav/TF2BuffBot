@@ -140,9 +140,11 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		}
 		char botname[64]; GetClientName(bot, botname, sizeof(botname));
 		int weap = GetPlayerWeaponSlot(bot, 0);
-		if (!weap)
+		if (weap == -1)
 		{
-			//I have no idea if this could possibly ever happen.
+			//This can happen in bizarre situations such as playing a classic mode
+			//on a map designed for a progressive mode (and thus having no buy area
+			//but the bot does get money). Not a normal situation!
 			PrintToChatAll("BOT %s doesn't have a weapon to drop (????)", botname);
 			return;
 		}
