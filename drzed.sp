@@ -1,6 +1,7 @@
 #include <sourcemod>
 #include <sdkhooks>
 #include <cstrike>
+#include <sdktools>
 
 #pragma newdecls required
 #pragma semicolon 1
@@ -22,12 +23,26 @@ public Plugin myinfo =
 ConVar sm_drzed_heal_price = null; //(0) If nonzero, healing can be bought for that much money
 #include "convars_drzed"
 
+StringMap interesting_weapons;
+char weapon_msgs[][64];
+bool seen_weapon[64];
+int num_interesting_weapons;
+
 public void OnPluginStart()
 {
 	RegAdminCmd("sm_hello", Command_Hello, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
+	HookEvent("item_purchase", Event_item_purchase);
+	HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
+	HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
+	//player_falldamage: report whenever anyone falls, esp for a lot of dmg
 	//As per carnage.sp, convars are created by the Python script.
 	CreateConVars();
+
+	interesting_weapons = CreateTrie();
+	int i = 0;
+	SetTrieValue(interesting_weapons, "weapon_ak47", i, false); weapon_msgs[i++] = "There's an AK in the game!";
+	num_interesting_weapons = i;
 }
 
 public Action Command_Hello(int client, int args)
@@ -35,6 +50,41 @@ public Action Command_Hello(int client, int args)
 	PrintToChatAll("Hello, world!");
 	PrintToServer("Hello, server!");
 	return Plugin_Handled;
+}
+
+public Action CS_OnCSWeaponDrop(int client, int weapon)
+{
+	char player[64]; GetClientName(client, player, sizeof(player));
+	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
+	char netcls[64]; GetEntityNetClass(weapon, netcls, sizeof(netcls));
+	char edict[64]; GetEdictClassname(weapon, edict, sizeof(edict));
+	PrintToServer("%s dropped weapon %d / %s / %s / %s", player, weapon, cls, netcls, edict);
+}
+
+public void reset_stats(Event event, const char[] name, bool dontBroadcast)
+{
+	PrintToServer("PURCHASE: Resetting stats");
+	for (int i = 0; i < num_interesting_weapons; ++i) seen_weapon[i] = false;
+}
+
+public void Event_item_purchase(Event event, const char[] name, bool dontBroadcast)
+{
+	if (GameRules_GetProp("m_bWarmupPeriod")) return; //Ignore purchases made during warmup
+	char weap[64]; event.GetString("weapon", weap, sizeof(weap));
+	int idx;
+	if (!GetTrieValue(interesting_weapons, weap, idx)) return;
+
+	int buyer = GetClientOfUserId(event.GetInt("userid"));
+	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return;
+	char player[64]; GetClientName(buyer, player, sizeof(player));
+	PrintToServer("PURCHASE <%d>: %s bought %s [%s]",
+		event.GetInt("team"), player, weap,
+		seen_weapon[idx] ? "seen" : "new"
+	);
+
+	if (seen_weapon[idx]) return;
+	seen_weapon[idx] = true;
+	PrintToChatAll(weapon_msgs[idx]);
 }
 
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
