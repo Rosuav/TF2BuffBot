@@ -41,7 +41,8 @@ public void OnPluginStart()
 
 	interesting_weapons = CreateTrie();
 	int i = 0;
-	SetTrieValue(interesting_weapons, "weapon_ak47", i, false); seen_weapon[i] = false; weapon_msgs[i++] = "There's an AK in the game!";
+	//This code doesn't really work properly, so I'm disabling it.
+	//SetTrieValue(interesting_weapons, "weapon_ak47", i, false); seen_weapon[i] = false; weapon_msgs[i++] = "There's an AK in the game!";
 	num_interesting_weapons = i;
 }
 
@@ -89,7 +90,7 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 
 public void reset_stats(Event event, const char[] name, bool dontBroadcast)
 {
-	PrintToServer("PURCHASE: Resetting stats");
+	//PrintToServer("PURCHASE: Resetting stats");
 	for (int i = 0; i < num_interesting_weapons; ++i) seen_weapon[i] = false;
 }
 
