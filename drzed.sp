@@ -115,7 +115,7 @@ public void Event_item_purchase(Event event, const char[] name, bool dontBroadca
 
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 {
-	//if (event.GetBool("teamonly")) return; //Ignore team chat (not working)
+	//if (!event.GetBool("teamonly")) return; //Require team chat (not working)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
 	if (!strcmp(msg, "!heal"))
