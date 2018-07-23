@@ -52,6 +52,32 @@ public Action Command_Hello(int client, int args)
 	return Plugin_Handled;
 }
 
+/* I have some plans here, but they're a fair way from fruition, so here are
+some notes instead.
+
+In a real competitive match, you buy equipment *as a team*. You wait to see
+what your teammates need before dropping all your money on stuff. But alas,
+the bots are not such team players, and will barge ahead and make purchases
+based solely on their own needs. While I can't make the bots truly act like
+humans, I can at least (well, in theory, anyhow) make them a bit chattier -
+make them tell you what they've already decided to do. That means the human
+players don't spend valuable time panning around, trying to figure out what
+the bots have done. This comes in a few varieties:
+
+1) The first time any "notable" weapon is purchased, announce it. Actually,
+   this could be a cool thing to announce to the opposite team too; let the
+   team brag "we have an AWPer among us".
+2) Any time a weapon is dropped during the buy period (or maybe the freeze)
+   by anyone on your team, announce it. "BOT Opie just dropped an AK-47".
+3) "Someone drop me a weapon pls?" - the bot with the most money would drop
+   the current primary, then buy a replacement according to his own rules.
+4) "Bots, buy nades" - all bots attempt to buy HE, Flash, Smoke, Molotov. A
+   bot normally will buy only one nade per round. This is stupid. TODO: See
+   if the bots will actually use more nades if they have them.
+
+The chat MUST be per-team. (Except maybe the "notable weapon" part.)
+*/
+
 public Action CS_OnCSWeaponDrop(int client, int weapon)
 {
 	char player[64]; GetClientName(client, player, sizeof(player));
