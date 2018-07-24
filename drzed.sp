@@ -20,7 +20,9 @@ public Plugin myinfo =
 	url = "https://github.com/Rosuav/TF2BuffBot",
 };
 
+ConVar sm_drzed_heal_max = null; //(0) If nonzero, healing can be bought up to that many hitpoints (100 is normal maximum)
 ConVar sm_drzed_heal_price = null; //(0) If nonzero, healing can be bought for that much money
+ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you equip the Heavy Assault Suit (also buffs heal_max while worn)
 #include "convars_drzed"
 
 StringMap interesting_weapons;
@@ -97,13 +99,19 @@ public void reset_stats(Event event, const char[] name, bool dontBroadcast)
 
 public void Event_item_purchase(Event event, const char[] name, bool dontBroadcast)
 {
-	if (GameRules_GetProp("m_bWarmupPeriod")) return; //Ignore purchases made during warmup
+	int buyer = GetClientOfUserId(event.GetInt("userid"));
+	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return;
 	char weap[64]; event.GetString("weapon", weap, sizeof(weap));
+	if (StrEqual(weap, "item_heavyassaultsuit"))
+	{
+		int hp = GetConVarInt(sm_drzed_suit_health_bonus);
+		if (hp) SetEntityHealth(buyer, GetClientHealth(buyer) + hp);
+	}
+
+	if (GameRules_GetProp("m_bWarmupPeriod")) return; //Other than the suit, ignore purchases made during warmup
 	int idx;
 	if (!GetTrieValue(interesting_weapons, weap, idx)) return;
 
-	int buyer = GetClientOfUserId(event.GetInt("userid"));
-	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return;
 	char player[64]; GetClientName(buyer, player, sizeof(player));
 	PrintToServer("PURCHASE <%d>: %s bought %s [%s]",
 		event.GetInt("team"), player, weap,
@@ -215,7 +223,13 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
 		int price = GetConVarInt(sm_drzed_heal_price);
 		if (!price) return; //Healing not available on this map/game mode/etc
-		int max_health = 100; //TODO: Should this be queried from somewhere? Increase it if wearing hvy suit? m_bHasHeavyArmor netprop
+		//In theory, free healing could be a thing (since "no healing available" is best signalled
+		//by setting heal_max to zero). Would have to figure out an alternate cost (score? earned
+		//every time you get N kills?), but it's not fundamentally illogical on non-money modes.
+		int max_health = GetConVarInt(sm_drzed_heal_max);
+		if (GetEntProp(target, Prop_Send, "m_bHasHeavyArmor"))
+			max_health += GetConVarInt(sm_drzed_suit_health_bonus);
+		if (!max_health) return; //Healing not available on this map/game mode/etc
 		if (GetClientHealth(target) >= max_health)
 		{
 			//Healing not needed. (Don't waste the player's money.)
