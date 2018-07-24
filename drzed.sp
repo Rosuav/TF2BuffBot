@@ -182,25 +182,25 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 					{
 						FakeClientCommandEx(client, "buy flashbang");
 						money -= 200;
-						++bought;
+						++bought; ++have_flash;
 					}
 					case 2: if (!have_smoke && money > 300)
 					{
 						FakeClientCommandEx(client, "buy smoke");
 						money -= 300;
-						++bought;
+						++bought; ++have_smoke;
 					}
 					case 3: if (!have_molly && money > molly_price)
 					{
 						FakeClientCommandEx(client, "buy molotov");
 						money -= molly_price;
-						++bought;
+						++bought; ++have_molly;
 					}
-					default: if (!have_he && money > 300)
+					default: if (!have_he && money > 300) //Higher chance of buying an HE
 					{
 						FakeClientCommandEx(client, "buy hegrenade");
 						money -= 300;
-						++bought;
+						++bought; ++have_he;
 					}
 				}
 			}
