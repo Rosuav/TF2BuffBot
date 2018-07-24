@@ -236,6 +236,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 }
 
 #if 0
+//Max health doesn't seem very significant in CS:GO, since there's basically nothing that heals you.
+
 public void OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_GetMaxHealth, maxhealthcheck);
