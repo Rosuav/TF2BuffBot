@@ -126,7 +126,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		if (!GameRules_GetProp("m_bFreezePeriod")) return; //Can only be done during freeze
 		int self = GetClientOfUserId(event.GetInt("userid"));
 		int team = GetClientTeam(self);
-		int bot = -1, topmoney = team == 2 ? 2700 : 3100;
+		int bot = -1, topmoney = team == 2 ? 2700 : 3100; //Ensure that the bot can buy a replacement M4/AK
 		for (int client = 1; client < MaxClients; ++client)
 		{
 			if (!IsClientInGame(client) || !IsPlayerAlive(client) || !IsFakeClient(client) || GetClientTeam(client) != team) continue;
