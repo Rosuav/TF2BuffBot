@@ -186,25 +186,25 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 				switch (RoundToFloor(7*GetURandomFloat()))
 				{
 					case 0: i = 10; //Chance to end purchases immediately
-					case 1: if (!have_flash && money > 200)
+					case 1: if (!have_flash && money >= 200)
 					{
 						FakeClientCommandEx(client, "buy flashbang");
 						money -= 200;
 						++bought; ++have_flash;
 					}
-					case 2: if (!have_smoke && money > 300)
+					case 2: if (!have_smoke && money >= 300)
 					{
 						FakeClientCommandEx(client, "buy smoke");
 						money -= 300;
 						++bought; ++have_smoke;
 					}
-					case 3: if (!have_molly && money > molly_price)
+					case 3: if (!have_molly && money >= molly_price)
 					{
 						FakeClientCommandEx(client, "buy molotov");
 						money -= molly_price;
 						++bought; ++have_molly;
 					}
-					default: if (!have_he && money > 300) //Higher chance of buying an HE
+					default: if (!have_he && money >= 300) //Higher chance of buying an HE
 					{
 						FakeClientCommandEx(client, "buy hegrenade");
 						money -= 300;
