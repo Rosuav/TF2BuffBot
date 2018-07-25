@@ -90,6 +90,10 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	char edict[64]; GetEdictClassname(weapon, edict, sizeof(edict));
 	PrintToServer("%s dropped weapon %d / %s / %s / %s", player, weapon, cls, netcls, edict);
 	if (!IsFakeClient(client)) return;
+	//TODO: Translate weapon IDs ("weapon_ak47") into names ("AK-47")
+	//more intelligently than just ignoring the first seven characters
+	//(esp since some things aren't "weapon_*"). Might also have some
+	//items unannounced - we don't care when someone drops a Glock.
 	char command[256]; Format(command, sizeof(command), "say_team I'm dropping my %s", cls[7]);
 	FakeClientCommandEx(client, command);
 }
