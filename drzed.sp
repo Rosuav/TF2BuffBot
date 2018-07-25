@@ -89,6 +89,9 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	char netcls[64]; GetEntityNetClass(weapon, netcls, sizeof(netcls));
 	char edict[64]; GetEdictClassname(weapon, edict, sizeof(edict));
 	PrintToServer("%s dropped weapon %d / %s / %s / %s", player, weapon, cls, netcls, edict);
+	if (!IsFakeClient(client)) return;
+	char command[256]; Format(command, sizeof(command), "say_team I'm dropping my %s", cls[7]);
+	FakeClientCommandEx(client, command);
 }
 
 public void reset_stats(Event event, const char[] name, bool dontBroadcast)
