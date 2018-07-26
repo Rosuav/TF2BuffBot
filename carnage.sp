@@ -400,14 +400,11 @@ public void OnClientPutInServer(int client)
 }
 public Action maxhealthcheck(int entity, int &maxhealth)
 {
-	/* TODO: Redefine the Bonkvich such that, for its duration, your
-	max health is increased. (And also insta-heal you.) Then, when it
-	expires, it'll quietly stop adjusting, so you revert to normal max
-	health, and any extra health will become overheal. */
 	/* TODO: GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxBuffedHealth", _, entity)
 	returns the "max buffed health" which may affect overheal. Change that too?? */
-	if (entity > MaxClients || GetClientUserId(entity) != ragebox_userid) return Plugin_Continue;
-	maxhealth += maxhealth / 2;
+	if (entity > MaxClients) return Plugin_Continue;
+	if (TF2_IsPlayerInCondition(entity, TFCond_NoTaunting_DEPRECATED)) maxhealth += 150;
+	if (GetClientUserId(entity) == ragebox_userid) maxhealth += maxhealth / 2;
 	return Plugin_Changed;
 }
 public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
@@ -509,6 +506,8 @@ public void respawncheck(int entity)
 
 public Action Command_Effects(int client, int args)
 {
+	//TODO: If the message begins with a colour code, strip that and show the rest.
+	//TODO: Replace %s with a placeholder name.
 	ReplyToCommand(client, "[SM] Effects available in category 1 (Good):");
 	for (int i = 0; i < sizeof(benefits); ++i)
 		ReplyToCommand(client, "[SM] %3d: %s", i + 1, benefits_desc[i]);
@@ -673,7 +672,7 @@ void class_specific_buff(int target, int duration)
 		TFCond_FocusBuff, //Sniper
 		TFCond_CritOnDamage, //Soldier
 		TFCond_CritCola, //DemoMan
-		view_as<TFCond>(-7), //Medic
+		TFCond_NoTaunting_DEPRECATED, //Medic
 		TFCond_CritOnDamage, //Heavy
 		TFCond_CritOnDamage, //Pyro
 		TFCond_CritOnDamage, //Spy
@@ -1137,7 +1136,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		char targetname[MAX_NAME_LENGTH];
 		GetClientName(target, targetname, sizeof(targetname));
 		PrintToChatAll("%s opens a lunch box and eats a Bonkvich.", targetname);
-		apply_effect(target, view_as<TFCond>(-7));
+		apply_effect(target, TFCond_NoTaunting_DEPRECATED);
 		return;
 	}
 	if (cheats_active && !strcmp(msg, "!money"))
@@ -1820,23 +1819,6 @@ void apply_effect(int target, TFCond condition, int duration=0)
 		Debug("Applied effect Sentry Mode to %d", target);
 		return;
 	}
-	else if (condition == view_as<TFCond>(-7))
-	{
-		int healing = 30 * duration; //A default 30 sec duration means 900 hp of healing.
-		int hp = GetClientHealth(target); //You gain that on top of your current health, even if it's full.
-		int resource = GetPlayerResourceEntity();
-		int max = GetEntProp(resource, Prop_Send, "m_iMaxHealth", _, target) + healing * 2;
-		if (max < hp)
-		{
-			Debug("Massive Overheal would have no benefit, ignoring");
-			return;
-		}
-		hp += healing;
-		if (hp > max) hp = max; //Overheal maxes out at twice the Bonkvich's benefit.
-		SetEntityHealth(target, hp);
-		Debug("Applied effect Massive Overheal to %d", target);
-		return;
-	}
 	else if (condition == view_as<TFCond>(-8))
 	{
 		class_specific_buff(target, duration);
@@ -1915,6 +1897,22 @@ void apply_effect(int target, TFCond condition, int duration=0)
 		//isn't in any weapon slot??
 		//CJA 20171125: Ah. You segfault the server as soon as you try to fire.
 		//That was very pretty and extremely entertaining... for a brief moment.
+	}
+	else if (condition == TFCond_NoTaunting_DEPRECATED)
+	{
+		int healing = 20 * duration; //A default 30 sec duration means 600 hp of healing.
+		int hp = GetClientHealth(target); //You gain that on top of your current health, even if it's full.
+		int resource = GetPlayerResourceEntity();
+		int max = GetEntProp(resource, Prop_Send, "m_iMaxHealth", _, target) + healing * 2;
+		if (max < hp)
+		{
+			Debug("Massive Overheal would have no benefit, ignoring");
+			return;
+		}
+		hp += healing;
+		if (hp > max) hp = max; //Overheal maxes out at twice the Bonkvich's benefit.
+		SetEntityHealth(target, hp);
+		PrintToChatAll("Applied effect Massive Overheal to %d", target);
 	}
 	TF2_AddCondition(target, condition, duration + 0.0, 0);
 	Debug("Applied effect %d to %d", condition, target);

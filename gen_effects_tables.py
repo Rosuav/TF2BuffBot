@@ -45,7 +45,7 @@ effects = {
 		"TFCond_RegenBuffed": "%s turns into a Time Lord and starts regenerating...",
 		# "view_as<TFCond>(-1)": "%s becomes as light as a feather!",
 		# "TFCond_KingAura": "It's good to be the king, right %s?", # Doesn't seem to work
-		"view_as<TFCond>(-7)": "%s eats a radioactive ham sandvich.",
+		"TFCond_NoTaunting_DEPRECATED": "%s eats a radioactive ham sandvich.", # Redefined to be Bonkvich
 		"view_as<TFCond>(-8)":    "%s parties like it's three easy payments of $19.99!", # Class-specific buff
 		"view_as<TFCond>(-8) ":   "%s celebrates the diversity of classes on the team!", # has multiple entries,
 		"view_as<TFCond>(-8)  ":  "%s pretends someone just got dominated! Bahahahaha!", # making it more likely
