@@ -402,6 +402,7 @@ public Action maxhealthcheck(int entity, int &maxhealth)
 {
 	/* TODO: GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxBuffedHealth", _, entity)
 	returns the "max buffed health" which may affect overheal. Change that too?? */
+	//TODO: Pick a different health-buff cond code - this one happens briefly at other times.
 	if (entity > MaxClients) return Plugin_Continue;
 	if (TF2_IsPlayerInCondition(entity, TFCond_NoTaunting_DEPRECATED)) maxhealth += 150;
 	if (GetClientUserId(entity) == ragebox_userid) maxhealth += maxhealth / 2;
