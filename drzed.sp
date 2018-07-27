@@ -20,6 +20,7 @@ public Plugin myinfo =
 	url = "https://github.com/Rosuav/TF2BuffBot",
 };
 
+ConVar sm_drzed_max_hitpoints = null; //(0) Number of hitpoints a normal character has (w/o Assault Suit) - 0 to leave at default
 ConVar sm_drzed_heal_max = null; //(0) If nonzero, healing can be bought up to that many hitpoints (100 is normal maximum)
 ConVar sm_drzed_heal_price = null; //(0) If nonzero, healing can be bought for that much money
 ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you equip the Heavy Assault Suit (also buffs heal_max while worn)
@@ -272,20 +273,22 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
-#if 0
 //Max health doesn't seem very significant in CS:GO, since there's basically nothing that heals you.
-
+//But we set the health on spawn too, so it ends up applying.
 public void OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_GetMaxHealth, maxhealthcheck);
+	SDKHook(client, SDKHook_SpawnPost, sethealth);
 }
 public Action maxhealthcheck(int entity, int &maxhealth)
 {
-	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity) || IsFakeClient(entity)) return Plugin_Continue;
-	//TODO: If you're wearing the Heavy Assault Suit, your max health is increased
-	//(probably according to a cvar, which will default to 100). Also TODO: When
-	//you *buy* the suit, your health is instantly filled to its new maximum.
-	//maxhealth = 200;
+	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return Plugin_Continue;
+	maxhealth = GetConVarInt(sm_drzed_max_hitpoints);
 	return Plugin_Changed;
 }
-#endif
+void sethealth(int entity)
+{
+	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return;
+	int health = GetConVarInt(sm_drzed_max_hitpoints);
+	if (health) SetEntityHealth(entity, health);
+}
