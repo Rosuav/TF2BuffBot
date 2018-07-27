@@ -131,6 +131,7 @@ public void Event_item_purchase(Event event, const char[] name, bool dontBroadca
 	PrintToChatAll(weapon_msgs[idx]);
 }
 
+//Note that the mark is global; one player can mark and another can check pos.
 float marked_pos[3];
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 {
