@@ -130,11 +130,27 @@ public void Event_item_purchase(Event event, const char[] name, bool dontBroadca
 	PrintToChatAll(weapon_msgs[idx]);
 }
 
+float marked_pos[3];
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 {
 	//if (!event.GetBool("teamonly")) return; //Require team chat (not working)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
+	if (!strcmp(msg, "!mark"))
+	{
+		int self = GetClientOfUserId(event.GetInt("userid"));
+		GetClientAbsOrigin(self, marked_pos);
+		PrintToChat(self, "Marked position: %f, %f, %f", marked_pos[0], marked_pos[1], marked_pos[2]);
+		return;
+	}
+	if (!strcmp(msg, "!pos"))
+	{
+		int self = GetClientOfUserId(event.GetInt("userid"));
+		float pos[3]; GetClientAbsOrigin(self, pos);
+		float dist = GetVectorDistance(marked_pos, pos, false);
+		PrintToChat(self, "Distance from marked pos: %.2f", dist);
+		return;
+	}
 	if (!strcmp(msg, "!drop"))
 	{
 		//The wealthiest bot on your team will (1) drop primary weapon, then (2) buy M4A1.
