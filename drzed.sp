@@ -26,27 +26,47 @@ ConVar sm_drzed_heal_price = null; //(0) If nonzero, healing can be bought for t
 ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you equip the Heavy Assault Suit (also buffs heal_max while worn)
 #include "convars_drzed"
 
-StringMap interesting_weapons;
-char weapon_msgs[][64];
-bool seen_weapon[64];
-int num_interesting_weapons;
+StringMap weapon_names;
 
 public void OnPluginStart()
 {
 	RegAdminCmd("sm_hello", Command_Hello, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("item_purchase", Event_item_purchase);
-	HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
-	HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
+	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
+	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
 	//player_falldamage: report whenever anyone falls, esp for a lot of dmg
 	//As per carnage.sp, convars are created by the Python script.
 	CreateConVars();
 
-	interesting_weapons = CreateTrie();
-	int i = 0;
-	//This code doesn't really work properly, so I'm disabling it.
-	//SetTrieValue(interesting_weapons, "weapon_ak47", i, false); seen_weapon[i] = false; weapon_msgs[i++] = "There's an AK in the game!";
-	num_interesting_weapons = i;
+	weapon_names = CreateTrie();
+	//If a weapon is uninteresting (ie we don't care when it's dropped),
+	//set it to an empty string. Weapons not mentioned will be shown by
+	//their class names ("weapon_ak47" etc).
+	SetTrieString(weapon_names, "weapon_glock", "");
+	SetTrieString(weapon_names, "weapon_hkp2000", "");
+	SetTrieString(weapon_names, "weapon_ak47", "AK-47");
+	SetTrieString(weapon_names, "weapon_galilar", "Galil");
+	SetTrieString(weapon_names, "weapon_famas", "FAMAS");
+	SetTrieString(weapon_names, "weapon_m4a1", "M4");
+	SetTrieString(weapon_names, "weapon_ssg08", "Scout");
+	SetTrieString(weapon_names, "weapon_aug", "AUG");
+	SetTrieString(weapon_names, "weapon_sg556", "SG-553");
+	SetTrieString(weapon_names, "weapon_awp", "AWP");
+	SetTrieString(weapon_names, "weapon_m249", "M249");
+	SetTrieString(weapon_names, "weapon_negev", "Negev");
+	SetTrieString(weapon_names, "weapon_scar20", "SCAR-20");
+	SetTrieString(weapon_names, "weapon_g3sg1", "G3SG1");
+	SetTrieString(weapon_names, "weapon_nova", "Nova");
+	SetTrieString(weapon_names, "weapon_xm1014", "XM1014");
+	SetTrieString(weapon_names, "weapon_mag7", "MAG-7");
+	SetTrieString(weapon_names, "weapon_mac10", "MAC-10");
+	SetTrieString(weapon_names, "weapon_mp9", "MP9");
+	SetTrieString(weapon_names, "weapon_mp7", "MP7");
+	SetTrieString(weapon_names, "weapon_ump45", "UMP-45");
+	SetTrieString(weapon_names, "weapon_p90", "P90");
+	SetTrieString(weapon_names, "weapon_bizon", "PP-Bizon");
+	SetTrieString(weapon_names, "weapon_taser", "Zeus x27");
 }
 
 public Action Command_Hello(int client, int args)
@@ -85,24 +105,13 @@ The chat MUST be per-team. (Except maybe the "notable weapon" part.)
 public Action CS_OnCSWeaponDrop(int client, int weapon)
 {
 	if (!GameRules_GetProp("m_bFreezePeriod")) return; //Announce only during freeze time.
+	if (!IsFakeClient(client)) return; //Don't force actual players to speak - it violates expectations.
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
-	char netcls[64]; GetEntityNetClass(weapon, netcls, sizeof(netcls));
-	char edict[64]; GetEdictClassname(weapon, edict, sizeof(edict));
-	PrintToServer("%s dropped weapon %d / %s / %s / %s", player, weapon, cls, netcls, edict);
-	if (!IsFakeClient(client)) return;
-	//TODO: Translate weapon IDs ("weapon_ak47") into names ("AK-47")
-	//more intelligently than just ignoring the first seven characters
-	//(esp since some things aren't "weapon_*"). Might also have some
-	//items unannounced - we don't care when someone drops a Glock.
-	char command[256]; Format(command, sizeof(command), "say_team I'm dropping my %s", cls[7]);
+	GetTrieString(weapon_names, cls, cls, sizeof(cls)); //Transform and put back in the same buffer
+	if (!cls[0]) return; //Boring weapon - we don't care when that's dropped
+	char command[256]; Format(command, sizeof(command), "say_team I'm dropping my %s", cls);
 	FakeClientCommandEx(client, command);
-}
-
-public void reset_stats(Event event, const char[] name, bool dontBroadcast)
-{
-	//PrintToServer("PURCHASE: Resetting stats");
-	for (int i = 0; i < num_interesting_weapons; ++i) seen_weapon[i] = false;
 }
 
 public void Event_item_purchase(Event event, const char[] name, bool dontBroadcast)
@@ -115,20 +124,6 @@ public void Event_item_purchase(Event event, const char[] name, bool dontBroadca
 		int hp = GetConVarInt(sm_drzed_suit_health_bonus);
 		if (hp) SetEntityHealth(buyer, GetClientHealth(buyer) + hp);
 	}
-
-	if (GameRules_GetProp("m_bWarmupPeriod")) return; //Other than the suit, ignore purchases made during warmup
-	int idx;
-	if (!GetTrieValue(interesting_weapons, weap, idx)) return;
-
-	char player[64]; GetClientName(buyer, player, sizeof(player));
-	PrintToServer("PURCHASE <%d>: %s bought %s [%s]",
-		event.GetInt("team"), player, weap,
-		seen_weapon[idx] ? "seen" : "new"
-	);
-
-	if (seen_weapon[idx]) return;
-	seen_weapon[idx] = true;
-	PrintToChatAll(weapon_msgs[idx]);
 }
 
 //Note that the mark is global; one player can mark and another can check pos.
