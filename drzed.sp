@@ -178,9 +178,13 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			return;
 		}
 		char cls[64]; GetEntityClassname(weap, cls, sizeof(cls));
-		CS_DropWeapon(bot, weap, true);
+		//Transform the class name to a human-readable name. Note that
+		//the "boring" weapons in terms of regular drops aren't going
+		//to happen this way, as they're just pistols.
+		GetTrieString(weapon_names, cls, cls, sizeof(cls));
+		CS_DropWeapon(bot, weap, true, true);
 		FakeClientCommandEx(bot, "buy m4a1");
-		PrintToChatAll("BOT %s dropped his %s", botname, cls[7]);
+		PrintToChatAll("BOT %s dropped his %s", botname, cls);
 		return;
 	}
 	if (!strcmp(msg, "!jayne"))
