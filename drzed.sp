@@ -109,6 +109,9 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
 	GetTrieString(weapon_names, cls, cls, sizeof(cls)); //Transform and put back in the same buffer
+	//TODO: Check which weapon slot this goes in. If it's not a primary weapon, ignore it. (Then
+	//the weapon_names mapping can simply have every weapon in it.) Then, query the bot's current
+	//weapon in the primary slot, and say "I'm dropping my %s in favour of a %s".
 	if (!cls[0]) return; //Boring weapon - we don't care when that's dropped
 	char command[256]; Format(command, sizeof(command), "say_team I'm dropping my %s", cls);
 	FakeClientCommandEx(client, command);
