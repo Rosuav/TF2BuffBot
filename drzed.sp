@@ -112,6 +112,10 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	if (!cls[0]) return; //Boring weapon - we don't care when that's dropped
 	char command[256]; Format(command, sizeof(command), "say_team I'm dropping my %s", cls);
 	FakeClientCommandEx(client, command);
+	File fp = OpenFile("bot_weapon_drops.log", "a");
+	char time[64]; FormatTime(time, sizeof(time), "%Y-%m-%d %H:%M:%S", GetTime());
+	WriteFileLine(fp, "[%s] BOT %s dropped %s", time, player, cls);
+	CloseHandle(fp);
 }
 
 public void Event_item_purchase(Event event, const char[] name, bool dontBroadcast)
