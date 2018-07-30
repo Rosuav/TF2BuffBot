@@ -273,7 +273,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int max_health = GetConVarInt(sm_drzed_heal_max);
 		if (GetEntProp(target, Prop_Send, "m_bHasHeavyArmor"))
 			max_health += GetConVarInt(sm_drzed_suit_health_bonus);
-		if (!max_health) return; //Healing not available on this map/game mode/etc
+		if (max_health <= 0) return; //Healing not available on this map/game mode/etc
 		if (GetClientHealth(target) >= max_health)
 		{
 			//Healing not needed. (Don't waste the player's money.)
