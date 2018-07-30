@@ -504,19 +504,32 @@ public void respawncheck(int entity)
 	if (ragebox_userid == -1) randomize_ragebox(0);
 }
 
+char[] trim_message(char[] msg)
+{
+	//Apparently, it's okay to return (a pointer to?) a local buffer,
+	//as long as that buffer was declared with a fixed size. I have
+	//no idea what SourcePawn thinks strings are; they're not first
+	//class objects, but they're also not pointer-to-char the way C
+	//treats them.
+	char result[128];
+	if (!strncmp(msg, "\x079ACDFF\x01", 8)) //Suppress the extra color code added by gen_effects_tables.py
+		Format(result, sizeof(result), msg[8], "<NAME>");
+	else
+		Format(result, sizeof(result), msg, "<NAME>");
+	return result;
+}
+
 public Action Command_Effects(int client, int args)
 {
-	//TODO: If the message begins with a colour code, strip that and show the rest.
-	//TODO: Replace %s with a placeholder name.
 	ReplyToCommand(client, "[SM] Effects available in category 1 (Good):");
 	for (int i = 0; i < sizeof(benefits); ++i)
-		ReplyToCommand(client, "[SM] %3d: %s", i + 1, benefits_desc[i]);
+		ReplyToCommand(client, "[SM] %3d: %s", i + 1, trim_message(benefits_desc[i]));
 	ReplyToCommand(client, "[SM] Effects available in category 2 (Bad):");
 	for (int i = 0; i < sizeof(detriments); ++i)
-		ReplyToCommand(client, "[SM] %3d: %s", i + 1, detriments_desc[i]);
+		ReplyToCommand(client, "[SM] %3d: %s", i + 1, trim_message(detriments_desc[i]));
 	ReplyToCommand(client, "[SM] Effects available in category 3 (Weird):");
 	for (int i = 0; i < sizeof(weird); ++i)
-		ReplyToCommand(client, "[SM] %3d: %s", i + 1, weird_desc[i]);
+		ReplyToCommand(client, "[SM] %3d: %s", i + 1, trim_message(weird_desc[i]));
 	ReplyToCommand(client, "[SM] The 1-based indices can be used with sm_ccc_debug_force_effect.");
 	return Plugin_Handled;
 }
