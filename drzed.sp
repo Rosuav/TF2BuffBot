@@ -76,6 +76,9 @@ public Action Command_Hello(int client, int args)
 	return Plugin_Handled;
 }
 
+//Silence the warning "unused parameter"
+any ignore(any ignoreme) {return ignoreme;}
+
 /* Some of this would be better done by redefining the way bots buy gear; I
 can't currently do this, so it's all done as chat commands.
 
@@ -95,23 +98,40 @@ the bots have done. This comes in a few varieties:
 3) "Bots, buy nades" - all bots attempt to buy HE, Flash, Smoke, Molotov. A
    bot normally will buy only one nade per round. This is stupid.
 */
-
+int dropped_weapon[MAXPLAYERS + 1];
 public Action CS_OnCSWeaponDrop(int client, int weapon)
 {
+	if (client > MAXPLAYERS) return;
 	if (!GameRules_GetProp("m_bFreezePeriod")) return; //Announce only during freeze time.
 	if (!IsFakeClient(client)) return; //Don't force actual players to speak - it violates expectations.
+	//Delay the actual message to allow a replacement weapon to be collected
+	dropped_weapon[client] = weapon;
+	CreateTimer(0.01, announce_weapon_drop, client, TIMER_FLAG_NO_MAPCHANGE);
+}
+Action announce_weapon_drop(Handle timer, any client)
+{
+	ignore(timer);
 	char player[64]; GetClientName(client, player, sizeof(player));
-	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
+	char cls[64]; GetEntityClassname(dropped_weapon[client], cls, sizeof(cls));
 	GetTrieString(weapon_names, cls, cls, sizeof(cls)); //Transform and put back in the same buffer
-	//TODO: Check which weapon slot this goes in. If it's not a primary weapon, ignore it. (Then
-	//the weapon_names mapping can simply have every weapon in it.) Then, query the bot's current
-	//weapon in the primary slot, and say "I'm dropping my %s in favour of a %s".
+	//TODO: Check which weapon slot this goes in. If it's not a primary weapon, ignore it. Then
+	//the weapon_names mapping can simply have every weapon in it.
 	if (!cls[0]) return; //Boring weapon - we don't care when that's dropped
-	char command[256]; Format(command, sizeof(command), "say_team I'm dropping my %s", cls);
+	int newweap = GetPlayerWeaponSlot(client, 0); //Whatcha got as your primary now?
+	char newcls[64] = "(nothing)";
+	char command[256];
+	if (newweap != -1)
+	{
+		//Normal case: the weapon was dropped because another was bought.
+		GetEntityClassname(newweap, newcls, sizeof(newcls));
+		GetTrieString(weapon_names, newcls, newcls, sizeof(newcls));
+		Format(command, sizeof(command), "say_team I'm dropping my %s in favour of this %s", cls, newcls);
+	}
+	else Format(command, sizeof(command), "say_team I'm dropping my %s", cls); //Theoretically they might not get a new weapon.
 	FakeClientCommandEx(client, command);
 	File fp = OpenFile("bot_weapon_drops.log", "a");
 	char time[64]; FormatTime(time, sizeof(time), "%Y-%m-%d %H:%M:%S", GetTime());
-	WriteFileLine(fp, "[%s] BOT %s dropped %s", time, player, cls);
+	WriteFileLine(fp, "[%s] BOT %s dropped %s for %s", time, player, cls, newcls);
 	CloseHandle(fp);
 }
 
