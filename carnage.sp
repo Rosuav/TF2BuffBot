@@ -402,9 +402,8 @@ public Action maxhealthcheck(int entity, int &maxhealth)
 {
 	/* TODO: GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxBuffedHealth", _, entity)
 	returns the "max buffed health" which may affect overheal. Change that too?? */
-	//TODO: Pick a different health-buff cond code - this one happens briefly at other times.
 	if (entity > MaxClients) return Plugin_Continue;
-	if (TF2_IsPlayerInCondition(entity, TFCond_NoTaunting_DEPRECATED)) maxhealth += 150;
+	if (TF2_IsPlayerInCondition(entity, TFCond_Unknown2)) maxhealth += 150; //NOTE: This appears to prevent the decay of overheal (????).
 	if (GetClientUserId(entity) == ragebox_userid) maxhealth += maxhealth / 2;
 	return Plugin_Changed;
 }
@@ -673,7 +672,7 @@ void class_specific_buff(int target, int duration)
 		TFCond_FocusBuff, //Sniper
 		TFCond_CritOnDamage, //Soldier
 		TFCond_CritCola, //DemoMan
-		TFCond_NoTaunting_DEPRECATED, //Medic
+		TFCond_Unknown2, //Medic
 		TFCond_CritOnDamage, //Heavy
 		TFCond_CritOnDamage, //Pyro
 		TFCond_CritOnDamage, //Spy
@@ -1137,7 +1136,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		char targetname[MAX_NAME_LENGTH];
 		GetClientName(target, targetname, sizeof(targetname));
 		PrintToChatAll("%s opens a lunch box and eats a Bonkvich.", targetname);
-		apply_effect(target, TFCond_NoTaunting_DEPRECATED);
+		apply_effect(target, TFCond_Unknown2);
 		return;
 	}
 	if (cheats_active && !strcmp(msg, "!money"))
@@ -1899,7 +1898,7 @@ void apply_effect(int target, TFCond condition, int duration=0)
 		//CJA 20171125: Ah. You segfault the server as soon as you try to fire.
 		//That was very pretty and extremely entertaining... for a brief moment.
 	}
-	else if (condition == TFCond_NoTaunting_DEPRECATED)
+	else if (condition == TFCond_Unknown2)
 	{
 		int healing = 20 * duration; //A default 30 sec duration means 600 hp of healing.
 		int hp = GetClientHealth(target); //You gain that on top of your current health, even if it's full.
