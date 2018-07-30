@@ -325,6 +325,7 @@ public void OnEntityCreated(int entity, const char[] cls)
 		//TODO: Adjust the tank's speed once it gets below a certain health.
 		//Does it make sense to start fast and slow down when it gets damaged, or to
 		//start slower and then speed up as stuff gets kicked off it?
+		//More generally: Need a way to carry info from the POP file into the runtime.
 	}
 	if (entity >= 0 && entity < 2048 && !strcmp(cls, "tf_weapon_medigun"))
 	{
