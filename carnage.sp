@@ -1070,7 +1070,7 @@ if (flag != -1) AcceptEntityInput(flag, "ForceReset", -1, -1, 0);
 int swap_player = 0;
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 {
-	//if (event.GetBool("teamonly")) return; //Ignore team chat (not working)
+	//if (event.GetBool("teamonly")) return; //Ignore team chat (not working - there's no "teamonly" so it always returns 0)
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
 	/* TODO: Have a way for a player to relinquish the KOTH timer.
