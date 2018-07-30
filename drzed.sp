@@ -76,8 +76,8 @@ public Action Command_Hello(int client, int args)
 	return Plugin_Handled;
 }
 
-/* I have some plans here, but they're a fair way from fruition, so here are
-some notes instead.
+/* Some of this would be better done by redefining the way bots buy gear; I
+can't currently do this, so it's all done as chat commands.
 
 In a real competitive match, you buy equipment *as a team*. You wait to see
 what your teammates need before dropping all your money on stuff. But alas,
@@ -88,18 +88,12 @@ make them tell you what they've already decided to do. That means the human
 players don't spend valuable time panning around, trying to figure out what
 the bots have done. This comes in a few varieties:
 
-1) The first time any "notable" weapon is purchased, announce it. Actually,
-   this could be a cool thing to announce to the opposite team too; let the
-   team brag "we have an AWPer among us".
-2) Any time a weapon is dropped during the buy period (or maybe the freeze)
-   by anyone on your team, announce it. "BOT Opie just dropped an AK-47".
-3) "Someone drop me a weapon pls?" - the bot with the most money would drop
-   the current primary, then buy a replacement according to his own rules.
-4) "Bots, buy nades" - all bots attempt to buy HE, Flash, Smoke, Molotov. A
-   bot normally will buy only one nade per round. This is stupid. TODO: See
-   if the bots will actually use more nades if they have them.
-
-The chat MUST be per-team. (Except maybe the "notable weapon" part.)
+1) When a bot drops a weapon during freeze time, he will announce it unless
+   it is a basic pistol. "BOT Opie: I'm dropping my AK-47".
+2) "Someone drop me a weapon pls?" - the wealthiest bot, if any have enough
+   to help, drops his current primary then buys either an M4A1 or an AK-47.
+3) "Bots, buy nades" - all bots attempt to buy HE, Flash, Smoke, Molotov. A
+   bot normally will buy only one nade per round. This is stupid.
 */
 
 public Action CS_OnCSWeaponDrop(int client, int weapon)
