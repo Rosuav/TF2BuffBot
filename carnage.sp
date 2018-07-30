@@ -1038,7 +1038,7 @@ void spin_roulette_wheel(int userid)
 			//Kill the person. Slap! Bam!
 			//TODO: Remove any invulnerabilities first, just in case.
 			PrintToChatAll("%s begs for something amazing...", targetname);
-			SlapPlayer(target, 1000); //1000hp of damage should kill anyone.
+			SlapPlayer(target, 10000); //10,000hp of damage should kill anyone.
 		}
 		carnage_points[slot] = 0;
 		return;
