@@ -222,7 +222,9 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			int have_flash = GetEntProp(client, Prop_Data, "m_iAmmo", _, 15);
 			int have_smoke = GetEntProp(client, Prop_Data, "m_iAmmo", _, 16);
 			int have_molly = GetEntProp(client, Prop_Data, "m_iAmmo", _, 17);
-			//And decoys are in array position 18, but we don't care about them
+			//And decoys are in array position 18. TODO: Check for total grenades,
+			//to avoid having the bots claim to have bought 3 nades when they had
+			//2 already (will need to include decoys in that count).
 			int molly_price = team == 2 ? 400 : 600; //Incendiary grenades are overpriced for CTs
 			money -= 1000; //Ensure that the bots don't spend below $1000 this way (just in case).
 			int bought = 0;
