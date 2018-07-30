@@ -184,8 +184,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		}
 		if (bot == -1)
 		{
-			//TODO: PrintToChatTeam (which doesn't exist)
-			PrintToChatAll("No bots on your team have enough money to help");
+			PrintToChat(self, "No bots on your team have enough money to help");
 			return;
 		}
 		char botname[64]; GetClientName(bot, botname, sizeof(botname));
@@ -195,7 +194,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			//This can happen in bizarre situations such as playing a classic mode
 			//on a map designed for a progressive mode (and thus having no buy area
 			//but the bot does get money). Not a normal situation!
-			PrintToChatAll("BOT %s doesn't have a weapon to drop (????)", botname);
+			PrintToChat(self, "BOT %s doesn't have a weapon to drop (????)", botname);
 			return;
 		}
 		char cls[64]; GetEntityClassname(weap, cls, sizeof(cls));
@@ -205,7 +204,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		GetTrieString(weapon_names, cls, cls, sizeof(cls));
 		CS_DropWeapon(bot, weap, true, true);
 		FakeClientCommandEx(bot, "buy m4a1");
-		PrintToChatAll("BOT %s dropped his %s", botname, cls);
+		FakeClientCommandEx(bot, "say_team Here, I'll drop this %s", cls);
 		return;
 	}
 	if (!strcmp(msg, "!jayne"))
@@ -230,7 +229,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			{
 				switch (RoundToFloor(7*GetURandomFloat()))
 				{
-					case 0: i = 10; //Chance to end purchases immediately
+					//case 0: buy HE - handled by 'default' below
 					case 1: if (!have_flash && money >= 200)
 					{
 						FakeClientCommandEx(client, "buy flashbang");
@@ -258,7 +257,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 				}
 			}
 			char botname[64]; GetClientName(client, botname, sizeof(botname));
-			if (bought) PrintToChatAll("BOT %s bought %d grenades.", botname, bought);
+			if (bought) FakeClientCommandEx(client, "say_team Buying %d grenades.", bought);
 		}
 		return;
 	}
