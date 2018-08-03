@@ -26,11 +26,11 @@ ConVar sm_drzed_heal_price = null; //(0) If nonzero, healing can be bought for t
 ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you equip the Heavy Assault Suit (also buffs heal_max while worn)
 ConVar sm_drzed_gate_health_left = null; //(0) If nonzero, one-shots from full health will leave you on this much health
 ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much damage (after armor) ignore the health gate
-
 #include "convars_drzed"
 
 StringMap weapon_names;
 
+ConVar default_weapons[4];
 public void OnPluginStart()
 {
 	RegAdminCmd("sm_hello", Command_Hello, ADMFLAG_SLAY);
@@ -43,11 +43,14 @@ public void OnPluginStart()
 	CreateConVars();
 
 	weapon_names = CreateTrie();
-	//If a weapon is uninteresting (ie we don't care when it's dropped),
-	//set it to an empty string. Weapons not mentioned will be shown by
-	//their class names ("weapon_ak47" etc).
-	SetTrieString(weapon_names, "weapon_glock", "");
-	SetTrieString(weapon_names, "weapon_hkp2000", "");
+	//Weapons not mentioned will be shown by their class names.
+	SetTrieString(weapon_names, "weapon_glock", "Glock");
+	SetTrieString(weapon_names, "weapon_hkp2000", "P2000");
+	SetTrieString(weapon_names, "weapon_p250", "P250");
+	SetTrieString(weapon_names, "weapon_elite", "Dualies");
+	SetTrieString(weapon_names, "weapon_fiveseven", "Five-Seven");
+	SetTrieString(weapon_names, "weapon_tec9", "Tec-9");
+	SetTrieString(weapon_names, "weapon_deagle", "Deagle");
 	SetTrieString(weapon_names, "weapon_ak47", "AK-47");
 	SetTrieString(weapon_names, "weapon_galilar", "Galil");
 	SetTrieString(weapon_names, "weapon_famas", "FAMAS");
@@ -70,6 +73,11 @@ public void OnPluginStart()
 	SetTrieString(weapon_names, "weapon_p90", "P90");
 	SetTrieString(weapon_names, "weapon_bizon", "PP-Bizon");
 	SetTrieString(weapon_names, "weapon_taser", "Zeus x27");
+
+	default_weapons[0] = FindConVar("mp_ct_default_primary");
+	default_weapons[1] = FindConVar("mp_t_default_primary");
+	default_weapons[2] = FindConVar("mp_ct_default_secondary");
+	default_weapons[3] = FindConVar("mp_t_default_secondary");
 }
 
 public Action Command_Hello(int client, int args)
@@ -116,10 +124,15 @@ Action announce_weapon_drop(Handle timer, any client)
 	ignore(timer);
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(dropped_weapon[client], cls, sizeof(cls));
+	if (!strcmp(cls, "weapon_c4")) return; //TODO: Once the slot check is implemented, ignore if not primary/secondary
+	for (int i = 0; i < sizeof(default_weapons); ++i)
+	{
+		char ignoreme[64]; GetConVarString(default_weapons[i], ignoreme, sizeof(ignoreme));
+		if (ignoreme[0] && !strcmp(cls, ignoreme)) return; //It's a default weapon.
+	}
 	GetTrieString(weapon_names, cls, cls, sizeof(cls)); //Transform and put back in the same buffer
-	//TODO: Check which weapon slot this goes in. If it's not a primary weapon, ignore it. Then
-	//the weapon_names mapping can simply have every weapon in it.
-	if (!cls[0]) return; //Boring weapon - we don't care when that's dropped
+	//TODO: Check which weapon slot this goes in. If it's not a primary weapon, ignore it.
+	//Or alternatively: check the appropriate slot, rather than hard-coding Primary.
 	int newweap = GetPlayerWeaponSlot(client, 0); //Whatcha got as your primary now?
 	char newcls[64] = "(nothing)";
 	char command[256];
@@ -361,19 +374,19 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	if (health < full) return Plugin_Continue; //Below the health gate
 	int dmg = RoundToFloor(damage);
 	if (dmg < health) return Plugin_Continue; //Wouldn't kill you
+	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
+	if (!strcmp(cls, "weapon_knife")) return Plugin_Continue; //No health-gating knife backstabs
+	GetTrieString(weapon_names, cls, cls, sizeof(cls));
+	char name[64]; GetClientName(attacker, name, sizeof(name));
 	int overkill = GetConVarInt(sm_drzed_gate_overkill);
 	if (dmg >= overkill)
 	{
-		PrintToChat(victim, "BEWM! You got overkilled [%d damage].", dmg);
+		PrintToChat(victim, "BEWM! %s overkilled you with his %s (%d damage).", name, cls, dmg);
 		return Plugin_Continue;
 	}
-	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
-	if (!strcmp(cls, "weapon_knife")) return Plugin_Continue; //No health-gating knife backstabs
 	damage = 0.0 + health - gate; //Leave you on the health gate
 	//NOTE: This won't change the denting of the armor. Probably doesn't matter; anything
 	//that would be health gated is generally going to have high armor pen.
-	GetTrieString(weapon_names, cls, cls, sizeof(cls));
-	char name[64]; GetClientName(attacker, name, sizeof(name));
 	PrintToChat(victim, "%s dealt %d with his %s, but you gated", name, dmg, cls);
 	return Plugin_Changed;
 }
