@@ -149,21 +149,54 @@ public void Event_item_purchase(Event event, const char[] name, bool dontBroadca
 
 //Note that the mark is global; one player can mark and another can check pos.
 float marked_pos[3];
+int show_positions[MAXPLAYERS + 1];
+int nshowpos = 0;
+public void OnGameFrame()
+{
+	for (int i = 0; i < nshowpos; ++i)
+	{
+		float pos[3]; GetClientAbsOrigin(show_positions[i], pos);
+		float dist = GetVectorDistance(marked_pos, pos, false);
+		PrintCenterText(show_positions[i], "Distance from marked pos: %.2f", dist);
+	}
+}
+
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 {
 	//if (!event.GetBool("teamonly")) return; //Require team chat (not working - there's no "teamonly" so it always returns 0)
+	int self = GetClientOfUserId(event.GetInt("userid"));
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
 	if (!strcmp(msg, "!mark"))
 	{
-		int self = GetClientOfUserId(event.GetInt("userid"));
 		GetClientAbsOrigin(self, marked_pos);
 		PrintToChat(self, "Marked position: %f, %f, %f", marked_pos[0], marked_pos[1], marked_pos[2]);
 		return;
 	}
+	if (!strcmp(msg, "!showpos"))
+	{
+		for (int i = 0; i < nshowpos; ++i) if (show_positions[i] == self)
+		{
+			PrintToChat(self, "Already showing pos each frame.");
+			return;
+		}
+		show_positions[nshowpos++] = self;
+		PrintToChat(self, "Will show pos each frame.");
+		return;
+	}
+	if (!strcmp(msg, "!unshowpos"))
+	{
+		for (int i = 0; i < nshowpos; ++i) if (show_positions[i] == self)
+		{
+			show_positions[i] = show_positions[--nshowpos];
+			PrintToChat(self, "Will no longer show pos each frame.");
+			return;
+		}
+		PrintToChat(self, "Was not showing pos.");
+		return;
+	}
 	if (!strcmp(msg, "!pos"))
 	{
-		int self = GetClientOfUserId(event.GetInt("userid"));
 		float pos[3]; GetClientAbsOrigin(self, pos);
 		float dist = GetVectorDistance(marked_pos, pos, false);
 		PrintToChat(self, "Distance from marked pos: %.2f", dist);
@@ -173,7 +206,6 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	{
 		//The wealthiest bot on your team will (1) drop primary weapon, then (2) buy M4A1.
 		if (!GameRules_GetProp("m_bFreezePeriod")) return; //Can only be done during freeze
-		int self = GetClientOfUserId(event.GetInt("userid"));
 		int team = GetClientTeam(self);
 		int bot = -1, topmoney = team == 2 ? 2700 : 3100; //Ensure that the bot can buy a replacement M4/AK
 		for (int client = 1; client < MaxClients; ++client)
@@ -212,7 +244,6 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	{
 		//It'd sure be nice if we had more grenades on the team!
 		if (!GameRules_GetProp("m_bFreezePeriod")) return; //Can only be done during freeze
-		int self = GetClientOfUserId(event.GetInt("userid"));
 		int team = GetClientTeam(self);
 		for (int client = 1; client < MaxClients; ++client)
 		{
