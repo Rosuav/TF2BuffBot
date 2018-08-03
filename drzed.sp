@@ -24,6 +24,9 @@ ConVar sm_drzed_max_hitpoints = null; //(0) Number of hitpoints a normal charact
 ConVar sm_drzed_heal_max = null; //(0) If nonzero, healing can be bought up to that many hitpoints (100 is normal maximum)
 ConVar sm_drzed_heal_price = null; //(0) If nonzero, healing can be bought for that much money
 ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you equip the Heavy Assault Suit (also buffs heal_max while worn)
+ConVar sm_drzed_gate_health_left = null; //(0) If nonzero, one-shots from full health will leave you on this much health
+ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much damage (after armor) ignore the health gate
+
 #include "convars_drzed"
 
 StringMap weapon_names;
@@ -333,6 +336,7 @@ public void OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_GetMaxHealth, maxhealthcheck);
 	SDKHook(client, SDKHook_SpawnPost, sethealth);
+	SDKHook(client, SDKHook_OnTakeDamageAlive, healthgate);
 }
 public Action maxhealthcheck(int entity, int &maxhealth)
 {
@@ -345,4 +349,31 @@ void sethealth(int entity)
 	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return;
 	int health = GetConVarInt(sm_drzed_max_hitpoints);
 	if (health) SetEntityHealth(entity, health);
+}
+
+public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
+	int &weapon, float damageForce[3], float damagePosition[3])
+{
+	int gate = GetConVarInt(sm_drzed_gate_health_left);
+	if (!gate) return Plugin_Continue; //Health gate not active
+	int full = GetConVarInt(sm_drzed_max_hitpoints); if (!full) full = 100;
+	int health = GetClientHealth(victim);
+	if (health < full) return Plugin_Continue; //Below the health gate
+	int dmg = RoundToFloor(damage);
+	if (dmg < health) return Plugin_Continue; //Wouldn't kill you
+	int overkill = GetConVarInt(sm_drzed_gate_overkill);
+	if (dmg >= overkill)
+	{
+		PrintToChat(victim, "BEWM! You got overkilled [%d damage].", dmg);
+		return Plugin_Continue;
+	}
+	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
+	if (!strcmp(cls, "weapon_knife")) return Plugin_Continue; //No health-gating knife backstabs
+	damage = 0.0 + health - gate; //Leave you on the health gate
+	//NOTE: This won't change the denting of the armor. Probably doesn't matter; anything
+	//that would be health gated is generally going to have high armor pen.
+	GetTrieString(weapon_names, cls, cls, sizeof(cls));
+	char name[64]; GetClientName(attacker, name, sizeof(name));
+	PrintToChat(victim, "%s dealt %d with his %s, but you gated", name, dmg, cls);
+	return Plugin_Changed;
 }
