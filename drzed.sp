@@ -44,17 +44,21 @@ public void OnPluginStart()
 
 	weapon_names = CreateTrie();
 	//Weapons not mentioned will be shown by their class names.
+	//NOTE: Weapons that have alternates (P2000/USP-S, Deagle/R8) may possibly be
+	//distinguished by netprop m_iEntityQuality which appears to be 4 for the
+	//non-stock item. There are other qualities, including Strange/Stat-Trak, and
+	//I don't know how they interact.
 	SetTrieString(weapon_names, "weapon_glock", "Glock");
-	SetTrieString(weapon_names, "weapon_hkp2000", "P2000");
-	SetTrieString(weapon_names, "weapon_p250", "P250");
+	SetTrieString(weapon_names, "weapon_hkp2000", "P2000/USP");
+	SetTrieString(weapon_names, "weapon_p250", "P250/CZ75a");
 	SetTrieString(weapon_names, "weapon_elite", "Dualies");
 	SetTrieString(weapon_names, "weapon_fiveseven", "Five-Seven");
 	SetTrieString(weapon_names, "weapon_tec9", "Tec-9");
-	SetTrieString(weapon_names, "weapon_deagle", "Deagle");
+	SetTrieString(weapon_names, "weapon_deagle", "Deagle"); //or R8, but nobody uses that
 	SetTrieString(weapon_names, "weapon_ak47", "AK-47");
 	SetTrieString(weapon_names, "weapon_galilar", "Galil");
 	SetTrieString(weapon_names, "weapon_famas", "FAMAS");
-	SetTrieString(weapon_names, "weapon_m4a1", "M4");
+	SetTrieString(weapon_names, "weapon_m4a1", "M4"); //M4A4 or M4A1-S
 	SetTrieString(weapon_names, "weapon_ssg08", "Scout");
 	SetTrieString(weapon_names, "weapon_aug", "AUG");
 	SetTrieString(weapon_names, "weapon_sg556", "SG-553");
