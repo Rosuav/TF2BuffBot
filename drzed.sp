@@ -371,6 +371,21 @@ void sethealth(int entity)
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
 	int &weapon, float damageForce[3], float damagePosition[3])
 {
+	/*
+	if (attacker && attacker < MAXPLAYERS)
+	{
+		//Mess with damage based on who's dealing it.
+		if (IsFakeClient(attacker)) return Plugin_Continue; //Example: Bots are unaffected
+		//Example: Scale the damage according to how hurt you are
+		//Like the TF2 Equalizer, but done as a simple scaling of all damage.
+		int health = GetClientHealth(attacker) * 2;
+		int max = GetConVarInt(sm_drzed_max_hitpoints); if (!max) max = 100; //TODO
+		float factor = 2.0; //At max health, divide by this; at zero health, multiply by this.
+		if (health > max) damage /= factor * (health - max) / max;
+		else if (health < max) damage *= factor * health / max;
+		return Plugin_Changed;
+	}
+	*/
 	int gate = GetConVarInt(sm_drzed_gate_health_left);
 	if (!gate) return Plugin_Continue; //Health gate not active
 	int full = GetConVarInt(sm_drzed_max_hitpoints); if (!full) full = 100;
