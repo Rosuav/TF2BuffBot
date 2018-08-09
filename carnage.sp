@@ -474,12 +474,15 @@ public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float 
 		damage *= 0.75;
 		return Plugin_Changed;
 	}
+	//TODO: If someone leaves the game, this can crash out.
 	if (TF2_GetPlayerClass(ragebox_holder) == TFClass_Medic)
 	{
 		int index = GetEntPropEnt(ragebox_holder, Prop_Send, "m_hActiveWeapon");
 		char cls[32]; GetEdictClassname(index, cls, sizeof(cls));
 		if (!strcmp(cls, "tf_weapon_medigun") && GetEntProp(index, Prop_Send, "m_bHealing") == 1)
 		{
+			//TODO: Healing target isn't always a client?? Seeing some cases
+			//where heal target is 460, which bombs out in GetClientName.
 			int patient = GetEntPropEnt(index, Prop_Send, "m_hHealingTarget");
 			char patientname[MAX_NAME_LENGTH];
 			GetClientName(patient, patientname, sizeof(patientname));
