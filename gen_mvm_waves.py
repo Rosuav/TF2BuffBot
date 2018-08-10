@@ -422,3 +422,10 @@ with PopFile("mvm_mannworks.pop", starting_money=5002, harby_money=0, tank_healt
 		# Bonus: a bit of Air Strike fodder to start things off. Helps if the
 		# wave has to be restarted.
 		subwave("Milkman", 10, max_active=10, spawn_count=10)
+
+# mvm_ghost_town probably isn't worth trying to mess with.
+# mvm_mannhattan and mvm_rottenburg are the only ones left to make.
+# Note that neither map supports tanks, so they will "feel different"
+# from the other wave patterns automatically, by not having any of
+# my signature harby-tank waves. This may mean they can/should use a
+# ReflectMe boss, or it might mean that soldiers become normal bots.
