@@ -495,6 +495,8 @@ public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float 
 	}
 	if (ragebox_holder == attacker)
 	{
+		//NOTE: If a medic has the ragebox and the patient blast jumps,
+		//the jump will be twice as high/far. Should this be prevented?
 		Debug("Ragebox holder dealing damage; 100%% damage bonus");
 		damage *= 2.0;
 		return Plugin_Changed;
