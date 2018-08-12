@@ -429,3 +429,7 @@ with PopFile("mvm_mannworks.pop", starting_money=5002, harby_money=0, tank_healt
 # from the other wave patterns automatically, by not having any of
 # my signature harby-tank waves. This may mean they can/should use a
 # ReflectMe boss, or it might mean that soldiers become normal bots.
+
+
+# Note: A wave block can have a Description "..." attribute. It MAY be
+# possible to use this to convey info to the plugin.
