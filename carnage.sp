@@ -326,6 +326,7 @@ public void OnEntityCreated(int entity, const char[] cls)
 		//Does it make sense to start fast and slow down when it gets damaged, or to
 		//start slower and then speed up as stuff gets kicked off it?
 		//More generally: Need a way to carry info from the POP file into the runtime.
+		//AcceptEntityInput(entity, "Ignite", -1, -1, 0); //Create flames under the tank (insignificant amount of DOT)
 	}
 	if (entity >= 0 && entity < 2048 && !strcmp(cls, "tf_weapon_medigun"))
 	{
