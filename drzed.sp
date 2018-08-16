@@ -385,7 +385,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		else if (health < max) damage *= factor * health / max;
 		return Plugin_Changed;
 	}
-	*/
+	// */
 	int gate = GetConVarInt(sm_drzed_gate_health_left);
 	if (!gate) return Plugin_Continue; //Health gate not active
 	int full = GetConVarInt(sm_drzed_max_hitpoints); if (!full) full = 100;
