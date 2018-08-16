@@ -72,7 +72,7 @@ public void OnPluginStart()
 	SetTrieString(weapon_names, "weapon_mag7", "MAG-7");
 	SetTrieString(weapon_names, "weapon_mac10", "MAC-10");
 	SetTrieString(weapon_names, "weapon_mp9", "MP9");
-	SetTrieString(weapon_names, "weapon_mp7", "MP7");
+	SetTrieString(weapon_names, "weapon_mp7", "MP5/MP7");
 	SetTrieString(weapon_names, "weapon_ump45", "UMP-45");
 	SetTrieString(weapon_names, "weapon_p90", "P90");
 	SetTrieString(weapon_names, "weapon_bizon", "PP-Bizon");
