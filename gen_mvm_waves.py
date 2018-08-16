@@ -333,7 +333,7 @@ with PopFile("mvm_coaltown.pop", starting_money=1511, tank_health=25000) as pop:
 		subwave("T_TFBot_Demoman_Knight", 50, max_active=10, spawn_count=5)
 		support("T_TFBot_Sniper_Huntsman", "T_TFBot_Pyro_Flaregun")
 
-with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25, tank_health=25000, tank_money=250, support_money=5) as pop:
+with PopFile("mvm_decoy.pop", starting_money=1502, tank_speed=50, harby_money=25, tank_health=20000, tank_money=250, support_money=5) as pop:
 	with wave:
 		subwave("Milkman", 150, max_active=50, spawn_count=10, money=3)
 		subwave("Anorexic_Heavy", 10, money=15)

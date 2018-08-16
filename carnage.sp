@@ -146,6 +146,7 @@ public void OnPluginStart()
 	HookEvent("ctf_flag_captured", Captured);
 	HookEvent("teamplay_point_captured", Captured);
 	HookEvent("teamplay_point_startcapture", StartCapture);
+	HookEntityOutput("tank_boss", "OnHealthBelow50Percent", accelerate_tank);
 	//The actual code to create convars convars is built by the Python script,
 	//and yes, I'm aware that I now have two problems.
 	CreateConVars();
@@ -159,6 +160,19 @@ public void OnPluginStart()
 	GameConfGetKeyValue(gameConfig, "SpriteHalo", buffer, sizeof(buffer));
 	HaloSprite = PrecacheModel(buffer);
 	//End GPL code. (The rest of this file is even more freely usable.)
+}
+
+public void accelerate_tank(const char[] output, int caller, int activator, float delay)
+{
+	//TODO: Look at the tank's current speed and add 50% to it
+	//rather than hard-coding a new speed of 100. Or let the Pop
+	//file choose the speed (either globally or per-tank). Also,
+	//flag the tank somehow as "have set the speed", and then
+	//trigger this event also at 40%, 30%, 20%, and 10%, in case
+	//the 50% event doesn't fire (has been observed).
+	SetVariantInt(100);
+	AcceptEntityInput(caller, "SetSpeed", -1, -1, 0);
+	PrintToChatAll("Relieved of its armor, the tank speeds up!");
 }
 
 TFCond hysteria_effects[] = {
