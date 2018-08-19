@@ -126,6 +126,7 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 Action announce_weapon_drop(Handle timer, any client)
 {
 	ignore(timer);
+	if (!IsValidEntity(dropped_weapon[client])) return;
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(dropped_weapon[client], cls, sizeof(cls));
 	if (!strcmp(cls, "weapon_c4")) return; //TODO: Once the slot check is implemented, ignore if not primary/secondary
