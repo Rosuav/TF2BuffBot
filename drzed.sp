@@ -372,6 +372,16 @@ void sethealth(int entity)
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
 	int &weapon, float damageForce[3], float damagePosition[3])
 {
+	if (damagetype & DMG_CLUB)
+	{
+		//Looks like someone got beaned with a 'nade.
+		if (IsValidEntity(weapon))
+		{
+			char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
+			PrintToChatAll("Attacker %d clubbed %d for %.0f \"<%X>\" damage with %s", attacker, victim, damage, damagetype, cls);
+		}
+		else PrintToChatAll("Attacker %d clubbed %d for %.0f \"<%X>\" damage without a weapon", attacker, victim, damage, damagetype);
+	}
 	/*
 	if (attacker && attacker < MAXPLAYERS)
 	{
