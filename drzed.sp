@@ -360,7 +360,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	}
 	if (!strcmp(msg, "!heal"))
 	{
-		int target = GetClientOfUserId(event.GetInt("userid"));
+		int target = self; //Should players be able to request healing for each other? For now, no.
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
 		int price = GetConVarInt(sm_drzed_heal_price);
 		if (!price) return; //Healing not available on this map/game mode/etc
