@@ -196,6 +196,8 @@ Action deselect_weapon(Handle timer, any client)
 	//Ideally, I would like to now say "and select slot 4", but that doesn't seem
 	//to work. It might also be possible to pick by a different slot (eg "slot7"
 	//for flashbang), but I can't get that to work either.
+	//ClientCommand(client, "use weapon_flashbang"); //This isn't reliable
+	ClientCommand(client, "slot4"); //This isn't reliable either but it miiiight work.
 }
 
 public void Event_item_purchase(Event event, const char[] name, bool dontBroadcast)
