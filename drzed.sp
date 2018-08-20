@@ -29,8 +29,9 @@ ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much da
 #include "convars_drzed"
 
 StringMap weapon_names;
-
 ConVar default_weapons[4];
+Handle switch_weapon_call = null;
+
 public void OnPluginStart()
 {
 	RegAdminCmd("sm_hello", Command_Hello, ADMFLAG_SLAY);
@@ -83,6 +84,14 @@ public void OnPluginStart()
 	default_weapons[1] = FindConVar("mp_t_default_primary");
 	default_weapons[2] = FindConVar("mp_ct_default_secondary");
 	default_weapons[3] = FindConVar("mp_t_default_secondary");
+
+	Handle gamedata = LoadGameConfigFile("sdkhooks.games");
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "Weapon_Switch");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	switch_weapon_call = EndPrepSDKCall();
+	delete gamedata;
 }
 
 public Action Command_Hello(int client, int args)
@@ -197,7 +206,11 @@ Action deselect_weapon(Handle timer, any client)
 	//to work. It might also be possible to pick by a different slot (eg "slot7"
 	//for flashbang), but I can't get that to work either.
 	//ClientCommand(client, "use weapon_flashbang"); //This isn't reliable
-	ClientCommand(client, "slot4"); //This isn't reliable either but it miiiight work.
+	//ClientCommand(client, "slot4"); //This isn't reliable either but it miiiight work.
+	int weapon = GetPlayerWeaponSlot(client, 3);
+	if (weapon == -1) return;
+	SDKCall(switch_weapon_call, client, weapon, 0);
+	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 }
 
 public void Event_item_purchase(Event event, const char[] name, bool dontBroadcast)
