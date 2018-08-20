@@ -36,6 +36,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_hello", Command_Hello, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("item_purchase", Event_item_purchase);
+	HookEvent("weapon_fire", Event_weapon_fire);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
 	//player_falldamage: report whenever anyone falls, esp for a lot of dmg
@@ -154,6 +155,47 @@ Action announce_weapon_drop(Handle timer, any client)
 	char time[64]; FormatTime(time, sizeof(time), "%Y-%m-%d %H:%M:%S", GetTime());
 	WriteFileLine(fp, "[%s] BOT %s dropped %s for %s", time, player, cls, newcls);
 	CloseHandle(fp);
+}
+
+//If you throw a grenade and it's the only thing you have, unselect.
+public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (GetPlayerWeaponSlot(client, 2) != -1) return; //Normally you'll have a knife, and things are fine.
+	char weapon[64]; event.GetString("weapon", weapon, sizeof(weapon));
+	int ammo_offset = 0;
+	if (!strcmp(weapon, "weapon_hegrenade")) ammo_offset = 14;
+	else if (!strcmp(weapon, "weapon_flashbang")) ammo_offset = 15;
+	else if (!strcmp(weapon, "weapon_smokegrenade")) ammo_offset = 16;
+	else if (!strcmp(weapon, "weapon_molotov") || !strcmp(weapon, "weapon_incgrenade")) ammo_offset = 17;
+	else if (!strcmp(weapon, "weapon_decoy")) ammo_offset = 18;
+	else return; //Wasn't a grenade you just threw.
+
+	//Okay, you threw a grenade, and we know where to check its ammo.
+	//Let's see if you have stock of anything else.
+	if (GetPlayerWeaponSlot(client, 0) != -1) return; //Got a primary? All good.
+	if (GetPlayerWeaponSlot(client, 1) != -1) return; //Got a pistol? All good.
+	//Already checked knife above as our fast-abort.
+	//Checking for a 'nade gives false positives.
+	if (GetPlayerWeaponSlot(client, 5) != -1) return; //Got the C4? All good.
+
+	//Do you have ammo of any other type of grenade?
+	for (int offset = 14; offset <= 18; ++offset)
+		if (offset != ammo_offset && GetEntProp(client, Prop_Data, "m_iAmmo", _, offset) > 0)
+			//You have some other 'nade. Default behaviour is fine.
+			return;
+
+	//You don't have anything else. Unselect the current weapon, allowing you
+	//to reselect your one and only grenade.
+	CreateTimer(0.25, deselect_weapon, client, TIMER_FLAG_NO_MAPCHANGE);
+}
+Action deselect_weapon(Handle timer, any client)
+{
+	ignore(timer);
+	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", -1);
+	//Ideally, I would like to now say "and select slot 4", but that doesn't seem
+	//to work. It might also be possible to pick by a different slot (eg "slot7"
+	//for flashbang), but I can't get that to work either.
 }
 
 public void Event_item_purchase(Event event, const char[] name, bool dontBroadcast)
