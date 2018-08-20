@@ -207,6 +207,10 @@ Action deselect_weapon(Handle timer, any client)
 	//for flashbang), but I can't get that to work either.
 	//ClientCommand(client, "use weapon_flashbang"); //This isn't reliable
 	//ClientCommand(client, "slot4"); //This isn't reliable either but it miiiight work.
+	//The below technique (supported by some setup code in OnPluginStart)
+	//is courtesy of SHUFEN.jp on alliedmods.net forums. It appears to be
+	//more reliable than ClientCommand. Validate it with usage, then nuke
+	//all the other variants.
 	int weapon = GetPlayerWeaponSlot(client, 3);
 	if (weapon == -1) return;
 	SDKCall(switch_weapon_call, client, weapon, 0);
