@@ -436,6 +436,8 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	if (damagetype & DMG_CLUB)
 	{
 		//Looks like someone got beaned with a 'nade.
+		//NOTE: Not all grenade impacts have the CLUB type. I'm not sure how else
+		//to recognize them; they have a type of zero and no weapon.
 		if (IsValidEntity(weapon))
 		{
 			char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
