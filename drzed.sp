@@ -26,6 +26,7 @@ ConVar sm_drzed_heal_price = null; //(0) If nonzero, healing can be bought for t
 ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you equip the Heavy Assault Suit (also buffs heal_max while worn)
 ConVar sm_drzed_gate_health_left = null; //(0) If nonzero, one-shots from full health will leave you on this much health
 ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much damage (after armor) ignore the health gate
+ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 #include "convars_drzed"
 
 StringMap weapon_names;
@@ -445,10 +446,17 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		}
 		else PrintToChatAll("Attacker %d clubbed %d for %.0f \"<%X>\" damage without a weapon", attacker, victim, damage, damagetype);
 	}
-	/*
-	if (attacker && attacker < MAXPLAYERS)
+	int hack = GetConVarInt(sm_drzed_hack);
+	if (hack && attacker && attacker < MAXPLAYERS)
 	{
-		//Mess with damage based on who's dealing it.
+		//Mess with damage based on who's dealing it. This is a total hack, and
+		//can change at any time while I play around with testing stuff.
+		if (hack == 2)
+		{
+			//Quickly prove that stuff is working
+			if (IsFakeClient(attacker)) damage = 0.0; else damage = 100.0;
+			return Plugin_Changed;
+		}
 		if (IsFakeClient(attacker)) return Plugin_Continue; //Example: Bots are unaffected
 		//Example: Scale the damage according to how hurt you are
 		//Like the TF2 Equalizer, but done as a simple scaling of all damage.
@@ -459,7 +467,6 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		else if (health < max) damage *= factor * health / max;
 		return Plugin_Changed;
 	}
-	// */
 	int gate = GetConVarInt(sm_drzed_gate_health_left);
 	if (!gate) return Plugin_Continue; //Health gate not active
 	int full = GetConVarInt(sm_drzed_max_hitpoints); if (!full) full = 100;
