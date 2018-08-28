@@ -5,6 +5,8 @@ These two Team Fortress 2 mods can be used independently or together. Carnage
 Compensation is a roll-the-dice mod based around a desire to create carnage;
 Bot Control allows human players to give instructions to bots on the same team.
 
+This repository also has a largely undocumented CS:GO mod. TODO: Document it.
+
 Carnage Collection and Compensation
 -----------------------------------
 
