@@ -240,7 +240,7 @@ void jayne(int team)
 	if (!GameRules_GetProp("m_bFreezePeriod")) return; //Can only be done during freeze
 	for (int client = 1; client < MaxClients; ++client)
 	{
-		if (!IsClientInGame(client) || !IsPlayerAlive(client) || !IsFakeClient(client) || GetClientTeam(client) != team) continue;
+		if (!IsClientInGame(client) || !IsPlayerAlive(client) || !IsFakeClient(client) || (team && GetClientTeam(client) != team)) continue;
 		int money = GetEntProp(client, Prop_Send, "m_iAccount");
 		int have_he = GetEntProp(client, Prop_Data, "m_iAmmo", _, 14);
 		int have_flash = GetEntProp(client, Prop_Data, "m_iAmmo", _, 15);
