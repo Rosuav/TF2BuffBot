@@ -287,6 +287,7 @@ void jayne(int team)
 		if (bought) FakeClientCommandEx(client, "say_team Buying %d grenades.", bought);
 	}
 }
+public Action buy_nades(Handle timer, any ignore) {jayne(0);}
 
 //Note that the mark is global; one player can mark and another can check pos.
 float marked_pos[3];
@@ -296,12 +297,14 @@ int last_freeze = -1;
 public void OnGameFrame()
 {
 	int freeze = GameRules_GetProp("m_bFreezePeriod");
-	if (freeze != last_freeze)
+	if (freeze && !last_freeze)
 	{
-		last_freeze = freeze;
-		if (freeze) PrintToServer("** Now frozen **");
-		else PrintToServer("** No longer frozen **");
+		//When we go into freeze time, wait half a second, then get the bots to buy nades.
+		//Note that they won't buy nades if we're out of freeze time, so you need at least
+		//one full second of freeze in order to do this reliably.
+		CreateTimer(0.5, buy_nades, 0, TIMER_FLAG_NO_MAPCHANGE);
 	}
+	last_freeze = freeze;
 
 	for (int i = 0; i < nshowpos; ++i)
 	{
