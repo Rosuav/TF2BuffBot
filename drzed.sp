@@ -137,7 +137,7 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	//Code duplicated from the timer below.
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
-	PrintToServer("BOT %s (%s) dropped a %s", player, GetClientTeam(client) == CS_TEAM_T ? "(T)" : "(CT)", cls);
+	PrintToServer("BOT %s (%s) dropped a %s", player, GetClientTeam(client) == CS_TEAM_T ? "T" : "CT", cls);
 }
 Action announce_weapon_drop(Handle timer, any client)
 {
