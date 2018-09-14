@@ -235,6 +235,59 @@ public void Event_item_purchase(Event event, const char[] name, bool dontBroadca
 	}
 }
 
+void jayne(int team)
+{
+		if (!GameRules_GetProp("m_bFreezePeriod")) return; //Can only be done during freeze
+		for (int client = 1; client < MaxClients; ++client)
+		{
+			if (!IsClientInGame(client) || !IsPlayerAlive(client) || !IsFakeClient(client) || GetClientTeam(client) != team) continue;
+			int money = GetEntProp(client, Prop_Send, "m_iAccount");
+			int have_he = GetEntProp(client, Prop_Data, "m_iAmmo", _, 14);
+			int have_flash = GetEntProp(client, Prop_Data, "m_iAmmo", _, 15);
+			int have_smoke = GetEntProp(client, Prop_Data, "m_iAmmo", _, 16);
+			int have_molly = GetEntProp(client, Prop_Data, "m_iAmmo", _, 17);
+			//And decoys are in array position 18. TODO: Check for total grenades,
+			//to avoid having the bots claim to have bought 3 nades when they had
+			//2 already (will need to include decoys in that count).
+			int molly_price = team == 2 ? 400 : 600; //Incendiary grenades are overpriced for CTs
+			money -= 1000; //Ensure that the bots don't spend below $1000 this way (just in case).
+			int bought = 0;
+			for (int i = 0; i < 7; ++i)
+			{
+				switch (RoundToFloor(7*GetURandomFloat()))
+				{
+					//case 0: buy HE - handled by 'default' below
+					case 1: if (!have_flash && money >= 200)
+					{
+						FakeClientCommandEx(client, "buy flashbang");
+						money -= 200;
+						++bought; ++have_flash;
+					}
+					case 2: if (!have_smoke && money >= 300)
+					{
+						FakeClientCommandEx(client, "buy smoke");
+						money -= 300;
+						++bought; ++have_smoke;
+					}
+					case 3: if (!have_molly && money >= molly_price)
+					{
+						FakeClientCommandEx(client, "buy molotov");
+						money -= molly_price;
+						++bought; ++have_molly;
+					}
+					default: if (!have_he && money >= 300) //Higher chance of buying an HE
+					{
+						FakeClientCommandEx(client, "buy hegrenade");
+						money -= 300;
+						++bought; ++have_he;
+					}
+				}
+			}
+			char botname[64]; GetClientName(client, botname, sizeof(botname));
+			if (bought) FakeClientCommandEx(client, "say_team Buying %d grenades.", bought);
+		}
+}
+
 //Note that the mark is global; one player can mark and another can check pos.
 float marked_pos[3];
 int show_positions[MAXPLAYERS + 1];
@@ -340,56 +393,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	if (!strcmp(msg, "!jayne"))
 	{
 		//It'd sure be nice if we had more grenades on the team!
-		if (!GameRules_GetProp("m_bFreezePeriod")) return; //Can only be done during freeze
-		int team = GetClientTeam(self);
-		for (int client = 1; client < MaxClients; ++client)
-		{
-			if (!IsClientInGame(client) || !IsPlayerAlive(client) || !IsFakeClient(client) || GetClientTeam(client) != team) continue;
-			int money = GetEntProp(client, Prop_Send, "m_iAccount");
-			int have_he = GetEntProp(client, Prop_Data, "m_iAmmo", _, 14);
-			int have_flash = GetEntProp(client, Prop_Data, "m_iAmmo", _, 15);
-			int have_smoke = GetEntProp(client, Prop_Data, "m_iAmmo", _, 16);
-			int have_molly = GetEntProp(client, Prop_Data, "m_iAmmo", _, 17);
-			//And decoys are in array position 18. TODO: Check for total grenades,
-			//to avoid having the bots claim to have bought 3 nades when they had
-			//2 already (will need to include decoys in that count).
-			int molly_price = team == 2 ? 400 : 600; //Incendiary grenades are overpriced for CTs
-			money -= 1000; //Ensure that the bots don't spend below $1000 this way (just in case).
-			int bought = 0;
-			for (int i = 0; i < 7; ++i)
-			{
-				switch (RoundToFloor(7*GetURandomFloat()))
-				{
-					//case 0: buy HE - handled by 'default' below
-					case 1: if (!have_flash && money >= 200)
-					{
-						FakeClientCommandEx(client, "buy flashbang");
-						money -= 200;
-						++bought; ++have_flash;
-					}
-					case 2: if (!have_smoke && money >= 300)
-					{
-						FakeClientCommandEx(client, "buy smoke");
-						money -= 300;
-						++bought; ++have_smoke;
-					}
-					case 3: if (!have_molly && money >= molly_price)
-					{
-						FakeClientCommandEx(client, "buy molotov");
-						money -= molly_price;
-						++bought; ++have_molly;
-					}
-					default: if (!have_he && money >= 300) //Higher chance of buying an HE
-					{
-						FakeClientCommandEx(client, "buy hegrenade");
-						money -= 300;
-						++bought; ++have_he;
-					}
-				}
-			}
-			char botname[64]; GetClientName(client, botname, sizeof(botname));
-			if (bought) FakeClientCommandEx(client, "say_team Buying %d grenades.", bought);
-		}
+		jayne(GetClientTeam(self));
 		return;
 	}
 	if (!strcmp(msg, "!heal"))
