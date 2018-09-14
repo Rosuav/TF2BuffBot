@@ -252,6 +252,8 @@ void jayne(int team)
 		int molly_price = team == 2 ? 400 : 600; //Incendiary grenades are overpriced for CTs
 		money -= 1000; //Ensure that the bots don't spend below $1000 this way (just in case).
 		int bought = 0;
+		int which = -1;
+		char nade_desc[][] = {"HE", "flash", "smoke", "molly"};
 		for (int i = 0; i < 7; ++i)
 		{
 			switch (RoundToFloor(7*GetURandomFloat()))
@@ -262,29 +264,34 @@ void jayne(int team)
 					FakeClientCommandEx(client, "buy flashbang");
 					money -= 200;
 					++bought; ++have_flash;
+					which = 1;
 				}
 				case 2: if (!have_smoke && money >= 300)
 				{
 					FakeClientCommandEx(client, "buy smoke");
 					money -= 300;
 					++bought; ++have_smoke;
+					which = 2;
 				}
 				case 3: if (!have_molly && money >= molly_price)
 				{
 					FakeClientCommandEx(client, "buy molotov");
 					money -= molly_price;
 					++bought; ++have_molly;
+					which = 3;
 				}
 				default: if (!have_he && money >= 300) //Higher chance of buying an HE
 				{
 					FakeClientCommandEx(client, "buy hegrenade");
 					money -= 300;
 					++bought; ++have_he;
+					which = 0;
 				}
 			}
 		}
 		char botname[64]; GetClientName(client, botname, sizeof(botname));
-		if (bought) FakeClientCommandEx(client, "say_team Buying %d grenades.", bought);
+		if (bought == 1) FakeClientCommandEx(client, "say_team Buying %s.", nade_desc[which]); //If only buying one, say which
+		else if (bought) FakeClientCommandEx(client, "say_team Buying %d grenades.", bought);
 	}
 }
 public Action buy_nades(Handle timer, any ignore) {jayne(0);}
