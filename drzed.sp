@@ -138,7 +138,7 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
 	GetTrieString(weapon_names, cls, cls, sizeof(cls));
-	PrintToServer("BOT %s dropped a %s", player, cls);
+	PrintToServer("BOT %s (%s) dropped a %s", player, GetClientTeam(client) == CS_TEAM_T ? "(T)" : "(CT)", cls);
 }
 Action announce_weapon_drop(Handle timer, any client)
 {
