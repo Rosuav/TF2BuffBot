@@ -253,7 +253,7 @@ void jayne(int team)
 		money -= 1000; //Ensure that the bots don't spend below $1000 this way (just in case).
 		int bought = 0;
 		int which = -1;
-		char nade_desc[][] = {"HE", "flash", "smoke", "molly"};
+		char nade_desc[][] = {"HE", "Flash", "Smoke", "Molly"};
 		for (int i = 0; i < 7; ++i)
 		{
 			switch (RoundToFloor(7*GetURandomFloat()))
