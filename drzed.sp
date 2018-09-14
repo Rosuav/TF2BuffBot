@@ -133,6 +133,12 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	//Delay the actual message to allow a replacement weapon to be collected
 	dropped_weapon[client] = weapon;
 	CreateTimer(0.01, announce_weapon_drop, client, TIMER_FLAG_NO_MAPCHANGE);
+	//DEBUG: For some reason, not all weapon drops are getting properly announced. Not sure why.
+	//Code duplicated from the timer below.
+	char player[64]; GetClientName(client, player, sizeof(player));
+	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
+	GetTrieString(weapon_names, cls, cls, sizeof(cls));
+	PrintToServer("BOT %s dropped a %s", player, cls);
 }
 Action announce_weapon_drop(Handle timer, any client)
 {
