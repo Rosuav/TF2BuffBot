@@ -239,31 +239,15 @@ public void Event_item_purchase(Event event, const char[] name, bool dontBroadca
 float marked_pos[3];
 int show_positions[MAXPLAYERS + 1];
 int nshowpos = 0;
-int last_freeze = -1; RoundState last_state;
-char state_desc[][] = {
-	"RoundState_Init",
-	"RoundState_Pregame",
-	"RoundState_StartGame",
-	"RoundState_Preround",
-	"RoundState_RoundRunning",
-	"RoundState_TeamWin",
-	"RoundState_Restart",
-	"RoundState_Stalemate",
-	"RoundState_GameOver",
-	"RoundState_Bonus",
-	"RoundState_BetweenRounds",
-};
+int last_freeze = -1;
 public void OnGameFrame()
 {
 	int freeze = GameRules_GetProp("m_bFreezePeriod");
-	RoundState state = GameRules_GetRoundState();
-	if (freeze != last_freeze || state != last_state)
+	if (freeze != last_freeze)
 	{
-		last_freeze = freeze; last_state = state;
-		PrintToServer("Now in %s [%s]",
-			state_desc[state],
-			freeze ? "frozen" : "unfrozen"
-		);
+		last_freeze = freeze;
+		if (freeze) PrintToServer("** Now frozen **");
+		else PrintToServer("** No longer frozen **");
 	}
 
 	for (int i = 0; i < nshowpos; ++i)
