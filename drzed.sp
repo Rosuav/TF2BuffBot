@@ -440,6 +440,8 @@ void sethealth(int entity)
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
 	int &weapon, float damageForce[3], float damagePosition[3])
 {
+	#if 0
+	//(CLUB damage doesn't seem all that significant after all)
 	if (damagetype & DMG_CLUB)
 	{
 		//Looks like someone got beaned with a 'nade.
@@ -452,6 +454,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		}
 		else PrintToChatAll("Attacker %d clubbed %d for %.0f \"<%X>\" damage without a weapon", attacker, victim, damage, damagetype);
 	}
+	#endif
 	int hack = GetConVarInt(sm_drzed_hack);
 	if (hack && attacker && attacker < MAXPLAYERS)
 	{
