@@ -137,6 +137,7 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	//Code duplicated from the timer below.
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
+	//This line *is* happening even when stuff is breaking.
 	PrintToServer("BOT %s (%s) dropped a %s", player, GetClientTeam(client) == CS_TEAM_T ? "T" : "CT", cls);
 }
 Action announce_weapon_drop(Handle timer, any client)
@@ -152,6 +153,7 @@ Action announce_weapon_drop(Handle timer, any client)
 		if (ignoreme[0] && !strcmp(cls, ignoreme)) return; //It's a default weapon.
 	}
 	GetTrieString(weapon_names, cls, cls, sizeof(cls)); //Transform and put back in the same buffer
+	PrintToServer("==> BOT %s dropped a %s", player, cls);
 	//TODO: Check which weapon slot this goes in. If it's not a primary weapon, ignore it.
 	//Or alternatively: check the appropriate slot, rather than hard-coding Primary.
 	int newweap = GetPlayerWeaponSlot(client, 0); //Whatcha got as your primary now?
