@@ -143,8 +143,8 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 Action announce_weapon_drop(Handle timer, any client)
 {
 	ignore(timer);
-	if (!IsValidEntity(dropped_weapon[client])) {PrintToServer("==> Ignoring no-longer-valid entity"); return;}
 	char player[64]; GetClientName(client, player, sizeof(player));
+	if (!IsValidEntity(dropped_weapon[client])) {PrintToServer("==> BOT %s: Ignoring no-longer-valid entity", player); return;}
 	char cls[64]; GetEntityClassname(dropped_weapon[client], cls, sizeof(cls));
 	if (!strcmp(cls, "weapon_c4")) {PrintToServer("==> BOT %s: Ignoring C4", player); return;} //TODO: Once the slot check is implemented, ignore if not primary/secondary
 	for (int i = 0; i < sizeof(default_weapons); ++i)
