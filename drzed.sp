@@ -143,14 +143,18 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 Action announce_weapon_drop(Handle timer, any client)
 {
 	ignore(timer);
-	if (!IsValidEntity(dropped_weapon[client])) return;
+	if (!IsValidEntity(dropped_weapon[client])) {PrintToServer("==> Ignoring no-longer-valid entity"); return;}
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(dropped_weapon[client], cls, sizeof(cls));
-	if (!strcmp(cls, "weapon_c4")) return; //TODO: Once the slot check is implemented, ignore if not primary/secondary
+	if (!strcmp(cls, "weapon_c4")) {PrintToServer("==> BOT %s: Ignoring C4", player); return;} //TODO: Once the slot check is implemented, ignore if not primary/secondary
 	for (int i = 0; i < sizeof(default_weapons); ++i)
 	{
 		char ignoreme[64]; GetConVarString(default_weapons[i], ignoreme, sizeof(ignoreme));
-		if (ignoreme[0] && !strcmp(cls, ignoreme)) return; //It's a default weapon.
+		if (ignoreme[0] && !strcmp(cls, ignoreme)) //It's a default weapon.
+		{
+			PrintToServer("==> BOT %s: Ignoring default weapon %s", player, ignoreme);
+			return;
+		}
 	}
 	GetTrieString(weapon_names, cls, cls, sizeof(cls)); //Transform and put back in the same buffer
 	PrintToServer("==> BOT %s dropped a %s", player, cls);
