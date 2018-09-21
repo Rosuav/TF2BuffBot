@@ -6,11 +6,6 @@
 #pragma newdecls required
 #pragma semicolon 1
 
-//By default, calling Debug() does nothing.
-public void Debug(const char[] fmt, any ...) { }
-//For a full log of carnage score changes, enable this:
-//#define Debug PrintToServer
-
 public Plugin myinfo =
 {
 	name = "Dr Zed",
@@ -35,7 +30,6 @@ Handle switch_weapon_call = null;
 
 public void OnPluginStart()
 {
-	RegAdminCmd("sm_hello", Command_Hello, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("item_purchase", Event_item_purchase);
 	HookEvent("weapon_fire", Event_weapon_fire);
@@ -93,13 +87,6 @@ public void OnPluginStart()
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	switch_weapon_call = EndPrepSDKCall();
 	delete gamedata;
-}
-
-public Action Command_Hello(int client, int args)
-{
-	PrintToChatAll("Hello, world!");
-	PrintToServer("Hello, server!");
-	return Plugin_Handled;
 }
 
 //Silence the warning "unused parameter"
@@ -468,21 +455,6 @@ void sethealth(int entity)
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
 	int &weapon, float damageForce[3], float damagePosition[3])
 {
-	#if 0
-	//(CLUB damage doesn't seem all that significant after all)
-	if (damagetype & DMG_CLUB)
-	{
-		//Looks like someone got beaned with a 'nade.
-		//NOTE: Not all grenade impacts have the CLUB type. I'm not sure how else
-		//to recognize them; they have a type of zero and no weapon.
-		if (IsValidEntity(weapon))
-		{
-			char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
-			PrintToChatAll("Attacker %d clubbed %d for %.0f \"<%X>\" damage with %s", attacker, victim, damage, damagetype, cls);
-		}
-		else PrintToChatAll("Attacker %d clubbed %d for %.0f \"<%X>\" damage without a weapon", attacker, victim, damage, damagetype);
-	}
-	#endif
 	int hack = GetConVarInt(sm_drzed_hack);
 	if (hack && attacker && attacker < MAXPLAYERS)
 	{
