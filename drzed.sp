@@ -24,6 +24,17 @@ ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much da
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 #include "convars_drzed"
 
+//Write something to the server console and also the live-stream display (if applicable)
+public void PrintToStream(const char[] fmt, any ...)
+{
+	char buffer[4096];
+	VFormat(buffer, sizeof(buffer), fmt, 2);
+	PrintToServer(buffer);
+	File fp = OpenFile("server_chat.log", "a");
+	WriteFileLine(fp, buffer);
+	CloseHandle(fp);
+}
+
 StringMap weapon_names;
 ConVar default_weapons[4];
 Handle switch_weapon_call = null;
@@ -125,26 +136,26 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
 	//This line *is* happening even when stuff is breaking.
-	PrintToServer("BOT %s (%s) dropped a %s", player, GetClientTeam(client) == CS_TEAM_T ? "T" : "CT", cls);
+	PrintToStream("BOT %s (%s) dropped a %s", player, GetClientTeam(client) == CS_TEAM_T ? "T" : "CT", cls);
 }
 Action announce_weapon_drop(Handle timer, any client)
 {
 	ignore(timer);
 	char player[64]; GetClientName(client, player, sizeof(player));
-	if (!IsValidEntity(dropped_weapon[client])) {PrintToServer("==> BOT %s: Ignoring no-longer-valid entity", player); return;}
+	if (!IsValidEntity(dropped_weapon[client])) {PrintToStream("==> BOT %s: Ignoring no-longer-valid entity", player); return;}
 	char cls[64]; GetEntityClassname(dropped_weapon[client], cls, sizeof(cls));
-	if (!strcmp(cls, "weapon_c4")) {PrintToServer("==> BOT %s: Ignoring C4", player); return;} //TODO: Once the slot check is implemented, ignore if not primary/secondary
+	if (!strcmp(cls, "weapon_c4")) {PrintToStream("==> BOT %s: Ignoring C4", player); return;} //TODO: Once the slot check is implemented, ignore if not primary/secondary
 	for (int i = 0; i < sizeof(default_weapons); ++i)
 	{
 		char ignoreme[64]; GetConVarString(default_weapons[i], ignoreme, sizeof(ignoreme));
 		if (ignoreme[0] && !strcmp(cls, ignoreme)) //It's a default weapon.
 		{
-			PrintToServer("==> BOT %s: Ignoring default weapon %s", player, ignoreme);
+			PrintToStream("==> BOT %s: Ignoring default weapon %s", player, ignoreme);
 			return;
 		}
 	}
 	GetTrieString(weapon_names, cls, cls, sizeof(cls)); //Transform and put back in the same buffer
-	PrintToServer("==> BOT %s dropped a %s", player, cls);
+	PrintToStream("==> BOT %s dropped a %s", player, cls);
 	//TODO: Check which weapon slot this goes in. If it's not a primary weapon, ignore it.
 	//Or alternatively: check the appropriate slot, rather than hard-coding Primary.
 	int newweap = GetPlayerWeaponSlot(client, 0); //Whatcha got as your primary now?
