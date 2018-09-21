@@ -122,15 +122,17 @@ the bots have done. This comes in a few varieties:
 3) "Bots, buy nades" - all bots attempt to buy HE, Flash, Smoke, Molotov. A
    bot normally will buy only one nade per round. This is stupid.
 */
-int dropped_weapon[MAXPLAYERS + 1];
 public Action CS_OnCSWeaponDrop(int client, int weapon)
 {
 	if (client > MAXPLAYERS) return;
 	if (!GameRules_GetProp("m_bFreezePeriod")) return; //Announce only during freeze time.
 	if (!IsFakeClient(client)) return; //Don't force actual players to speak - it violates expectations.
 	//Delay the actual message to allow a replacement weapon to be collected
-	dropped_weapon[client] = weapon;
-	CreateTimer(0.01, announce_weapon_drop, client, TIMER_FLAG_NO_MAPCHANGE);
+	Handle params;
+	CreateDataTimer(0.01, announce_weapon_drop, params, TIMER_FLAG_NO_MAPCHANGE);
+	WritePackCell(params, client);
+	WritePackCell(params, weapon);
+	ResetPack(params);
 	//DEBUG: For some reason, not all weapon drops are getting properly announced. Not sure why.
 	//Code duplicated from the timer below.
 	char player[64]; GetClientName(client, player, sizeof(player));
@@ -138,12 +140,14 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	//This line *is* happening even when stuff is breaking.
 	PrintToStream("BOT %s (%s) dropped a %s", player, GetClientTeam(client) == CS_TEAM_T ? "T" : "CT", cls);
 }
-Action announce_weapon_drop(Handle timer, any client)
+Action announce_weapon_drop(Handle timer, Handle params)
 {
 	ignore(timer);
+	int client = ReadPackCell(params);
+	int weapon = ReadPackCell(params);
 	char player[64]; GetClientName(client, player, sizeof(player));
-	if (!IsValidEntity(dropped_weapon[client])) {PrintToStream("==> BOT %s: Ignoring no-longer-valid entity", player); return;}
-	char cls[64]; GetEntityClassname(dropped_weapon[client], cls, sizeof(cls));
+	if (!IsValidEntity(weapon)) {PrintToStream("==> BOT %s: Ignoring no-longer-valid entity", player); return;}
+	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
 	if (!strcmp(cls, "weapon_c4")) {PrintToStream("==> BOT %s: Ignoring C4", player); return;} //TODO: Once the slot check is implemented, ignore if not primary/secondary
 	for (int i = 0; i < sizeof(default_weapons); ++i)
 	{
