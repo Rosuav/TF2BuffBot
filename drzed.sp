@@ -139,8 +139,8 @@ Action announce_weapon_drop(Handle timer, Handle params)
 	ignore(timer);
 	int client = ReadPackCell(params);
 	int weapon = ReadPackCell(params);
+	if (!IsClientInGame(client) || !IsValidEntity(weapon)) return; //Map changed, player left, or something like that
 	char player[64]; GetClientName(client, player, sizeof(player));
-	if (!IsValidEntity(weapon)) return;
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
 	if (!strcmp(cls, "weapon_c4")) return; //TODO: Once the slot check is implemented, ignore if not primary/secondary
 	for (int i = 0; i < sizeof(default_weapons); ++i)
