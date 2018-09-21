@@ -132,6 +132,11 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	CreateDataTimer(0.01, announce_weapon_drop, params, TIMER_FLAG_NO_MAPCHANGE);
 	WritePackCell(params, client);
 	WritePackCell(params, weapon);
+	//Detect the slot that this weapon goes in by looking for it pre-drop.
+	//This hook is executed prior to the drop actually happening, so the weapon should
+	//still be in the character's inventory somewhere. Currently will only ever
+	//transmit "slot 1" (secondary/pistol) or "slot 0" (anything else).
+	WritePackCell(params, GetPlayerWeaponSlot(client, 1) == weapon);
 	ResetPack(params);
 }
 Action announce_weapon_drop(Handle timer, Handle params)
@@ -139,6 +144,7 @@ Action announce_weapon_drop(Handle timer, Handle params)
 	ignore(timer);
 	int client = ReadPackCell(params);
 	int weapon = ReadPackCell(params);
+	int slot = ReadPackCell(params);
 	if (!IsClientInGame(client) || !IsValidEntity(weapon)) return; //Map changed, player left, or something like that
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
@@ -149,9 +155,7 @@ Action announce_weapon_drop(Handle timer, Handle params)
 		if (ignoreme[0] && !strcmp(cls, ignoreme)) return; //It's a default weapon.
 	}
 	GetTrieString(weapon_names, cls, cls, sizeof(cls)); //Transform and put back in the same buffer
-	//TODO: Check which weapon slot this goes in. If it's not a primary weapon, ignore it.
-	//Or alternatively: check the appropriate slot, rather than hard-coding Primary.
-	int newweap = GetPlayerWeaponSlot(client, 0); //Whatcha got as your primary now?
+	int newweap = GetPlayerWeaponSlot(client, slot); //Whatcha got as your primary now?
 	char newcls[64] = "(nothing)";
 	char command[256];
 	if (newweap != -1)
