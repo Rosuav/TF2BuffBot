@@ -133,12 +133,6 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	WritePackCell(params, client);
 	WritePackCell(params, weapon);
 	ResetPack(params);
-	//DEBUG: For some reason, not all weapon drops are getting properly announced. Not sure why.
-	//Code duplicated from the timer below.
-	char player[64]; GetClientName(client, player, sizeof(player));
-	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
-	//This line *is* happening even when stuff is breaking.
-	PrintToStream("BOT %s (%s) dropped a %s", player, GetClientTeam(client) == CS_TEAM_T ? "T" : "CT", cls);
 }
 Action announce_weapon_drop(Handle timer, Handle params)
 {
@@ -146,20 +140,15 @@ Action announce_weapon_drop(Handle timer, Handle params)
 	int client = ReadPackCell(params);
 	int weapon = ReadPackCell(params);
 	char player[64]; GetClientName(client, player, sizeof(player));
-	if (!IsValidEntity(weapon)) {PrintToStream("==> BOT %s: Ignoring no-longer-valid entity", player); return;}
+	if (!IsValidEntity(weapon)) return;
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
-	if (!strcmp(cls, "weapon_c4")) {PrintToStream("==> BOT %s: Ignoring C4", player); return;} //TODO: Once the slot check is implemented, ignore if not primary/secondary
+	if (!strcmp(cls, "weapon_c4")) return; //TODO: Once the slot check is implemented, ignore if not primary/secondary
 	for (int i = 0; i < sizeof(default_weapons); ++i)
 	{
 		char ignoreme[64]; GetConVarString(default_weapons[i], ignoreme, sizeof(ignoreme));
-		if (ignoreme[0] && !strcmp(cls, ignoreme)) //It's a default weapon.
-		{
-			PrintToStream("==> BOT %s: Ignoring default weapon %s", player, ignoreme);
-			return;
-		}
+		if (ignoreme[0] && !strcmp(cls, ignoreme)) return; //It's a default weapon.
 	}
 	GetTrieString(weapon_names, cls, cls, sizeof(cls)); //Transform and put back in the same buffer
-	PrintToStream("==> BOT %s dropped a %s", player, cls);
 	//TODO: Check which weapon slot this goes in. If it's not a primary weapon, ignore it.
 	//Or alternatively: check the appropriate slot, rather than hard-coding Primary.
 	int newweap = GetPlayerWeaponSlot(client, 0); //Whatcha got as your primary now?
