@@ -146,6 +146,8 @@ Action announce_weapon_drop(Handle timer, Handle params)
 	int weapon = ReadPackCell(params);
 	int slot = ReadPackCell(params);
 	if (!IsClientInGame(client) || !IsValidEntity(weapon)) return; //Map changed, player left, or something like that
+	int newweap = GetPlayerWeaponSlot(client, slot); //Whatcha got now?
+	if (newweap == weapon) return; //Dropped a weapon and instantly picked it up again (seems to happen in Short Demolition mode a lot)
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
 	if (!strcmp(cls, "weapon_c4")) return; //TODO: Once the slot check is implemented, ignore if not primary/secondary
@@ -155,7 +157,6 @@ Action announce_weapon_drop(Handle timer, Handle params)
 		if (ignoreme[0] && !strcmp(cls, ignoreme)) return; //It's a default weapon.
 	}
 	GetTrieString(weapon_names, cls, cls, sizeof(cls)); //Transform and put back in the same buffer
-	int newweap = GetPlayerWeaponSlot(client, slot); //Whatcha got as your primary now?
 	char newcls[64] = "(nothing)";
 	char command[256];
 	if (newweap != -1)
