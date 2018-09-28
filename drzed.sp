@@ -25,7 +25,7 @@ ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
-//tail -f /steamcmd_linux/csgo/csgo/server_chat.log
+//tail -f steamcmd_linux/csgo/csgo/server_chat.log
 public void PrintToStream(const char[] fmt, any ...)
 {
 	char buffer[4096];
