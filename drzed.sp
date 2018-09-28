@@ -86,6 +86,16 @@ public void OnPluginStart()
 	SetTrieString(weapon_names, "weapon_p90", "P90");
 	SetTrieString(weapon_names, "weapon_bizon", "PP-Bizon");
 	SetTrieString(weapon_names, "weapon_taser", "Zeus x27");
+	SetTrieString(weapon_names, "weapon_knife", "Knife");
+	SetTrieString(weapon_names, "weapon_hegrenade", "HE");
+	SetTrieString(weapon_names, "hegrenade_projectile", "HE"); //The thrown grenade is a separate entity class from the wielded grenade
+	SetTrieString(weapon_names, "weapon_molotov", "Molly"); //T-side
+	SetTrieString(weapon_names, "weapon_incgrenade", "Molly"); //CT-side
+	SetTrieString(weapon_names, "molotov_projectile", "Molly"); //Getting beaned with EITHER fire 'nade
+	SetTrieString(weapon_names, "inferno", "Molly"); //The actual flames
+	SetTrieString(weapon_names, "weapon_flashbang", "Flash"); //Non-damaging but you can still get beaned
+	SetTrieString(weapon_names, "weapon_c4", "C4"); //The carried C4
+	SetTrieString(weapon_names, "planted_c4", "C4"); //When the bomb goes off.... bladabooooom
 
 	default_weapons[0] = FindConVar("mp_ct_default_primary");
 	default_weapons[1] = FindConVar("mp_t_default_primary");
