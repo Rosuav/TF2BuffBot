@@ -25,6 +25,7 @@ ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
+//tail -f /steamcmd_linux/csgo/csgo/server_chat.log
 public void PrintToStream(const char[] fmt, any ...)
 {
 	char buffer[4096];
@@ -464,6 +465,19 @@ void sethealth(int entity)
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
 	int &weapon, float damageForce[3], float damagePosition[3])
 {
+	//Log all damage to console
+	int vicweap = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
+	char atkcls[64]; GetEntityClassname(weapon > 0 ? weapon : inflictor, atkcls, sizeof(atkcls));
+	char viccls[64]; GetEntityClassname(vicweap, viccls, sizeof(viccls));
+	GetTrieString(weapon_names, atkcls, atkcls, sizeof(atkcls));
+	GetTrieString(weapon_names, viccls, viccls, sizeof(viccls));
+	int cap = GetClientHealth(victim);
+	int score = RoundToFloor(damage);
+	if (score > cap) score = cap + 100; //100 bonus points for the kill, but the actual damage caps out at the health taken.
+	File fp = OpenFile("weapon_scores.log", "a");
+	WriteFileLine(fp, "%s damaged %s for %d (%.0fhp)", atkcls, viccls, score, damage);
+	CloseHandle(fp);
+
 	int hack = GetConVarInt(sm_drzed_hack);
 	if (hack && attacker && attacker < MAXPLAYERS)
 	{
