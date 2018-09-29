@@ -97,6 +97,8 @@ public void OnPluginStart()
 	SetTrieString(weapon_names, "flashbang_projectile", "Flash");
 	SetTrieString(weapon_names, "weapon_smokegrenade", "Smoke"); //Ditto
 	SetTrieString(weapon_names, "smokegrenade_projectile", "Smoke"); //Guessed - not proven
+	SetTrieString(weapon_names, "weapon_decoy", "Smoke"); //When wielded
+	SetTrieString(weapon_names, "decoy_projectile", "Smoke"); //Beaning and also the tiny boom at the end
 	SetTrieString(weapon_names, "weapon_c4", "C4"); //The carried C4
 	SetTrieString(weapon_names, "planted_c4", "C4"); //When the bomb goes off.... bladabooooom
 
