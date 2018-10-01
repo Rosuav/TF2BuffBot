@@ -53,23 +53,29 @@ public void OnPluginStart()
 
 	weapon_names = CreateTrie();
 	//Weapons not mentioned will be shown by their class names.
-	//NOTE: Weapons that have alternates (P2000/USP-S, Deagle/R8) may possibly be
-	//distinguished by netprop m_iEntityQuality which appears to be 4 for the
-	//non-stock item. There are other qualities, including Strange/Stat-Trak, and
-	//I don't know how they interact.
+	//NOTE: Weapons that have alternates (P2000/USP-S, Deagle/R8) may be
+	//distinguished by netprop m_iItemDefinitionIndex - see describe_weapon().
+	//There are other qualities, including Strange/Stat-Trak, which can be
+	//seen in netprop m_iEntityQuality.
 	SetTrieString(weapon_names, "weapon_glock", "Glock");
 	SetTrieString(weapon_names, "weapon_hkp2000", "*P2000/USP*");
 	SetTrieString(weapon_names, "*P2000/USP*32", "P2000");
 	SetTrieString(weapon_names, "*P2000/USP*61", "USP-S");
-	SetTrieString(weapon_names, "weapon_p250", "P250/CZ75a");
+	SetTrieString(weapon_names, "weapon_p250", "*P250/CZ75a*");
+	SetTrieString(weapon_names, "*P250/CZ75a*36", "P250");
+	SetTrieString(weapon_names, "*P250/CZ75a*63", "CZ75a");
 	SetTrieString(weapon_names, "weapon_elite", "Dualies");
 	SetTrieString(weapon_names, "weapon_fiveseven", "Five-Seven");
 	SetTrieString(weapon_names, "weapon_tec9", "Tec-9");
-	SetTrieString(weapon_names, "weapon_deagle", "Deagle"); //or R8, but nobody uses that
+	SetTrieString(weapon_names, "weapon_deagle", "*Deagle/R8*");
+	SetTrieString(weapon_names, "*Deagle/R8*1", "Deagle");
+	SetTrieString(weapon_names, "*Deagle/R8*64", "R8");
 	SetTrieString(weapon_names, "weapon_ak47", "AK-47");
 	SetTrieString(weapon_names, "weapon_galilar", "Galil");
 	SetTrieString(weapon_names, "weapon_famas", "FAMAS");
-	SetTrieString(weapon_names, "weapon_m4a1", "M4"); //M4A4 or M4A1-S
+	SetTrieString(weapon_names, "weapon_m4a1", "*M4*");
+	SetTrieString(weapon_names, "*M4*16", "M4A4");
+	SetTrieString(weapon_names, "*M4*60", "M4A1-S");
 	SetTrieString(weapon_names, "weapon_ssg08", "Scout");
 	SetTrieString(weapon_names, "weapon_aug", "AUG");
 	SetTrieString(weapon_names, "weapon_sg556", "SG-553");
@@ -83,7 +89,9 @@ public void OnPluginStart()
 	SetTrieString(weapon_names, "weapon_mag7", "MAG-7");
 	SetTrieString(weapon_names, "weapon_mac10", "MAC-10");
 	SetTrieString(weapon_names, "weapon_mp9", "MP9");
-	SetTrieString(weapon_names, "weapon_mp7", "MP5/MP7");
+	SetTrieString(weapon_names, "weapon_mp7", "*MP5/MP7*");
+	SetTrieString(weapon_names, "*MP5/MP7*23", "MP5-SD");
+	SetTrieString(weapon_names, "*MP5/MP7*33", "MP7");
 	SetTrieString(weapon_names, "weapon_ump45", "UMP-45");
 	SetTrieString(weapon_names, "weapon_p90", "P90");
 	SetTrieString(weapon_names, "weapon_bizon", "PP-Bizon");
