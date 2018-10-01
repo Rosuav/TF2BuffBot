@@ -523,7 +523,7 @@ void sethealth(int entity)
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
 	int &weapon, float damageForce[3], float damagePosition[3])
 {
-	//Log all damage to console
+	//Log all damage to a file that gets processed by a Python script
 	int vicweap = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
 	char atkcls[64]; describe_weapon(weapon > 0 ? weapon : inflictor, atkcls, sizeof(atkcls));
 	char viccls[64]; describe_weapon(vicweap, viccls, sizeof(viccls));
