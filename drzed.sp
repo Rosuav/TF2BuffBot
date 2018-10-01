@@ -38,6 +38,7 @@ public void PrintToStream(const char[] fmt, any ...)
 
 StringMap weapon_names;
 ConVar default_weapons[4];
+ConVar ammo_grenade_limit_total;
 Handle switch_weapon_call = null;
 
 public void OnPluginStart()
@@ -116,6 +117,7 @@ public void OnPluginStart()
 	default_weapons[1] = FindConVar("mp_t_default_primary");
 	default_weapons[2] = FindConVar("mp_ct_default_secondary");
 	default_weapons[3] = FindConVar("mp_t_default_secondary");
+	ammo_grenade_limit_total = FindConVar("ammo_grenade_limit_total");
 
 	Handle gamedata = LoadGameConfigFile("sdkhooks.games");
 	StartPrepSDKCall(SDKCall_Player);
@@ -288,9 +290,9 @@ void jayne(int team)
 		int have_flash = GetEntProp(client, Prop_Data, "m_iAmmo", _, 15);
 		int have_smoke = GetEntProp(client, Prop_Data, "m_iAmmo", _, 16);
 		int have_molly = GetEntProp(client, Prop_Data, "m_iAmmo", _, 17);
-		//And decoys are in array position 18. TODO: Check for total grenades,
-		//to avoid having the bots claim to have bought 3 nades when they had
-		//2 already (will need to include decoys in that count).
+		int have_decoy = GetEntProp(client, Prop_Data, "m_iAmmo", _, 18);
+		int total_nades = have_he + have_flash + have_smoke + have_molly + have_decoy;
+		int max_nades = GetConVarInt(ammo_grenade_limit_total);
 		int molly_price = team == 2 ? 400 : 600; //Incendiary grenades are overpriced for CTs
 		money -= 1000; //Ensure that the bots don't spend below $1000 this way (just in case).
 		int bought = 0;
@@ -298,6 +300,7 @@ void jayne(int team)
 		char nade_desc[][] = {"HE", "Flash", "Smoke", "Molly"};
 		for (int i = 0; i < 7; ++i)
 		{
+			if (total_nades + bought >= max_nades) break;
 			switch (RoundToFloor(7*GetURandomFloat()))
 			{
 				//case 0: buy HE - handled by 'default' below
@@ -334,6 +337,9 @@ void jayne(int team)
 		char botname[64]; GetClientName(client, botname, sizeof(botname));
 		if (bought == 1) FakeClientCommandEx(client, "say_team Buying %s.", nade_desc[which]); //If only buying one, say which
 		else if (bought) FakeClientCommandEx(client, "say_team Buying %d grenades.", bought);
+		//TODO maybe: Delay a frame or two, then count total nades again.
+		//Give the "Buying N grenades" message based on the difference
+		//between that figure and total_nades from above.
 	}
 }
 public Action buy_nades(Handle timer, any ignore) {jayne(0);}
