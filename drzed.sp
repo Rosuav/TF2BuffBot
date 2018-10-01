@@ -197,14 +197,13 @@ Action announce_weapon_drop(Handle timer, Handle params)
 		char ignoreme[64]; GetConVarString(default_weapons[i], ignoreme, sizeof(ignoreme));
 		if (ignoreme[0] && !strcmp(cls, ignoreme)) return; //It's a default weapon.
 	}
-	GetTrieString(weapon_names, cls, cls, sizeof(cls)); //Transform and put back in the same buffer
+	describe_weapon(weapon, cls, sizeof(cls));
 	char newcls[64] = "(nothing)";
 	char command[256];
 	if (newweap != -1)
 	{
 		//Normal case: the weapon was dropped because another was bought.
-		GetEntityClassname(newweap, newcls, sizeof(newcls));
-		GetTrieString(weapon_names, newcls, newcls, sizeof(newcls));
+		describe_weapon(newweap, newcls, sizeof(newcls));
 		Format(command, sizeof(command), "say_team I'm dropping my %s in favour of this %s", cls, newcls);
 	}
 	else Format(command, sizeof(command), "say_team I'm dropping my %s", cls); //Theoretically they might not get a new weapon.
@@ -435,11 +434,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		CS_DropWeapon(bot, weap, true, true);
 		FakeClientCommandEx(bot, "buy m4a1");
 
-		char cls[64]; GetEntityClassname(weap, cls, sizeof(cls));
-		//Transform the class name to a human-readable name. Note that
-		//the "boring" weapons in terms of regular drops aren't going
-		//to happen this way, as they're just pistols.
-		GetTrieString(weapon_names, cls, cls, sizeof(cls));
+		char cls[64]; describe_weapon(weap, cls, sizeof(cls));
 		FakeClientCommandEx(bot, "say_team Here, I'll drop this %s", cls);
 		return;
 	}
@@ -507,10 +502,8 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 {
 	//Log all damage to console
 	int vicweap = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
-	char atkcls[64]; GetEntityClassname(weapon > 0 ? weapon : inflictor, atkcls, sizeof(atkcls));
-	char viccls[64]; GetEntityClassname(vicweap, viccls, sizeof(viccls));
-	GetTrieString(weapon_names, atkcls, atkcls, sizeof(atkcls));
-	GetTrieString(weapon_names, viccls, viccls, sizeof(viccls));
+	char atkcls[64]; describe_weapon(weapon > 0 ? weapon : inflictor, atkcls, sizeof(atkcls));
+	char viccls[64]; describe_weapon(vicweap, viccls, sizeof(viccls));
 	int cap = GetClientHealth(victim);
 	int score = RoundToFloor(damage);
 	if (score > cap) score = cap + 100; //100 bonus points for the kill, but the actual damage caps out at the health taken.
@@ -546,9 +539,8 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	if (health < full) return Plugin_Continue; //Below the health gate
 	int dmg = RoundToFloor(damage);
 	if (dmg < health) return Plugin_Continue; //Wouldn't kill you
-	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
-	if (!strcmp(cls, "weapon_knife")) return Plugin_Continue; //No health-gating knife backstabs
-	GetTrieString(weapon_names, cls, cls, sizeof(cls));
+	char cls[64]; describe_weapon(weapon, cls, sizeof(cls));
+	if (!strcmp(cls, "Knife")) return Plugin_Continue; //No health-gating knife backstabs
 	char name[64]; GetClientName(attacker, name, sizeof(name));
 	int overkill = GetConVarInt(sm_drzed_gate_overkill);
 	if (dmg >= overkill)
