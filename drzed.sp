@@ -58,7 +58,9 @@ public void OnPluginStart()
 	//non-stock item. There are other qualities, including Strange/Stat-Trak, and
 	//I don't know how they interact.
 	SetTrieString(weapon_names, "weapon_glock", "Glock");
-	SetTrieString(weapon_names, "weapon_hkp2000", "P2000/USP");
+	SetTrieString(weapon_names, "weapon_hkp2000", "*P2000/USP*");
+	SetTrieString(weapon_names, "*P2000/USP*32", "P2000");
+	SetTrieString(weapon_names, "*P2000/USP*61", "USP-S");
 	SetTrieString(weapon_names, "weapon_p250", "P250/CZ75a");
 	SetTrieString(weapon_names, "weapon_elite", "Dualies");
 	SetTrieString(weapon_names, "weapon_fiveseven", "Five-Seven");
@@ -114,6 +116,21 @@ public void OnPluginStart()
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	switch_weapon_call = EndPrepSDKCall();
 	delete gamedata;
+}
+
+void describe_weapon(int weapon, char[] buffer, int bufsz)
+{
+	GetEntityClassname(weapon, buffer, bufsz);
+	GetTrieString(weapon_names, buffer, buffer, bufsz);
+	if (buffer[0] == '*')
+	{
+		//It's a thing with variants. Get the variant descriptor and use
+		//that instead/as well.
+		Format(buffer[strlen(buffer)], bufsz - strlen(buffer), "%d",
+			GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex"));
+		//If the variant is listed in the trie, transform it (again)
+		GetTrieString(weapon_names, buffer, buffer, bufsz);
+	}
 }
 
 //Silence the warning "unused parameter"
