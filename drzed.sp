@@ -43,6 +43,7 @@ Handle switch_weapon_call = null;
 
 public void OnPluginStart()
 {
+	RegAdminCmd("zed_money", give_all_money, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("item_purchase", Event_item_purchase);
 	HookEvent("weapon_fire", Event_weapon_fire);
@@ -126,6 +127,18 @@ public void OnPluginStart()
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	switch_weapon_call = EndPrepSDKCall();
 	delete gamedata;
+}
+
+public Action give_all_money(int initiator, int args)
+{
+	PrintToChatAll("Giving money to everyone!");
+	for (int client = 1; client < MaxClients; ++client)
+	{
+		if (!IsClientInGame(client)) continue;
+		int money = GetEntProp(client, Prop_Send, "m_iAccount") + 1000;
+		PrintToChat(client, "You now have $%d", money);
+		SetEntProp(client, Prop_Send, "m_iAccount", money);
+	}
 }
 
 void describe_weapon(int weapon, char[] buffer, int bufsz)
