@@ -172,11 +172,13 @@ players don't spend valuable time panning around, trying to figure out what
 the bots have done. This comes in a few varieties:
 
 1) When a bot drops a weapon during freeze time, he will announce it unless
-   it is a basic pistol. "BOT Opie: I'm dropping my AK-47".
+   it is a default one (starter pistol). "BOT Opie: I'm dropping my AK-47".
 2) "Someone drop me a weapon pls?" - the wealthiest bot, if any have enough
    to help, drops his current primary then buys either an M4A1 or an AK-47.
 3) "Bots, buy nades" - all bots attempt to buy HE, Flash, Smoke, Molotov. A
-   bot normally will buy only one nade per round. This is stupid.
+   bot normally will buy only one nade per round. This is stupid. On freeze
+   time start, all bots will automatically buy more nades; any human on the
+   team can also request that bots have another shot at buying nades.
 */
 public Action CS_OnCSWeaponDrop(int client, int weapon)
 {
@@ -190,9 +192,11 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	WritePackCell(params, weapon);
 	//Detect the slot that this weapon goes in by looking for it pre-drop.
 	//This hook is executed prior to the drop actually happening, so the weapon should
-	//still be in the character's inventory somewhere. Currently will only ever
-	//transmit "slot 1" (secondary/pistol) or "slot 0" (anything else).
-	WritePackCell(params, GetPlayerWeaponSlot(client, 1) == weapon);
+	//still be in the character's inventory somewhere.
+	for (int slot = 0; slot < 10; ++slot)
+		if (GetPlayerWeaponSlot(client, slot) == weapon)
+			WritePackCell(params, slot);
+	WritePackCell(params, -1); //Should really only do this if the previous line never hit, but whatevs. An extra pack integer in the weird case.
 	ResetPack(params);
 }
 Action announce_weapon_drop(Handle timer, Handle params)
@@ -206,7 +210,7 @@ Action announce_weapon_drop(Handle timer, Handle params)
 	if (newweap == weapon) return; //Dropped a weapon and instantly picked it up again (seems to happen in Short Demolition mode a lot)
 	char player[64]; GetClientName(client, player, sizeof(player));
 	char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
-	if (!strcmp(cls, "weapon_c4")) return; //TODO: Once the slot check is implemented, ignore if not primary/secondary
+	if (slot != 0 && slot != 1) return; //Ignore if not primary/secondary
 	for (int i = 0; i < sizeof(default_weapons); ++i)
 	{
 		char ignoreme[64]; GetConVarString(default_weapons[i], ignoreme, sizeof(ignoreme));
