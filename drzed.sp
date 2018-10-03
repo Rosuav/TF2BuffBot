@@ -529,7 +529,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	char viccls[64]; describe_weapon(vicweap, viccls, sizeof(viccls));
 	int cap = GetClientHealth(victim);
 	int score = RoundToFloor(damage);
-	if (score > cap) score = cap + 100; //100 bonus points for the kill, but the actual damage caps out at the health taken.
+	if (score >= cap) score = cap + 100; //100 bonus points for the kill, but the actual damage caps out at the health taken.
 	int teamdmg = 0;
 	if (attacker && attacker < MAXPLAYERS)
 		teamdmg = GetClientTeam(victim) == GetClientTeam(attacker);
