@@ -530,9 +530,13 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	int cap = GetClientHealth(victim);
 	int score = RoundToFloor(damage);
 	if (score > cap) score = cap + 100; //100 bonus points for the kill, but the actual damage caps out at the health taken.
-	//TODO: Record team damage and self damage separately
+	int teamdmg = 0;
+	if (attacker && attacker < MAXPLAYERS)
+		teamdmg = GetClientTeam(victim) == GetClientTeam(attacker);
 	File fp = OpenFile("weapon_scores.log", "a");
-	WriteFileLine(fp, "%s damaged %s for %d (%.0fhp)", atkcls, viccls, score, damage);
+	WriteFileLine(fp, "%s %sdamaged %s for %d (%.0fhp)",
+		victim == attacker ? "self" : teamdmg ? "team" : "",
+		atkcls, viccls, score, damage);
 	CloseHandle(fp);
 
 	int hack = GetConVarInt(sm_drzed_hack);

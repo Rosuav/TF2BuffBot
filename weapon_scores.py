@@ -25,9 +25,10 @@ def show_scores():
 while "moar data":
 	line = input()
 	# Zero-sum game: every point gained in one place is lost somewhere else
-	m = re.match("^(.+) damaged (.+) for ([0-9]+) \(([0-9]+)hp\)$", line)
+	m = re.match("^(.+) (|team|self)damaged (.+) for ([0-9]+) \(([0-9]+)hp\)$", line)
 	if not m: continue
-	killer, victim, score, hp = m.groups()
+	killer, mode, victim, score, hp = m.groups()
+	# TODO: Score team damage and self damage differently from normal damage-to-enemies
 	score = int(score)
 	total_score += score
 	scores[killer] += score
