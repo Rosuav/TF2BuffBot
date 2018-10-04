@@ -18,6 +18,7 @@ public Plugin myinfo =
 ConVar sm_drzed_max_hitpoints = null; //(0) Number of hitpoints a normal character has (w/o Assault Suit) - 0 to leave at default
 ConVar sm_drzed_heal_max = null; //(0) If nonzero, healing can be bought up to that many hitpoints (100 is normal maximum)
 ConVar sm_drzed_heal_price = null; //(0) If nonzero, healing can be bought for that much money
+ConVar sm_drzed_heal_freq_flyer = null; //(0) Every successful purchase of healing adds this to your max health
 ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you equip the Heavy Assault Suit (also buffs heal_max while worn)
 ConVar sm_drzed_gate_health_left = null; //(0) If nonzero, one-shots from full health will leave you on this much health
 ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much damage (after armor) ignore the health gate
@@ -386,6 +387,9 @@ public void OnGameFrame()
 	}
 }
 
+int healthbonus[MAXPLAYERS + 1];
+public void OnMapStart() {for (int i = 0; i <= MAXPLAYERS; ++i) healthbonus[i] = 0;}
+
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 {
 	//if (!event.GetBool("teamonly")) return; //Require team chat (not working - there's no "teamonly" so it always returns 0)
@@ -479,6 +483,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int max_health = GetConVarInt(sm_drzed_heal_max);
 		if (GetEntProp(target, Prop_Send, "m_bHasHeavyArmor"))
 			max_health += GetConVarInt(sm_drzed_suit_health_bonus);
+		max_health += healthbonus[target];
 		if (max_health <= 0) return; //Healing not available on this map/game mode/etc
 		if (GetClientHealth(target) >= max_health)
 		{
@@ -493,6 +498,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			PrintToChat(target, "Welcome to Dr Zed's Mobile Clinic. Healing costs $%d.", price);
 			return;
 		}
+		int increment = GetConVarInt(sm_drzed_heal_freq_flyer);
+		healthbonus[target] += increment; max_health += increment;
 		SetEntProp(target, Prop_Send, "m_iAccount", money - price);
 		SetEntityHealth(target, max_health);
 		PrintToChat(target, "Now go kill some enemies for me!"); //TODO: Different messages T and CT?
@@ -503,6 +510,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 //But we set the health on spawn too, so it ends up applying.
 public void OnClientPutInServer(int client)
 {
+	healthbonus[client] = 0;
 	SDKHook(client, SDKHook_GetMaxHealth, maxhealthcheck);
 	SDKHook(client, SDKHook_SpawnPost, sethealth);
 	SDKHook(client, SDKHook_OnTakeDamageAlive, healthgate);
@@ -517,7 +525,7 @@ void sethealth(int entity)
 {
 	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return;
 	int health = GetConVarInt(sm_drzed_max_hitpoints);
-	if (health) SetEntityHealth(entity, health);
+	if (health) SetEntityHealth(entity, health + healthbonus[entity]);
 }
 
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
