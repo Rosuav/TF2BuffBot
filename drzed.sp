@@ -73,24 +73,7 @@ public void OnPluginStart()
 	SetTrieString(weapon_names, "weapon_deagle", "*Deagle/R8*");
 	SetTrieString(weapon_names, "*Deagle/R8*1", "Deagle");
 	SetTrieString(weapon_names, "*Deagle/R8*64", "R8");
-	SetTrieString(weapon_names, "weapon_ak47", "AK-47");
-	SetTrieString(weapon_names, "weapon_galilar", "Galil");
-	SetTrieString(weapon_names, "weapon_famas", "FAMAS");
-	SetTrieString(weapon_names, "weapon_m4a1", "*M4*");
-	SetTrieString(weapon_names, "*M4*16", "M4A4");
-	SetTrieString(weapon_names, "*M4*60", "M4A1-S");
-	SetTrieString(weapon_names, "weapon_ssg08", "Scout");
-	SetTrieString(weapon_names, "weapon_aug", "AUG");
-	SetTrieString(weapon_names, "weapon_sg556", "SG-553");
-	SetTrieString(weapon_names, "weapon_awp", "AWP");
-	SetTrieString(weapon_names, "weapon_m249", "M249");
-	SetTrieString(weapon_names, "weapon_negev", "Negev");
-	SetTrieString(weapon_names, "weapon_scar20", "SCAR-20");
-	SetTrieString(weapon_names, "weapon_g3sg1", "G3SG1");
-	SetTrieString(weapon_names, "weapon_nova", "Nova");
-	SetTrieString(weapon_names, "weapon_xm1014", "XM1014");
-	SetTrieString(weapon_names, "weapon_mag7", "MAG-7");
-	SetTrieString(weapon_names, "weapon_mac10", "MAC-10");
+	//SMGs
 	SetTrieString(weapon_names, "weapon_mp9", "MP9");
 	SetTrieString(weapon_names, "weapon_mp7", "*MP5/MP7*");
 	SetTrieString(weapon_names, "*MP5/MP7*23", "MP5-SD");
@@ -98,8 +81,27 @@ public void OnPluginStart()
 	SetTrieString(weapon_names, "weapon_ump45", "UMP-45");
 	SetTrieString(weapon_names, "weapon_p90", "P90");
 	SetTrieString(weapon_names, "weapon_bizon", "PP-Bizon");
-	SetTrieString(weapon_names, "weapon_taser", "Zeus x27");
-	SetTrieString(weapon_names, "weapon_knife", "Knife");
+	SetTrieString(weapon_names, "weapon_mac10", "MAC-10");
+	//Assault Rifles
+	SetTrieString(weapon_names, "weapon_ak47", "AK-47");
+	SetTrieString(weapon_names, "weapon_galilar", "Galil");
+	SetTrieString(weapon_names, "weapon_famas", "FAMAS");
+	SetTrieString(weapon_names, "weapon_m4a1", "*M4*");
+	SetTrieString(weapon_names, "*M4*16", "M4A4");
+	SetTrieString(weapon_names, "*M4*60", "M4A1-S");
+	SetTrieString(weapon_names, "weapon_aug", "AUG");
+	SetTrieString(weapon_names, "weapon_sg556", "SG-553");
+	//Snipers
+	SetTrieString(weapon_names, "weapon_ssg08", "Scout");
+	SetTrieString(weapon_names, "weapon_awp", "AWP");
+	SetTrieString(weapon_names, "weapon_scar20", "SCAR-20");
+	SetTrieString(weapon_names, "weapon_g3sg1", "G3SG1");
+	//Shotties
+	SetTrieString(weapon_names, "weapon_nova", "Nova");
+	SetTrieString(weapon_names, "weapon_xm1014", "XM1014");
+	SetTrieString(weapon_names, "weapon_mag7", "MAG-7");
+	SetTrieString(weapon_names, "weapon_sawedoff", "Sawed-Off");
+	//Grenades
 	SetTrieString(weapon_names, "weapon_hegrenade", "HE");
 	SetTrieString(weapon_names, "hegrenade_projectile", "HE"); //The thrown grenade is a separate entity class from the wielded grenade
 	SetTrieString(weapon_names, "weapon_molotov", "Molly"); //T-side
@@ -112,6 +114,12 @@ public void OnPluginStart()
 	SetTrieString(weapon_names, "smokegrenade_projectile", "Smoke");
 	SetTrieString(weapon_names, "weapon_decoy", "Smoke"); //When wielded
 	SetTrieString(weapon_names, "decoy_projectile", "Smoke"); //Beaning and also the tiny boom at the end
+	//Other
+	SetTrieString(weapon_names, "weapon_m249", "M249");
+	SetTrieString(weapon_names, "weapon_negev", "Negev");
+	SetTrieString(weapon_names, "weapon_taser", "Zeus x27");
+	SetTrieString(weapon_names, "weapon_knife", "Knife");
+	SetTrieString(weapon_names, "weapon_knifegg", "Gold Knife"); //Arms Race mode only
 	SetTrieString(weapon_names, "weapon_c4", "C4"); //The carried C4
 	SetTrieString(weapon_names, "planted_c4", "C4"); //When the bomb goes off.... bladabooooom
 
