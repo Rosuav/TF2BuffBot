@@ -23,6 +23,7 @@ ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you eq
 ConVar sm_drzed_gate_health_left = null; //(0) If nonzero, one-shots from full health will leave you on this much health
 ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much damage (after armor) ignore the health gate
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
+ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
@@ -379,7 +380,7 @@ int last_freeze = -1;
 public void OnGameFrame()
 {
 	int freeze = GameRules_GetProp("m_bFreezePeriod");
-	if (freeze && !last_freeze)
+	if (freeze && !last_freeze && GetConVarInt(bot_autobuy_nades))
 	{
 		//When we go into freeze time, wait half a second, then get the bots to buy nades.
 		//Note that they won't buy nades if we're out of freeze time, so you need at least
