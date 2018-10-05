@@ -152,6 +152,7 @@ public Action give_all_money(int initiator, int args)
 
 void describe_weapon(int weapon, char[] buffer, int bufsz)
 {
+	if (weapon == -1) {strcopy(buffer, bufsz, "(none)"); return;}
 	GetEntityClassname(weapon, buffer, bufsz);
 	GetTrieString(weapon_names, buffer, buffer, bufsz);
 	if (buffer[0] == '*')
