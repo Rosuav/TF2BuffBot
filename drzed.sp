@@ -543,8 +543,8 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		teamdmg = GetClientTeam(victim) == GetClientTeam(attacker);
 	File fp = OpenFile("weapon_scores.log", "a");
 	WriteFileLine(fp, "%s %sdamaged %s for %d (%.0fhp)",
-		victim == attacker ? "self" : teamdmg ? "team" : "",
-		atkcls, viccls, score, damage);
+		atkcls, victim == attacker ? "self" : teamdmg ? "team" : "",
+		viccls, score, damage);
 	CloseHandle(fp);
 
 	int hack = GetConVarInt(sm_drzed_hack);
