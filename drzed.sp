@@ -22,6 +22,7 @@ ConVar sm_drzed_heal_freq_flyer = null; //(0) Every successful purchase of heali
 ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you equip the Heavy Assault Suit (also buffs heal_max while worn)
 ConVar sm_drzed_gate_health_left = null; //(0) If nonzero, one-shots from full health will leave you on this much health
 ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much damage (after armor) ignore the health gate
+ConVar sm_drzed_crippled_health = null; //(0) If >0, you get this many hitpoints of extra health during which you're crippled.
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 #include "convars_drzed"
@@ -49,6 +50,7 @@ public void OnPluginStart()
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("item_purchase", Event_item_purchase);
 	HookEvent("weapon_fire", Event_weapon_fire);
+	HookEvent("round_end", uncripple_all);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
 	//player_falldamage: report whenever anyone falls, esp for a lot of dmg
@@ -397,6 +399,83 @@ public void OnGameFrame()
 	}
 }
 
+int is_crippled(int client)
+{
+	if (!GetConVarInt(sm_drzed_crippled_health)) return 0; //Crippling isn't active, so you aren't crippled.
+	return GetEntProp(client, Prop_Send, "m_bHasHeavyArmor");
+}
+public Action crippled_health_drain(Handle timer, int client)
+{
+	if (!IsClientInGame(client) || !IsPlayerAlive(client) || !is_crippled(client)) return Plugin_Stop;
+	int health = GetClientHealth(client) - 1;
+	//TODO: Have the damage come from the original attacker (the one who crippled you)
+	//or the last person to deal you non-team damage.
+	if (health) SetEntityHealth(client, health); else SlapPlayer(client, 1, false);
+	return Plugin_Continue;
+}
+void cripple(int client)
+{
+	if (!GetConVarInt(sm_drzed_crippled_health)) return;
+	if (GameRules_GetProp("m_iRoundWinStatus"))
+	{
+		//The round is over. Insta-kill for exit frags.
+		//TODO: As above, have the damage come from orig attacker
+		SlapPlayer(client, GetClientHealth(client), false);
+		return;
+	}
+	SetEntityHealth(client, GetConVarInt(sm_drzed_crippled_health));
+	SetEntProp(client, Prop_Send, "m_bHasHeavyArmor", 1);
+	SetEntProp(client, Prop_Send, "m_ArmorValue", 0);
+	//Switch to knife. If you have no knife, you switch to a non-weapon.
+	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(client, 2));
+	CreateTimer(0.1, crippled_health_drain, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+}
+void uncripple(int client)
+{
+	if (!GetConVarInt(sm_drzed_crippled_health)) return;
+	//TODO: Have second-wind health be configurable
+	SetEntityHealth(client, GetConVarInt(sm_drzed_crippled_health) + 50);
+	SetEntProp(client, Prop_Send, "m_bHasHeavyArmor", 0);
+	SetEntProp(client, Prop_Send, "m_ArmorValue", 50);
+	//In case you have no weapon, try to switch back.
+	if (GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon")) for (int slot = 0; slot < 5; ++slot)
+	{
+		int weapon = GetPlayerWeaponSlot(client, slot);
+		if (weapon == -1) continue;
+		SDKCall(switch_weapon_call, client, weapon, 0);
+		SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
+		break;
+	}
+}
+public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3],
+	int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
+{
+	if (is_crippled(client))
+	{
+		//While you're crippled, you can't do certain things. There may be more restrictions to add.
+		if (buttons & IN_USE)
+		{
+			//Can't defuse the bomb or pick up weapons
+			buttons &= ~IN_USE;
+			return Plugin_Changed;
+		}
+	}
+	return Plugin_Continue;
+}
+public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
+{
+	//When the round ends, uncripple everyone. Winners get up, losers die.
+	int winner = event.GetInt("winner");
+	if (!winner) return;
+	//NOTE: Crashes on startup if it looks at the very last player. So we don't.
+	//No idea what's going on here - maybe the GOTV pseudo-player is bombing??
+	for (int client = 1; client < MAXPLAYERS; ++client) if (IsClientInGame(client) && IsPlayerAlive(client) && is_crippled(client))
+	{
+		if (GetClientTeam(client) == winner) uncripple(client);
+		else SlapPlayer(client, GetClientHealth(client), false);
+	}
+}
+
 int healthbonus[MAXPLAYERS + 1];
 public void OnMapStart() {for (int i = 0; i <= MAXPLAYERS; ++i) healthbonus[i] = 0;}
 
@@ -524,18 +603,21 @@ public void OnClientPutInServer(int client)
 	SDKHook(client, SDKHook_GetMaxHealth, maxhealthcheck);
 	SDKHook(client, SDKHook_SpawnPost, sethealth);
 	SDKHook(client, SDKHook_OnTakeDamageAlive, healthgate);
+	SDKHook(client, SDKHook_WeaponCanSwitchTo, weaponlock);
 }
 public Action maxhealthcheck(int entity, int &maxhealth)
 {
 	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return Plugin_Continue;
-	maxhealth = GetConVarInt(sm_drzed_max_hitpoints);
+	maxhealth = GetConVarInt(sm_drzed_max_hitpoints) + GetConVarInt(sm_drzed_crippled_health);
 	return Plugin_Changed;
 }
 void sethealth(int entity)
 {
 	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return;
 	int health = GetConVarInt(sm_drzed_max_hitpoints);
-	if (health) SetEntityHealth(entity, health + healthbonus[entity]);
+	if (!health) health = 100; //TODO: Find out what the default would otherwise have been
+	health += GetConVarInt(sm_drzed_crippled_health);
+	SetEntityHealth(entity, health + healthbonus[entity]);
 }
 
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
@@ -550,12 +632,25 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	if (score >= cap) score = cap + 100; //100 bonus points for the kill, but the actual damage caps out at the health taken.
 	int teamdmg = 0;
 	if (attacker && attacker < MAXPLAYERS)
+	{
 		teamdmg = GetClientTeam(victim) == GetClientTeam(attacker);
+		//If you knife someone while you're crippled, you get a second wind.
+		//TODO: Only if you knife them to death (cripple them).
+		if (is_crippled(attacker)) uncripple(attacker);
+	}
 	File fp = OpenFile("weapon_scores.log", "a");
 	WriteFileLine(fp, "%s %sdamaged %s for %d (%.0fhp)",
 		atkcls, victim == attacker ? "self" : teamdmg ? "team" : "",
 		viccls, score, damage);
 	CloseHandle(fp);
+	if (teamdmg && is_crippled(victim))
+	{
+		//GAIN health.
+		int health = GetClientHealth(victim) + 25;
+		if (health >= 100) uncripple(victim);
+		else SetEntityHealth(victim, health);
+		return Plugin_Stop;
+	}
 
 	int hack = GetConVarInt(sm_drzed_hack);
 	if (hack && attacker && attacker < MAXPLAYERS)
@@ -578,9 +673,23 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		else if (health < max) damage *= factor * health / max;
 		return Plugin_Changed;
 	}
+	//
+	int cripplepoint = GetConVarInt(sm_drzed_crippled_health);
+	if (cripplepoint)
+	{
+		int oldhealth = GetClientHealth(victim);
+		int newhealth = oldhealth - RoundToFloor(damage);
+		if (oldhealth > cripplepoint && newhealth <= cripplepoint)
+		{
+			cripple(victim);
+			return Plugin_Stop;
+		}
+	}
+	//
 	int gate = GetConVarInt(sm_drzed_gate_health_left);
 	if (!gate) return Plugin_Continue; //Health gate not active
 	int full = GetConVarInt(sm_drzed_max_hitpoints); if (!full) full = 100;
+	full += GetConVarInt(sm_drzed_crippled_health);
 	int health = GetClientHealth(victim);
 	if (health < full) return Plugin_Continue; //Below the health gate
 	int dmg = RoundToFloor(damage);
@@ -600,3 +709,30 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	PrintToChat(victim, "%s dealt %d with his %s, but you gated", name, dmg, cls);
 	return Plugin_Changed;
 }
+Action weaponlock(int client, int weapon)
+{
+	ignore(weapon);
+	if (is_crippled(client)) return Plugin_Stop;
+	return Plugin_Continue;
+}
+/*
+Revival of Teammates mode:
+* Everyone starts with 200 hp.
+* If you have > 100 hp, any damage that would reduce you below 100 sets you to 100.
+* While you have <= 100 hp, you are crippled, and lose 1hp every 0.1 seconds.
+* Teammates can heal crippled players by knifing them. Once > 100 hp, no longer crippled.
+* A crippled player is unable to fire any weapons, and is reduced to crawling speed.
+
+NOTE: There can be weirdnesses if you toggle the heavy suit and you have some armor.
+So don't do that. When you toggle on the suit, also wipe the armor to zero, and don't
+allow the player to buy armor while in that state. In fact, don't allow buying any
+equipment or weapons (nor picking them up).
+
+NOTE: Incompatible with game modes using the heavy assault suit.
+
+TODO: Test interaction btwn health gate and crippling.
+
+TODO: Require that you actually drop someone to revive
+
+TODO: Require multiple knife slashes to pick someone up, even if you got in there quickly
+*/
