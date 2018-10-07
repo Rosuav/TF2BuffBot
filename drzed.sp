@@ -728,7 +728,8 @@ So don't do that. When you toggle on the suit, also wipe the armor to zero, and 
 allow the player to buy armor while in that state. In fact, don't allow buying any
 equipment or weapons (nor picking them up).
 
-NOTE: Incompatible with game modes using the heavy assault suit.
+NOTE: Incompatible with game modes using the heavy assault suit. TODO: Disallow? Or
+mandate it somehow, and then deny the buy, so it preloads stuff? Might prevent crash.
 
 TODO: Test interaction btwn health gate and crippling.
 
