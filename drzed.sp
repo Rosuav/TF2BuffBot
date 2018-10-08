@@ -304,6 +304,7 @@ public void Event_item_purchase(Event event, const char[] name, bool dontBroadca
 	char weap[64]; event.GetString("weapon", weap, sizeof(weap));
 	if (StrEqual(weap, "item_heavyassaultsuit"))
 	{
+		//if (GetConVarInt(sm_drzed_crippled_health)) return Plugin_Stop; //Possible solution to the crashes? Enable the suit but disallow its purchase.
 		int hp = GetConVarInt(sm_drzed_suit_health_bonus);
 		if (hp) SetEntityHealth(buyer, GetClientHealth(buyer) + hp);
 	}
