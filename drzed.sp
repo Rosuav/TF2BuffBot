@@ -657,7 +657,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	CloseHandle(fp);
 	if (teamdmg && attacker != victim && is_crippled(victim))
 	{
-		//GAIN health.
+		//GAIN health. TODO: Only if knifed?
 		int health = GetClientHealth(victim) + 25;
 		if (health >= 100) uncripple(victim);
 		else SetEntityHealth(victim, health);
