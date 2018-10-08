@@ -404,13 +404,18 @@ int is_crippled(int client)
 	if (!GetConVarInt(sm_drzed_crippled_health)) return 0; //Crippling isn't active, so you aren't crippled.
 	return GetEntProp(client, Prop_Send, "m_bHasHeavyArmor");
 }
+void kill_crippled_player(int client)
+{
+	//Finally kill the player (for any reason)
+	//TODO: Have the damage come from the original attacker (the one who crippled you)
+	//or the last person to deal you non-team damage.
+	SlapPlayer(client, GetClientHealth(client), false);
+}
 public Action crippled_health_drain(Handle timer, int client)
 {
 	if (!IsClientInGame(client) || !IsPlayerAlive(client) || !is_crippled(client)) return Plugin_Stop;
 	int health = GetClientHealth(client) - 1;
-	//TODO: Have the damage come from the original attacker (the one who crippled you)
-	//or the last person to deal you non-team damage.
-	if (health) SetEntityHealth(client, health); else SlapPlayer(client, 1, false);
+	if (health) SetEntityHealth(client, health); else kill_crippled_player(client);
 	return Plugin_Continue;
 }
 void cripple(int client)
@@ -419,8 +424,7 @@ void cripple(int client)
 	if (GameRules_GetProp("m_iRoundWinStatus"))
 	{
 		//The round is over. Insta-kill for exit frags.
-		//TODO: As above, have the damage come from orig attacker
-		SlapPlayer(client, GetClientHealth(client), false);
+		kill_crippled_player(client);
 		return;
 	}
 	SetEntityHealth(client, GetConVarInt(sm_drzed_crippled_health));
@@ -471,8 +475,7 @@ public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
 	//No idea what's going on here - maybe the GOTV pseudo-player is bombing??
 	for (int client = 1; client < MAXPLAYERS; ++client) if (IsClientInGame(client) && IsPlayerAlive(client) && is_crippled(client))
 	{
-		if (GetClientTeam(client) == winner) uncripple(client);
-		else SlapPlayer(client, GetClientHealth(client), false);
+		if (GetClientTeam(client) == winner) uncripple(client); else kill_crippled_player(client);
 	}
 }
 
