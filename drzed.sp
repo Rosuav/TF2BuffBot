@@ -399,6 +399,7 @@ public void OnGameFrame()
 	}
 }
 
+int last_attacker[MAXPLAYERS+1], last_inflictor[MAXPLAYERS+1], last_weapon[MAXPLAYERS+1];
 int is_crippled(int client)
 {
 	if (!GetConVarInt(sm_drzed_crippled_health)) return 0; //Crippling isn't active, so you aren't crippled.
@@ -407,9 +408,11 @@ int is_crippled(int client)
 void kill_crippled_player(int client)
 {
 	//Finally kill the player (for any reason)
-	//TODO: Have the damage come from the original attacker (the one who crippled you)
-	//or the last person to deal you non-team damage.
-	SlapPlayer(client, GetClientHealth(client), false);
+	int inflictor = last_inflictor[client], attacker = last_attacker[client], weapon = last_weapon[client];
+	//TODO: What if they're no longer valid entities? What if there is some new
+	//entity with the same (recycled) ID?
+	if (!IsValidEntity(inflictor)) inflictor = 0; //or inflictor = attacker?
+	SDKHooks_TakeDamage(client, inflictor, attacker, GetClientHealth(client) + 0.0, 0, weapon);
 }
 public Action crippled_health_drain(Handle timer, int client)
 {
@@ -640,6 +643,12 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		//If you knife someone while you're crippled, you get a second wind.
 		//TODO: Only if you knife them to death (cripple them).
 		if (is_crippled(attacker) && !teamdmg) uncripple(attacker);
+		if (is_crippled(victim) && !teamdmg)
+		{
+			//If you take damage from an enemy while crippled, it can change
+			//who gets the credit for finishing you off.
+			last_attacker[victim] = attacker; last_inflictor[victim] = inflictor; last_weapon[victim] = weapon;
+		}
 	}
 	File fp = OpenFile("weapon_scores.log", "a");
 	WriteFileLine(fp, "%s %sdamaged %s for %d (%.0fhp)",
@@ -684,6 +693,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		int newhealth = oldhealth - RoundToFloor(damage);
 		if (oldhealth > cripplepoint && newhealth <= cripplepoint)
 		{
+			last_attacker[victim] = attacker; last_inflictor[victim] = inflictor; last_weapon[victim] = weapon;
 			cripple(victim);
 			return Plugin_Stop; //Returning Plugin_Stop doesn't seem to stop the damage event in all cases. Not sure why.
 		}
