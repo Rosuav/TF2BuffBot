@@ -48,7 +48,6 @@ public void OnPluginStart()
 {
 	RegAdminCmd("zed_money", give_all_money, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
-	HookEvent("item_purchase", Event_item_purchase);
 	HookEvent("weapon_fire", Event_weapon_fire);
 	HookEvent("round_end", uncripple_all);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
@@ -297,17 +296,17 @@ Action deselect_weapon(Handle timer, any client)
 	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 }
 
-public void Event_item_purchase(Event event, const char[] name, bool dontBroadcast)
+public Action CS_OnBuyCommand(int buyer, const char[] weap)
 {
-	int buyer = GetClientOfUserId(event.GetInt("userid"));
-	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return;
-	char weap[64]; event.GetString("weapon", weap, sizeof(weap));
-	if (StrEqual(weap, "item_heavyassaultsuit"))
+	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return Plugin_Continue;
+	if (StrEqual(weap, "heavyassaultsuit"))
 	{
-		//if (GetConVarInt(sm_drzed_crippled_health)) return Plugin_Stop; //Possible solution to the crashes? Enable the suit but disallow its purchase.
+		//Crippling mode uses the suit, so when that's happening, you can't buy the suit.
+		if (GetConVarInt(sm_drzed_crippled_health)) return Plugin_Stop;
 		int hp = GetConVarInt(sm_drzed_suit_health_bonus);
 		if (hp) SetEntityHealth(buyer, GetClientHealth(buyer) + hp);
 	}
+	return Plugin_Continue;
 }
 
 void jayne(int team)
@@ -637,14 +636,14 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		teamdmg = GetClientTeam(victim) == GetClientTeam(attacker);
 		//If you knife someone while you're crippled, you get a second wind.
 		//TODO: Only if you knife them to death (cripple them).
-		if (is_crippled(attacker)) uncripple(attacker);
+		if (is_crippled(attacker) && !teamdmg) uncripple(attacker);
 	}
 	File fp = OpenFile("weapon_scores.log", "a");
 	WriteFileLine(fp, "%s %sdamaged %s for %d (%.0fhp)",
 		atkcls, victim == attacker ? "self" : teamdmg ? "team" : "",
 		viccls, score, damage);
 	CloseHandle(fp);
-	if (teamdmg && is_crippled(victim))
+	if (teamdmg && attacker != victim && is_crippled(victim))
 	{
 		//GAIN health.
 		int health = GetClientHealth(victim) + 25;
@@ -683,7 +682,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		if (oldhealth > cripplepoint && newhealth <= cripplepoint)
 		{
 			cripple(victim);
-			return Plugin_Stop;
+			return Plugin_Stop; //Returning Plugin_Stop doesn't seem to stop the damage event in all cases. Not sure why.
 		}
 	}
 	//
@@ -729,12 +728,15 @@ So don't do that. When you toggle on the suit, also wipe the armor to zero, and 
 allow the player to buy armor while in that state. In fact, don't allow buying any
 equipment or weapons (nor picking them up).
 
-NOTE: Incompatible with game modes using the heavy assault suit. TODO: Disallow? Or
-mandate it somehow, and then deny the buy, so it preloads stuff? Might prevent crash.
+NOTE: Incompatible with game modes using the heavy assault suit. If crippling is a
+thing, heavyarmor purchases will simply be denied. Recommend setting the cvar
+mp_weapons_allow_heavyassaultsuit to 1 to force the game to precache the appropriate
+models and textures.
 
 TODO: Test interaction btwn health gate and crippling.
 
 TODO: Require that you actually drop someone to revive
 
-TODO: Require multiple knife slashes to pick someone up, even if you got in there quickly
+TODO: Require multiple knife slashes to pick someone up, even if you got in there
+quickly, and also require that it be the knife, not other forms of damage.
 */
