@@ -730,7 +730,7 @@ Action weaponlock(int client, int weapon)
 	if (is_crippled(client)) return Plugin_Stop;
 	return Plugin_Continue;
 }
-/* TODO: Put this into a good README or "modes.md" or something.
+/*
 Revival of Teammates mode:
 * Everyone starts with 200 hp.
 * If you have > 100 hp, any damage that would reduce you below 100 sets you to 100.
