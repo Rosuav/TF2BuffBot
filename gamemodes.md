@@ -28,3 +28,12 @@ you actually die. Teammates can revive you, or you can revive yourself by
 getting a kill on an enemy (or winning the round).
 
 Example config file: (none yet)
+
+## No One-Shots
+
+Classic mode. Add a health gate: if you are on full health and something
+would kill you, it leaves you on critically low health, but still alive.
+Certain attacks are able to bypass the health gate, including the knife;
+anything that deals massive overkill damage can punch right past it.
+
+Example config file: (none yet)
