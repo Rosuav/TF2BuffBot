@@ -23,6 +23,7 @@ ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you eq
 ConVar sm_drzed_gate_health_left = null; //(0) If nonzero, one-shots from full health will leave you on this much health
 ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much damage (after armor) ignore the health gate
 ConVar sm_drzed_crippled_health = null; //(0) If >0, you get this many hitpoints of extra health during which you're crippled.
+ConVar sm_drzed_crippled_revive_count = null; //(4) When someone has been crippled, it takes this many knife slashes to revive them.
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 #include "convars_drzed"
@@ -401,7 +402,7 @@ public void OnGameFrame()
 	}
 }
 
-int last_attacker[MAXPLAYERS+1], last_inflictor[MAXPLAYERS+1], last_weapon[MAXPLAYERS+1];
+int last_attacker[MAXPLAYERS+1], last_inflictor[MAXPLAYERS+1], last_weapon[MAXPLAYERS+1], crippled_status[MAXPLAYERS+1];
 int is_crippled(int client)
 {
 	if (!GetConVarInt(sm_drzed_crippled_health)) return 0; //Crippling isn't active, so you aren't crippled.
@@ -411,11 +412,18 @@ void kill_crippled_player(int client)
 {
 	//Finally kill the player (for any reason)
 	int inflictor = last_inflictor[client], attacker = last_attacker[client], weapon = last_weapon[client];
-	//TODO: What if they're no longer valid entities? What if there is some new
-	//entity with the same (recycled) ID?
-	if (!IsValidEntity(inflictor)) inflictor = 0; //or inflictor = attacker?
+	//If the attacker is no longer in the game, treat it as suicide. This
+	//follows the precedent of a molly thrown by a ragequitter.
+	if (!IsClientInGame(attacker)) attacker = client;
+	//If the weapon is no longer in the game, sometimes you'll get credited
+	//with the kill using a weird weapon. Most commonly, it'll say you killed
+	//someone with your currently-wielded weapon, but you might sometimes see
+	//"X killed Y with worldspawn" :)
+	if (!IsValidEntity(inflictor)) inflictor = attacker;
+	if (!IsValidEntity(weapon)) weapon = -1;
 	SDKHooks_TakeDamage(client, inflictor, attacker, GetClientHealth(client) + 0.0, 0, weapon);
 }
+public Action remove_cripple_prot(Handle timer, int client) {crippled_status[client] = 0;}
 public Action crippled_health_drain(Handle timer, int client)
 {
 	if (!IsClientInGame(client) || !IsPlayerAlive(client) || !is_crippled(client)) return Plugin_Stop;
@@ -426,26 +434,23 @@ public Action crippled_health_drain(Handle timer, int client)
 void cripple(int client)
 {
 	if (!GetConVarInt(sm_drzed_crippled_health)) return;
-	if (GameRules_GetProp("m_iRoundWinStatus"))
-	{
-		//The round is over. Insta-kill for exit frags.
-		kill_crippled_player(client);
-		return;
-	}
 	SetEntityHealth(client, GetConVarInt(sm_drzed_crippled_health));
 	SetEntProp(client, Prop_Send, "m_bHasHeavyArmor", 1);
 	SetEntProp(client, Prop_Send, "m_ArmorValue", 0);
 	//Switch to knife. If you have no knife, you switch to a non-weapon.
 	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(client, 2));
-	CreateTimer(0.1, crippled_health_drain, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+	CreateTimer(0.2, crippled_health_drain, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+	crippled_status[client] = -1; //Damage protection active.
+	CreateTimer(1.0, remove_cripple_prot, client, TIMER_FLAG_NO_MAPCHANGE);
 }
 void uncripple(int client)
 {
 	if (!GetConVarInt(sm_drzed_crippled_health)) return;
-	//TODO: Have second-wind health be configurable
 	SetEntityHealth(client, GetConVarInt(sm_drzed_crippled_health) + 50);
 	SetEntProp(client, Prop_Send, "m_bHasHeavyArmor", 0);
-	SetEntProp(client, Prop_Send, "m_ArmorValue", 50);
+	SetEntProp(client, Prop_Send, "m_ArmorValue", 5);
+	crippled_status[client] = -1; //Give damage protection again on revive
+	CreateTimer(1.0, remove_cripple_prot, client, TIMER_FLAG_NO_MAPCHANGE);
 	//In case you have no weapon, try to switch back.
 	if (GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon")) for (int slot = 0; slot < 5; ++slot)
 	{
@@ -642,9 +647,13 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	if (attacker && attacker < MAXPLAYERS)
 	{
 		teamdmg = GetClientTeam(victim) == GetClientTeam(attacker);
-		//If you knife someone while you're crippled, you get a second wind.
-		//TODO: Only if you knife them to death (cripple them).
-		if (is_crippled(attacker) && !teamdmg) uncripple(attacker);
+		if (is_crippled(attacker) && !teamdmg)
+		{
+			//If you knife someone while you're crippled, you get a second wind.
+			//Only applies to knife damage. You can't get a free second wind off
+			//a molly or other delayed damage.
+			if (!strcmp(atkcls, "Knife")) uncripple(attacker);
+		}
 		if (is_crippled(victim) && !teamdmg)
 		{
 			//If you take damage from an enemy while crippled, it can change
@@ -657,12 +666,24 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		atkcls, victim == attacker ? "self" : teamdmg ? "team" : "",
 		viccls, score, damage);
 	CloseHandle(fp);
-	if (teamdmg && attacker != victim && is_crippled(victim))
+
+	int cripplepoint = GetConVarInt(sm_drzed_crippled_health);
+	//For one second after being crippled, you get damage immunity.
+	if (cripplepoint && crippled_status[victim] == -1) {damage = 0.0; return Plugin_Changed;}
+	if (teamdmg && attacker != victim && is_crippled(victim) && !strcmp(atkcls, "Knife"))
 	{
-		//GAIN health. TODO: Only if knifed?
-		int health = GetClientHealth(victim) + 25;
-		if (health >= 100) uncripple(victim);
-		else SetEntityHealth(victim, health);
+		//Revival attempt - a teammate slashing you with a knife.
+		//Yeah, let's call it surgical or something. Whatever.
+		int revivecount = GetConVarInt(sm_drzed_crippled_revive_count);
+		if (++crippled_status[victim] >= revivecount) {uncripple(victim); return Plugin_Stop;}
+		//Even if it doesn't revive you, it'll give you some additional health
+		//so you don't bleed out.
+		int health = GetClientHealth(victim);
+		int missing = cripplepoint - health;
+		int gain = cripplepoint / revivecount;
+		//Gain the lesser of half the missing health and a quarter of crippled health.
+		if (gain > missing / 2) gain = missing / 2;
+		SetEntityHealth(victim, health + gain);
 		return Plugin_Stop;
 	}
 
@@ -688,9 +709,10 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		return Plugin_Changed;
 	}
 	//
-	int cripplepoint = GetConVarInt(sm_drzed_crippled_health);
-	if (cripplepoint)
+	if (cripplepoint && !GameRules_GetProp("m_iRoundWinStatus"))
 	{
+		//Note that crippling, as a feature, is disabled once the
+		//round is over. Insta-kill for exit frags.
 		int oldhealth = GetClientHealth(victim);
 		int newhealth = oldhealth - RoundToFloor(damage);
 		if (oldhealth > cripplepoint && newhealth <= cripplepoint)
@@ -750,8 +772,9 @@ models and textures.
 
 TODO: Test interaction btwn health gate and crippling.
 
-TODO: Require that you actually drop someone to revive
+TODO: Is it okay for a crippled person to revive another crippled person?
 
-TODO: Require multiple knife slashes to pick someone up, even if you got in there
-quickly, and also require that it be the knife, not other forms of damage.
+TODO: Unscope when crippled. It looks weird to be scoped with a knife.
+
+TODO: When you pick up a bot, you get to primary for some reason. Why? Weird.
 */
