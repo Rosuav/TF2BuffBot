@@ -781,7 +781,11 @@ TODO: Test interaction btwn health gate and crippling.
 
 TODO: Is it okay for a crippled person to revive another crippled person?
 
-TODO: When you pick up a bot, you get to primary for some reason. Why? Weird.
+TODO: When you pick up a bot, you get set to primary weapon for some reason.
+Why? Weird. May be able to use bot_takeover event to detect, and then force to
+knife again.
 
 TODO: Make sure you can't !heal while crippled
+
+TODO: Use Plugin_Handled rather than Plugin_Stop to disable damage??
 */
