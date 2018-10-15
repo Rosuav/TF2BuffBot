@@ -27,7 +27,7 @@ Classic mode. Add in a second hitpoint pool wherein you are crippled before
 you actually die. Teammates can revive you, or you can revive yourself by
 getting a kill on an enemy (or winning the round).
 
-Example config file: (none yet)
+Example config file: [revival.cfg](https://github.com/Rosuav/tf2server/blob/master/steamcmd_linux/csgo/csgo/cfg/revival.cfg)
 
 ## No One-Shots
 
