@@ -301,7 +301,7 @@ public Action CS_OnBuyCommand(int buyer, const char[] weap)
 {
 	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return Plugin_Continue;
 	//Disallow defusers during warmup (they're useless anyway)
-	if (StrEqual(weap, "defuser") && GameRules_GetProp("m_bWarmupPeriod")) {PrintToServer("denied"); return Plugin_Stop;}
+	if (StrEqual(weap, "defuser") && GameRules_GetProp("m_bWarmupPeriod")) return Plugin_Stop;
 	if (StrEqual(weap, "heavyassaultsuit"))
 	{
 		//Crippling mode uses the suit, so when that's happening, you can't buy the suit.
