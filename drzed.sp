@@ -326,6 +326,7 @@ void jayne(int team)
 		int have_decoy = GetEntProp(client, Prop_Data, "m_iAmmo", _, 18);
 		int total_nades = have_he + have_flash + have_smoke + have_molly + have_decoy;
 		int max_nades = GetConVarInt(ammo_grenade_limit_total);
+		//TODO: Respect per-type maximums that might be higher than 1
 		int molly_price = team == 2 ? 400 : 600; //Incendiary grenades are overpriced for CTs
 		money -= 1000; //Ensure that the bots don't spend below $1000 this way (just in case).
 		int bought = 0;
