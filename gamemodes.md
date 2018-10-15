@@ -36,4 +36,4 @@ would kill you, it leaves you on critically low health, but still alive.
 Certain attacks are able to bypass the health gate, including the knife;
 anything that deals massive overkill damage can punch right past it.
 
-Example config file: (none yet)
+Example config file: [drzed.cfg](https://github.com/Rosuav/tf2server/blob/master/steamcmd_linux/csgo/csgo/cfg/drzed.cfg)
