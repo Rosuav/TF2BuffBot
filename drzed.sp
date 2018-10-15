@@ -440,6 +440,12 @@ void cripple(int client)
 	SetEntProp(client, Prop_Send, "m_ArmorValue", 0);
 	//Switch to knife. If you have no knife, you switch to a non-weapon.
 	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(client, 2));
+	if (GetEntProp(client, Prop_Send, "m_bIsScoped"))
+	{
+		SetEntProp(client, Prop_Send, "m_iFOV", 90);
+		SetEntProp(client, Prop_Send, "m_bIsScoped", 0);
+		SetEntProp(client, Prop_Send, "m_bResumeZoom", 0);
+	}
 	CreateTimer(0.2, crippled_health_drain, client, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 	crippled_status[client] = -1; //Damage protection active.
 	CreateTimer(1.0, remove_cripple_prot, client, TIMER_FLAG_NO_MAPCHANGE);
@@ -774,8 +780,6 @@ models and textures.
 TODO: Test interaction btwn health gate and crippling.
 
 TODO: Is it okay for a crippled person to revive another crippled person?
-
-TODO: Unscope when crippled. It looks weird to be scoped with a knife.
 
 TODO: When you pick up a bot, you get to primary for some reason. Why? Weird.
 
