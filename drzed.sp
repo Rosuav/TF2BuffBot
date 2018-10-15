@@ -777,4 +777,6 @@ TODO: Is it okay for a crippled person to revive another crippled person?
 TODO: Unscope when crippled. It looks weird to be scoped with a knife.
 
 TODO: When you pick up a bot, you get to primary for some reason. Why? Weird.
+
+TODO: Make sure you can't !heal while crippled
 */
