@@ -543,6 +543,9 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	if (!strcmp(msg, "!drop"))
 	{
 		//The wealthiest bot on your team will (1) drop primary weapon, then (2) buy M4A1.
+		//TODO maybe: If the wealthiest bot is carrying an SMG and can afford another,
+		//drop and buy a UMP? Would allow !drop to work on SMG rounds. Might not be worth
+		//it though.
 		if (!GameRules_GetProp("m_bFreezePeriod")) return; //Can only be done during freeze
 		int team = GetClientTeam(self);
 		int bot = -1, topmoney = team == 2 ? 2700 : 3100; //Ensure that the bot can buy a replacement M4/AK
@@ -568,6 +571,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			return;
 		}
 		CS_DropWeapon(bot, weap, true, true);
+		//TODO: Buy different weapons, esp now the AUG/SG are so cheap
 		FakeClientCommandEx(bot, "buy m4a1");
 
 		char cls[64]; describe_weapon(weap, cls, sizeof(cls));
