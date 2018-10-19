@@ -730,7 +730,6 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	{
 		//If the bomb kills a CT, credit the kill to the bomb planter.
 		//(Don't penalize for team kills or suicide though.)
-		PrintToStream("C4 dealt damage atk %d infl %d weap %d pla %d", attacker, inflictor, weapon, bomb_planter);
 		if (IsClientInGame(bomb_planter)) attacker = bomb_planter;
 		return Plugin_Changed;
 	}
