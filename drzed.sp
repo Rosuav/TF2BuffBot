@@ -51,6 +51,7 @@ public void OnPluginStart()
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("weapon_fire", Event_weapon_fire);
 	HookEvent("round_end", uncripple_all);
+	HookEvent("bomb_planted", record_planter);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
 	//player_falldamage: report whenever anyone falls, esp for a lot of dmg
@@ -139,6 +140,11 @@ public void OnPluginStart()
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	switch_weapon_call = EndPrepSDKCall();
 	delete gamedata;
+}
+int bomb_planter = -1;
+public void record_planter(Event event, const char[] name, bool dontBroadcast)
+{
+	bomb_planter = GetClientOfUserId(event.GetInt("userid"));
 }
 
 public Action give_all_money(int initiator, int args)
@@ -719,6 +725,16 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		else if (health < max) damage *= factor * health / max;
 		return Plugin_Changed;
 	}
+
+	if (!strcmp(atkcls, "C4") && GetClientTeam(victim) == 3)
+	{
+		//If the bomb kills a CT, credit the kill to the bomb planter.
+		//(Don't penalize for team kills or suicide though.)
+		PrintToStream("C4 dealt damage atk %d infl %d weap %d pla %d", attacker, inflictor, weapon, bomb_planter);
+		if (IsClientInGame(bomb_planter)) attacker = bomb_planter;
+		return Plugin_Changed;
+	}
+
 	//
 	if (cripplepoint && !GameRules_GetProp("m_iRoundWinStatus"))
 	{
