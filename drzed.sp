@@ -52,6 +52,7 @@ public void OnPluginStart()
 	HookEvent("weapon_fire", Event_weapon_fire);
 	HookEvent("round_end", uncripple_all);
 	HookEvent("bomb_planted", record_planter);
+	HookEvent("player_team", player_team);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
 	//player_falldamage: report whenever anyone falls, esp for a lot of dmg
@@ -303,17 +304,30 @@ Action deselect_weapon(Handle timer, any client)
 	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weapon);
 }
 
+public Action add_bonus_health(Handle timer, int client)
+{
+	//If you now have a suit, give the health bonus. That way, if ANYTHING
+	//blocks the purchase, the health bonus won't happen.
+	if (GetEntProp(client, Prop_Send, "m_bHasHeavyArmor"))
+	{
+		int hp = GetConVarInt(sm_drzed_suit_health_bonus);
+		if (hp) SetEntityHealth(client, GetClientHealth(client) + hp);
+	}
+}
+
 public Action CS_OnBuyCommand(int buyer, const char[] weap)
 {
 	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return Plugin_Continue;
+	char name[64]; GetClientName(buyer, name, sizeof(name));
 	//Disallow defusers during warmup (they're useless anyway)
 	if (StrEqual(weap, "defuser") && GameRules_GetProp("m_bWarmupPeriod")) return Plugin_Stop;
 	if (StrEqual(weap, "heavyassaultsuit"))
 	{
 		//Crippling mode uses the suit, so when that's happening, you can't buy the suit.
 		if (GetConVarInt(sm_drzed_crippled_health)) return Plugin_Stop;
-		int hp = GetConVarInt(sm_drzed_suit_health_bonus);
-		if (hp) SetEntityHealth(buyer, GetClientHealth(buyer) + hp);
+		//If this purchase succeeds, grant a health bonus.
+		if (!GetEntProp(buyer, Prop_Send, "m_bHasHeavyArmor"))
+			CreateTimer(0.05, add_bonus_health, buyer, TIMER_FLAG_NO_MAPCHANGE);
 	}
 	return Plugin_Continue;
 }
@@ -502,8 +516,16 @@ public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
+int healthbonus_for_warmup; //Bonuses gained in warmup deathmatch don't carry over
 int healthbonus[MAXPLAYERS + 1];
-public void OnMapStart() {for (int i = 0; i <= MAXPLAYERS; ++i) healthbonus[i] = 0;}
+void reset_health_bonuses() {for (int i = 0; i <= MAXPLAYERS; ++i) healthbonus[i] = 0;}
+public void OnMapStart() {reset_health_bonuses();}
+
+public void player_team(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	healthbonus[client] = 0;
+}
 
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 {
@@ -594,6 +616,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	{
 		int target = self; //Should players be able to request healing for each other? For now, no.
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
+		if (GameRules_GetProp("m_iRoundWinStatus")) return; //Can't heal when the round is over.
 		int price = GetConVarInt(sm_drzed_heal_price);
 		if (!price) return; //Healing not available on this map/game mode/etc
 		//In theory, free healing could be a thing (since "no healing available" is best signalled
@@ -643,6 +666,12 @@ public Action maxhealthcheck(int entity, int &maxhealth)
 }
 void sethealth(int entity)
 {
+	if (GameRules_GetProp("m_bWarmupPeriod") != healthbonus_for_warmup)
+	{
+		//Reset everything as we go into or out of warmup
+		healthbonus_for_warmup = GameRules_GetProp("m_bWarmupPeriod");
+		reset_health_bonuses();
+	}
 	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return;
 	int health = GetConVarInt(sm_drzed_max_hitpoints);
 	if (!health) health = 100; //TODO: Find out what the default would otherwise have been
