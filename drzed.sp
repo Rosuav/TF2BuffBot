@@ -857,7 +857,9 @@ TODO: Use Plugin_Handled rather than Plugin_Stop to disable damage??
 */
 
 /*
-TODO: !heal cooldown
+TODO: !heal cooldown. It's a tad abusive if you can accumulate tons of money and then
+spam healing so nobody can take you down. Cooldown should be controlled by cvar.
 
-TODO: Heal target when controlling a bot
+TODO: Heal target when controlling a bot - the frequent flyer bonus should come from,
+and go to, the bot. Ensure that money is also spent correctly.
 */
