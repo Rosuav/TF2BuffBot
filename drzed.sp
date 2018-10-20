@@ -855,3 +855,9 @@ TODO: Make sure you can't !heal while crippled
 
 TODO: Use Plugin_Handled rather than Plugin_Stop to disable damage??
 */
+
+/*
+TODO: !heal cooldown
+
+TODO: Heal target when controlling a bot
+*/
