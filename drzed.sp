@@ -516,9 +516,16 @@ public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
+/* So, uhh.... this is one of those cases where I have NO idea what's wrong.
+Apparently, the healthbonus_for_warmup flag is getting reset unexpectedly.
+Having a few shims appears to prevent this. Cannot find any bug in my code,
+but if anyone else does, PLEASE let me know. */
 int healthbonus_for_warmup; //Bonuses gained in warmup deathmatch don't carry over
-int healthbonus[MAXPLAYERS + 1];
-void reset_health_bonuses() {for (int i = 0; i <= MAXPLAYERS; ++i) healthbonus[i] = 0;}
+public int shim1;
+public int shim2;
+public int shim3;
+int healthbonus[66]; //Has to be a bit bigger than MAXPLAYERS
+void reset_health_bonuses() {for (int i = 0; i < sizeof(healthbonus); ++i) healthbonus[i] = 0;}
 public void OnMapStart() {reset_health_bonuses();}
 
 public void player_team(Event event, const char[] name, bool dontBroadcast)
@@ -642,6 +649,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		}
 		int increment = GetConVarInt(sm_drzed_heal_freq_flyer);
 		healthbonus[target] += increment; max_health += increment;
+		//char playername[64]; GetClientName(target, playername, sizeof(playername));
+		//PrintToStream("Healing %s up to %d (bonus %d)", playername, max_health, healthbonus[target]);
 		SetEntProp(target, Prop_Send, "m_iAccount", money - price);
 		SetEntityHealth(target, max_health);
 		PrintToChat(target, "Now go kill some enemies for me!"); //TODO: Different messages T and CT?
@@ -664,18 +673,27 @@ public Action maxhealthcheck(int entity, int &maxhealth)
 	maxhealth = GetConVarInt(sm_drzed_max_hitpoints) + GetConVarInt(sm_drzed_crippled_health);
 	return Plugin_Changed;
 }
+
 void sethealth(int entity)
 {
-	if (GameRules_GetProp("m_bWarmupPeriod") != healthbonus_for_warmup)
+	//I do not understand why I can't just compare GetProp to the stored value.
+	//It's probably something to do with the almost-but-not-quite-sane type
+	//system ("tags") in SourcePawn.
+	int now_warmup = 0;
+	if (GameRules_GetProp("m_bWarmupPeriod")) now_warmup = 1;
+	if (now_warmup != healthbonus_for_warmup)
 	{
+		//PrintToStream("warmup %d => %d, resetting", healthbonus_for_warmup, now_warmup);
 		//Reset everything as we go into or out of warmup
-		healthbonus_for_warmup = GameRules_GetProp("m_bWarmupPeriod");
+		healthbonus_for_warmup = now_warmup; //This line appears to trample on one of the shims. HUH??
 		reset_health_bonuses();
 	}
 	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return;
 	int health = GetConVarInt(sm_drzed_max_hitpoints);
 	if (!health) health = 100; //TODO: Find out what the default would otherwise have been
 	health += GetConVarInt(sm_drzed_crippled_health);
+	//char name[64]; GetClientName(entity, name, sizeof(name));
+	//PrintToStream("Spawn %s (%d): %d + %d = %d hp", name, entity, health, healthbonus[entity], health + healthbonus[entity]);
 	SetEntityHealth(entity, health + healthbonus[entity]);
 }
 
