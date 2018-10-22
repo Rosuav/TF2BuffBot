@@ -30,6 +30,8 @@ while "moar data":
 	if not m: continue
 	killer, mode, victim, score, hp = m.groups()
 	# TODO: Score team damage and self damage differently from normal damage-to-enemies
+	# For now, just ignore both.
+	if mode != "": continue
 	score = int(score)
 	total_score += score
 	scores[killer] += score
