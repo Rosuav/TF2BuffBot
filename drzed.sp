@@ -633,7 +633,14 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int max_health = GetConVarInt(sm_drzed_heal_max);
 		if (GetEntProp(target, Prop_Send, "m_bHasHeavyArmor"))
 			max_health += GetConVarInt(sm_drzed_suit_health_bonus);
-		max_health += healthbonus[target];
+
+		//When you're controlling a bot, most info is available under your
+		//client (eg money, health), but for anything we track ourselves,
+		//use the client index of the bot you're controlling instead.
+		int real_client = target;
+		if (GetEntProp(target, Prop_Send, "m_bIsControllingBot"))
+			real_client = GetEntProp(target, Prop_Send, "m_iControlledBotEntIndex");
+		max_health += healthbonus[real_client];
 		if (max_health <= 0) return; //Healing not available on this map/game mode/etc
 		int cd = GetConVarInt(sm_drzed_heal_cooldown);
 		//TODO: Block healing if we're still in the cooldown
@@ -651,7 +658,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			return;
 		}
 		int increment = GetConVarInt(sm_drzed_heal_freq_flyer);
-		healthbonus[target] += increment; max_health += increment;
+		healthbonus[real_client] += increment; max_health += increment;
 		//char playername[64]; GetClientName(target, playername, sizeof(playername));
 		//PrintToStream("Healing %s up to %d (bonus %d)", playername, max_health, healthbonus[target]);
 		SetEntProp(target, Prop_Send, "m_iAccount", money - price);
@@ -855,9 +862,4 @@ knife again.
 TODO: Make sure you can't !heal while crippled
 
 TODO: Use Plugin_Handled rather than Plugin_Stop to disable damage??
-*/
-
-/*
-TODO: Heal target when controlling a bot - the frequent flyer bonus should come from,
-and go to, the bot. Ensure that money is also spent correctly.
 */
