@@ -28,6 +28,9 @@ way.
 * sm_drzed_heal_freq_flyer: Every time you heal up, your maximum health is
   increased by this much. Not recommended in classic modes (casual/compet),
   but can work well in (eg) Arms Race.
+* sm_drzed_heal_cooldown: If you have an abundance of money and a lack of
+  health, you could heal-spam while under fire and be indestructible. To
+  prevent this, healing has a short cooldown.
 
 ### Health gating
 

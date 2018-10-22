@@ -19,6 +19,7 @@ ConVar sm_drzed_max_hitpoints = null; //(0) Number of hitpoints a normal charact
 ConVar sm_drzed_heal_max = null; //(0) If nonzero, healing can be bought up to that many hitpoints (100 is normal maximum)
 ConVar sm_drzed_heal_price = null; //(0) If nonzero, healing can be bought for that much money
 ConVar sm_drzed_heal_freq_flyer = null; //(0) Every successful purchase of healing adds this to your max health
+ConVar sm_drzed_heal_cooldown = null; //(15) After buying healing, you can't buy more for this many seconds.
 ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you equip the Heavy Assault Suit (also buffs heal_max while worn)
 ConVar sm_drzed_gate_health_left = null; //(0) If nonzero, one-shots from full health will leave you on this much health
 ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much damage (after armor) ignore the health gate
@@ -634,6 +635,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			max_health += GetConVarInt(sm_drzed_suit_health_bonus);
 		max_health += healthbonus[target];
 		if (max_health <= 0) return; //Healing not available on this map/game mode/etc
+		int cd = GetConVarInt(sm_drzed_heal_cooldown);
+		//TODO: Block healing if we're still in the cooldown
 		if (GetClientHealth(target) >= max_health)
 		{
 			//Healing not needed. (Don't waste the player's money.)
@@ -843,8 +846,6 @@ thing, heavyarmor purchases will simply be denied. Recommend setting the cvar
 mp_weapons_allow_heavyassaultsuit to 1 to force the game to precache the appropriate
 models and textures.
 
-TODO: Test interaction btwn health gate and crippling.
-
 TODO: Is it okay for a crippled person to revive another crippled person?
 
 TODO: When you pick up a bot, you get set to primary weapon for some reason.
@@ -857,9 +858,6 @@ TODO: Use Plugin_Handled rather than Plugin_Stop to disable damage??
 */
 
 /*
-TODO: !heal cooldown. It's a tad abusive if you can accumulate tons of money and then
-spam healing so nobody can take you down. Cooldown should be controlled by cvar.
-
 TODO: Heal target when controlling a bot - the frequent flyer bonus should come from,
 and go to, the bot. Ensure that money is also spent correctly.
 */
