@@ -26,8 +26,8 @@ way.
   This is not in any way scaled - it always costs exactly this much to heal
   to the given maximum.
 * sm_drzed_heal_freq_flyer: Every time you heal up, your maximum health is
-  increased by this much. Not recommended in classic modes (casual/compet),
-  but can work well in (eg) Arms Race.
+  increased by this much. Can be unbalancing in classic modes (casual and
+  competitive), but works well in Arms Race.
 * sm_drzed_heal_cooldown: If you have an abundance of money and a lack of
   health, you could heal-spam while under fire and be indestructible. To
   prevent this, healing has a short cooldown.
@@ -41,7 +41,7 @@ still going to smash you to pieces...
 
 * sm_drzed_gate_health_left: How much health you should be left on (eg 10)
 * sm_drzed_gate_overkill: A single hit of at least this much will crash right
-  through the health gate.
+  through the health gate. Can be set ridiculously high to disable this check.
 
 ### Altered max hitpoints
 
