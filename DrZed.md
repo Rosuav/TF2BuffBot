@@ -130,4 +130,13 @@ can't afford rifles.
 
 ### Weapon scoring
 
-TODO: Document this
+"So-and-so brought a knife to a gunfight". Yep, that's a mistake. But what if
+you made the mistake of bringing a pistol to a riflefight? Or a scoped-in AWP
+to a SMG fight? Which is actually better at resolving encounters - an AUG or
+an M249? Track it with this log. Analysis is outside the plugin's control; it
+records the raw data. An associated Python script [weapon_scores.py](weapon_scores.py)
+shows the top winners and worst losers, and similar analysis could be done on
+entire categories of weapon, or adjusting for weapon price, etc.
+
+Note that self-damage and team-damage are recorded, so you can easily track
+which weapons tend to be mis-aimed too, if that interests you.
