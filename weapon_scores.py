@@ -23,6 +23,7 @@ def show_scores():
 		print("%-*s %s" % (width, winner, loser))
 
 while "moar data":
+	show_scores()
 	line = input()
 	# Zero-sum game: every point gained in one place is lost somewhere else
 	m = re.match("^(.+) (|team|self)damaged (.+) for ([0-9]+) \(([0-9]+)hp\)$", line)
@@ -33,4 +34,3 @@ while "moar data":
 	total_score += score
 	scores[killer] += score
 	scores[victim] -= score
-	show_scores()
