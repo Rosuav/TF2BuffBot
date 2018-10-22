@@ -126,7 +126,10 @@ measuring distance between two players is easy.
 Say "!drop" to your team to request a weapon drop. The wealthiest bot will
 drop his current weapon and then buy a replacement. Great for those times
 when there's some stupid bot sitting on a pile of cash while everyone else
-can't afford rifles.
+can't afford rifles. Note that bots still aren't smart enough to trade
+weapons with you, but if the default replacement weapon (M4 or AK) is
+superior to the one the wealthiest bot is using, you CAN use this to force
+him to upgrade.
 
 ### Weapon scoring
 
