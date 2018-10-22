@@ -85,7 +85,9 @@ assault suit, as it uses the suit to control crippled players.
 Console command: zed_money
 
 Tada, everyone has $1000 more than they had before. That's not enough? Run it
-again. Easy. Applies to all players, both teams.
+again. Easy. Applies to all players, both teams. Use it before a round starts
+if you want the bots to be able to use that money to buy gear; humans can, of
+course, spend the money any time they like (within buy period).
 
 ### Talkative bots
 
