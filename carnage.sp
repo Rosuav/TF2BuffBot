@@ -1950,7 +1950,6 @@ void apply_effect(int target, TFCond condition, int duration=0)
 		hp += healing;
 		if (hp > max) hp = max; //Overheal maxes out at twice the Bonkvich's benefit.
 		SetEntityHealth(target, hp);
-		PrintToChatAll("Applied effect Massive Overheal to %d", target);
 	}
 	TF2_AddCondition(target, condition, duration + 0.0, 0);
 	Debug("Applied effect %d to %d", condition, target);
