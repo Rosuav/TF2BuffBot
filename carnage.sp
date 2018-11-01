@@ -69,7 +69,7 @@ ConVar sm_ccc_coop_kill_divisor = null; //(4) It takes this many co-op kills to 
 ConVar sm_ccc_domheal_amount = null; //(20) Domination building heal hitpoints per tick
 ConVar sm_ccc_domheal_percent = null; //(0) Domination building heal percent of max hp per tick
 ConVar sm_ccc_admin_chat_name = null; //("") Name of admin for chat purposes
-ConVar sm_ccc_market_gardening = null; //(0) If 1, we're market gardening all the way!
+ConVar sm_ccc_market_gardening = null; //(0) If 1, we're market gardening all the way! If 2, it's King of the Bleeding Hill
 ConVar sm_ccc_koth_override_timers = null; //(0) If nonzero, KOTH maps will start with this many seconds on the clock
 char notable_kills[128][128];
 //TODO: Echo commands, where pre-written text gets spammed to chat (eg "Server going down yada yada")
@@ -429,11 +429,19 @@ public Action maxhealthcheck(int entity, int &maxhealth)
 }
 public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
 {
-	if (GetConVarInt(sm_ccc_market_gardening)) //Market Gardening mode
+	int mktgdn = GetConVarInt(sm_ccc_market_gardening);
+	if (mktgdn)
 	{
+		PrintToChatAll("Damage %.0fhp type %X from %d/%d to %d", damage, damagetype, attacker, inflictor, victim);
 		if (damagetype&DMG_FALL) {damage = 0.0; return Plugin_Changed;} //Disable all fall damage
 		if (attacker == victim) return Plugin_Continue; //Permit all blast jumping
 		if (!attacker) return Plugin_Continue; //Permit all environmental damage (drowning etc)
+		if (mktgdn == 2 && attacker <= MAXPLAYERS)
+		{
+			//"Bleeding Hill" mode - no damage whatsoever except bleed
+			damage = 0.0;
+			return Plugin_Changed;
+		}
 		if (attacker <= MAXPLAYERS && !TF2_IsPlayerInCondition(attacker, TFCond_BlastJumping))
 		{
 			//I've been seeing some console crashes involving "entity 320/trigger_hurt" dealing
@@ -525,7 +533,12 @@ public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float 
 
 public void respawncheck(int entity)
 {
-	if (entity <= MaxClients && GetClientUserId(entity) == ragebox_userid) set_ragebox(ragebox_userid);
+	if (entity <= MaxClients)
+	{
+		if (GetClientUserId(entity) == ragebox_userid) set_ragebox(ragebox_userid);
+		if (GetConVarInt(sm_ccc_market_gardening) == 2 && !TF2_IsPlayerInCondition(entity, TFCond_Bleeding))
+			TF2_MakeBleed(entity, entity, 3600.0); //Bleeding Hill
+	}
 	if (ragebox_userid == -1) randomize_ragebox(0);
 }
 
@@ -1764,6 +1777,10 @@ public void TF2_OnConditionRemoved(int client, TFCond cond)
 {
 	//PrintToChatAll("%d removed cond %d", client, cond);
 	if (cond == TFCond_Plague) SetEntityRenderColor(client, 255, 255, 255, 255);
+	if (cond == TFCond_Bleeding && GetConVarInt(sm_ccc_market_gardening) == 2)
+	{
+		TF2_MakeBleed(client, client, 3600.0); //Bleeding Hill
+	}
 	/*if (cond == TFCond_BlastJumping)
 	{
 		char targetname[MAX_NAME_LENGTH];
