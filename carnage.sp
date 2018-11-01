@@ -432,7 +432,6 @@ public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float 
 	int mktgdn = GetConVarInt(sm_ccc_market_gardening);
 	if (mktgdn)
 	{
-		PrintToChatAll("Damage %.0fhp type %X from %d/%d to %d", damage, damagetype, attacker, inflictor, victim);
 		if (damagetype&DMG_FALL) {damage = 0.0; return Plugin_Changed;} //Disable all fall damage
 		if (attacker == victim) return Plugin_Continue; //Permit all blast jumping
 		if (!attacker) return Plugin_Continue; //Permit all environmental damage (drowning etc)
@@ -536,8 +535,8 @@ public void respawncheck(int entity)
 	if (entity <= MaxClients)
 	{
 		if (GetClientUserId(entity) == ragebox_userid) set_ragebox(ragebox_userid);
-		if (GetConVarInt(sm_ccc_market_gardening) == 2 && !TF2_IsPlayerInCondition(entity, TFCond_Bleeding))
-			TF2_MakeBleed(entity, entity, 3600.0); //Bleeding Hill
+		if (GetConVarInt(sm_ccc_market_gardening) == 2) //Bleeding Hill
+			CreateTimer(1.0, health_drain, entity, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 	}
 	if (ragebox_userid == -1) randomize_ragebox(0);
 }
@@ -1761,6 +1760,17 @@ Action unblind(Handle timer, any target)
 	return Plugin_Stop;
 }
 
+Action health_drain(Handle timer, any target)
+{
+	ignore(timer);
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return Plugin_Stop;
+	if (GetConVarInt(sm_ccc_market_gardening) != 2) return Plugin_Stop;
+	int health = GetClientHealth(target);
+	if (health > 25) SetEntityHealth(target, health - 1);
+	else SDKHooks_TakeDamage(target, target, target, 1.0, 0, -1); //When you're nearly dead, it starts hurting.
+	return Plugin_Continue;
+}
+
 public void TF2_OnConditionAdded(int client, TFCond cond)
 {
 	//PrintToChatAll("%d added cond %d", client, cond);
@@ -1777,10 +1787,6 @@ public void TF2_OnConditionRemoved(int client, TFCond cond)
 {
 	//PrintToChatAll("%d removed cond %d", client, cond);
 	if (cond == TFCond_Plague) SetEntityRenderColor(client, 255, 255, 255, 255);
-	if (cond == TFCond_Bleeding && GetConVarInt(sm_ccc_market_gardening) == 2)
-	{
-		TF2_MakeBleed(client, client, 3600.0); //Bleeding Hill
-	}
 	/*if (cond == TFCond_BlastJumping)
 	{
 		char targetname[MAX_NAME_LENGTH];
