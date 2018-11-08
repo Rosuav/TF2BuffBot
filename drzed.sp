@@ -795,6 +795,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 				damage /= 10.0;
 				return Plugin_Changed;
 			}
+			return Plugin_Continue;
 		}
 		if (IsFakeClient(attacker)) return Plugin_Continue; //Example: Bots are unaffected
 		//Example: Scale the damage according to how hurt you are
