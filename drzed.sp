@@ -785,6 +785,17 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 			if (IsFakeClient(attacker)) damage = 0.0; else damage = 100.0;
 			return Plugin_Changed;
 		}
+		if (hack == 3)
+		{
+			//Damage only while flashed
+			float flashtm = GetEntPropFloat(attacker, Prop_Send, "m_flFlashDuration");
+			if (flashtm == 0.0)
+			{
+				//You're not flashed, so you deal fractional damage.
+				damage /= 10.0;
+				return Plugin_Changed;
+			}
+		}
 		if (IsFakeClient(attacker)) return Plugin_Continue; //Example: Bots are unaffected
 		//Example: Scale the damage according to how hurt you are
 		//Like the TF2 Equalizer, but done as a simple scaling of all damage.
