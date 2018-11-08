@@ -20,6 +20,7 @@ ConVar sm_drzed_heal_max = null; //(0) If nonzero, healing can be bought up to t
 ConVar sm_drzed_heal_price = null; //(0) If nonzero, healing can be bought for that much money
 ConVar sm_drzed_heal_freq_flyer = null; //(0) Every successful purchase of healing adds this to your max health
 ConVar sm_drzed_heal_cooldown = null; //(15) After buying healing, you can't buy more for this many seconds.
+ConVar sm_drzed_heal_damage_cd = null; //(2.5) Healing is available only when you've been out of combat for X seconds (taking no damage).
 ConVar sm_drzed_suit_health_bonus = null; //(0) Additional HP gained when you equip the Heavy Assault Suit (also buffs heal_max while worn)
 ConVar sm_drzed_gate_health_left = null; //(0) If nonzero, one-shots from full health will leave you on this much health
 ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much damage (after armor) ignore the health gate
@@ -526,13 +527,14 @@ public int shim1;
 public int shim2;
 public int shim3;
 int healthbonus[66]; //Has to be a bit bigger than MAXPLAYERS
-void reset_health_bonuses() {for (int i = 0; i < sizeof(healthbonus); ++i) healthbonus[i] = 0;}
+int heal_cooldown_tick[66];
+void reset_health_bonuses() {for (int i = 0; i < sizeof(healthbonus); ++i) healthbonus[i] = heal_cooldown_tick[i] = 0;}
 public void OnMapStart() {reset_health_bonuses();}
 
 public void player_team(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	healthbonus[client] = 0;
+	healthbonus[client] = heal_cooldown_tick[client] = 0;
 }
 
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
@@ -642,8 +644,15 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			real_client = GetEntProp(target, Prop_Send, "m_iControlledBotEntIndex");
 		max_health += healthbonus[real_client];
 		if (max_health <= 0) return; //Healing not available on this map/game mode/etc
-		int cd = GetConVarInt(sm_drzed_heal_cooldown);
-		//TODO: Block healing if we're still in the cooldown
+		int tick = GetGameTickCount();
+		if (tick < heal_cooldown_tick[real_client])
+		{
+			//TODO: Show a twirling cooldown?
+			PrintToChat(target, "Slow down, get out of danger, and I'll come help!");
+			return;
+		}
+		int cd = RoundToFloor(GetConVarFloat(sm_drzed_heal_cooldown) / GetTickInterval());
+		heal_cooldown_tick[real_client] = tick + cd;
 		if (GetClientHealth(target) >= max_health)
 		{
 			//Healing not needed. (Don't waste the player's money.)
@@ -760,6 +769,10 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		SetEntityHealth(victim, health + gain);
 		return Plugin_Stop;
 	}
+
+	int tick = GetGameTickCount();
+	int cd = RoundToFloor(GetConVarFloat(sm_drzed_heal_damage_cd) / GetTickInterval());
+	if (heal_cooldown_tick[victim] < tick + cd) heal_cooldown_tick[victim] = tick + cd;
 
 	int hack = GetConVarInt(sm_drzed_hack);
 	if (hack && attacker && attacker < MAXPLAYERS)
