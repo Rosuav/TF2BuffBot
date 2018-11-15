@@ -71,7 +71,7 @@ ConVar sm_ccc_domheal_percent = null; //(0) Domination building heal percent of 
 ConVar sm_ccc_admin_chat_name = null; //("") Name of admin for chat purposes
 ConVar sm_ccc_market_gardening = null; //(0) If 1, we're market gardening all the way! If 2, it's King of the Bleeding Hill
 ConVar sm_ccc_koth_override_timers = null; //(0) If nonzero, KOTH maps will start with this many seconds on the clock
-ConVar sm_ccc_ragebox_damage_reduction = null; //(25) The ragebox bearer gets this percentage damage reduction.
+ConVar sm_ccc_ragebox_damage_reduction = null; //(10) The ragebox bearer gets this percentage damage reduction.
 char notable_kills[128][128];
 //TODO: Echo commands, where pre-written text gets spammed to chat (eg "Server going down yada yada")
 #include "convars_carnage"
