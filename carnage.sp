@@ -493,6 +493,7 @@ public Action PlayerTookDamage(int victim, int &attacker, int &inflictor, float 
 	#endif
 	if (ragebox_userid <= 0) return Plugin_Continue;
 	int ragebox_holder = GetClientOfUserId(ragebox_userid);
+	if (!ragebox_holder) return Plugin_Continue; //If the ragebox holder has left, the userid becomes invalid.
 	if (ragebox_holder == victim)
 	{
 		if (attacker == victim) return Plugin_Continue; //Self-damage isn't affected (to permit blast jumping)
