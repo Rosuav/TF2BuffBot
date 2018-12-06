@@ -493,13 +493,55 @@ void uncripple(int client)
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3],
 	int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
+	//IN_ALT1 comes from the commands "+alt1" in client, and appears to have no effect
+	//IN_ZOOM appears to have the same effect as ATTACK2 on weapons with scopes, and also
+	//on the knife. Yes, "+zoom" will backstab with a knife. But it won't light a molly.
+	//IN_LEFT/IN_RIGHT rotate you, like a 90s video game. Still active but nobody uses.
+	//Holding Shift will activate IN_SPEED, not IN_WALK or IN_RUN.
+	//IN_GRENADE1/2 correspond to "+grenade1/2" but have no visible effect.
+	/*PrintCenterText(client, "Buttons: %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+		buttons & IN_ATTACK ? "IN_ATTACK " : "",
+		buttons & IN_JUMP ? "IN_JUMP " : "",
+		buttons & IN_DUCK ? "IN_DUCK " : "",
+		buttons & IN_FORWARD ? "IN_FORWARD " : "",
+		buttons & IN_BACK ? "IN_BACK " : "",
+		buttons & IN_USE ? "IN_USE " : "",
+		buttons & IN_CANCEL ? "IN_CANCEL " : "",
+		buttons & IN_LEFT ? "IN_LEFT " : "",
+		buttons & IN_RIGHT ? "IN_RIGHT " : "",
+		buttons & IN_MOVELEFT ? "IN_MOVELEFT " : "",
+		buttons & IN_MOVERIGHT ? "IN_MOVERIGHT " : "",
+		buttons & IN_ATTACK2 ? "IN_ATTACK2 " : "",
+		buttons & IN_RUN ? "IN_RUN " : "",
+		buttons & IN_RELOAD ? "IN_RELOAD " : "",
+		buttons & IN_ALT1 ? "IN_ALT1 " : "",
+		buttons & IN_ALT2 ? "IN_ALT2 " : "",
+		buttons & IN_SCORE ? "IN_SCORE " : "",
+		buttons & IN_SPEED ? "IN_SPEED " : "",
+		buttons & IN_WALK ? "IN_WALK " : "",
+		buttons & IN_ZOOM ? "IN_ZOOM " : "",
+		buttons & IN_WEAPON1 ? "IN_WEAPON1 " : "",
+		buttons & IN_WEAPON2 ? "IN_WEAPON2 " : "",
+		buttons & IN_BULLRUSH ? "IN_BULLRUSH " : "",
+		buttons & IN_GRENADE1 ? "IN_GRENADE1 " : "",
+		buttons & IN_GRENADE2 ? "IN_GRENADE2 " : "",
+		buttons & IN_ATTACK3 ? "IN_ATTACK3 " : ""
+	);*/
 	if (is_crippled(client))
 	{
 		//While you're crippled, you can't do certain things. There may be more restrictions to add.
-		if (buttons & IN_USE)
+		//You can't defuse or pick up weapons (IN_USE). You can't change speed (walk mode, IN_SPEED).
+		//Should you be prevented from jumping (IN_JUMP)?
+		//What's IN_CANCEL?
+		//Can the game force you to drop a carried hostage?
+		int invalid = IN_USE | IN_SPEED;
+		//Should you be forced to crouch (IN_DUCK)? Looks good to others, but the client simulates
+		//it and keeps on uncrouching you, which looks ugly.
+		int mandatory = 0;
+		int btn = (buttons & ~invalid) | mandatory;
+		if (btn != buttons)
 		{
-			//Can't defuse the bomb or pick up weapons
-			buttons &= ~IN_USE;
+			buttons = btn;
 			return Plugin_Changed;
 		}
 	}
