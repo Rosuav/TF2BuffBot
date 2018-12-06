@@ -437,7 +437,7 @@ void kill_crippled_player(int client)
 	int inflictor = last_inflictor[client], attacker = last_attacker[client], weapon = last_weapon[client];
 	//If the attacker is no longer in the game, treat it as suicide. This
 	//follows the precedent of a molly thrown by a ragequitter.
-	if (!IsClientInGame(attacker)) attacker = client;
+	if (attacker && !IsClientInGame(attacker)) attacker = client;
 	//If the weapon is no longer in the game, sometimes you'll get credited
 	//with the kill using a weird weapon. Most commonly, it'll say you killed
 	//someone with your currently-wielded weapon, but you might sometimes see
