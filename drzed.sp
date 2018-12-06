@@ -817,7 +817,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	}
 
 	//
-	if (cripplepoint && !GameRules_GetProp("m_iRoundWinStatus"))
+	if (cripplepoint)
 	{
 		//Note that crippling, as a feature, is disabled once the
 		//round is over. Insta-kill for exit frags.
@@ -825,6 +825,12 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		int newhealth = oldhealth - RoundToFloor(damage);
 		if (oldhealth > cripplepoint && newhealth <= cripplepoint)
 		{
+			if (GameRules_GetProp("m_iRoundWinStatus") || GameRules_GetProp("m_bWarmupPeriod"))
+			{
+				//During warmup and end-of-round, crippled people just instadie
+				SetEntityHealth(victim, GetClientHealth(victim) - cripplepoint);
+				return Plugin_Continue; //and then the normal damage goes through
+			}
 			last_attacker[victim] = attacker; last_inflictor[victim] = inflictor; last_weapon[victim] = weapon;
 			cripple(victim);
 			return Plugin_Stop; //Returning Plugin_Stop doesn't seem to stop the damage event in all cases. Not sure why.
