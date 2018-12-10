@@ -207,6 +207,7 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 	if (client > MAXPLAYERS) return;
 	if (!GameRules_GetProp("m_bFreezePeriod")) return; //Announce only during freeze time.
 	if (!IsFakeClient(client)) return; //Don't force actual players to speak - it violates expectations.
+	#if 0 //It seems that GetPlayerWeaponSlot can crash the server (?????)
 	//Delay the actual message to allow a replacement weapon to be collected
 	Handle params;
 	CreateDataTimer(0.01, announce_weapon_drop, params, TIMER_FLAG_NO_MAPCHANGE);
@@ -220,6 +221,7 @@ public Action CS_OnCSWeaponDrop(int client, int weapon)
 			WritePackCell(params, slot);
 	WritePackCell(params, -1); //Should really only do this if the previous line never hit, but whatevs. An extra pack integer in the weird case.
 	ResetPack(params);
+	#endif
 }
 Action announce_weapon_drop(Handle timer, Handle params)
 {
@@ -259,6 +261,7 @@ Action announce_weapon_drop(Handle timer, Handle params)
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
+	#if 0 //It seems that GetPlayerWeaponSlot can crash the server (?????)
 	if (GetPlayerWeaponSlot(client, 2) != -1) return; //Normally you'll have a knife, and things are fine.
 	char weapon[64]; event.GetString("weapon", weapon, sizeof(weapon));
 	int ammo_offset = 0;
@@ -286,6 +289,7 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	//You don't have anything else. Unselect the current weapon, allowing you
 	//to reselect your one and only grenade.
 	CreateTimer(0.25, deselect_weapon, client, TIMER_FLAG_NO_MAPCHANGE);
+	#endif
 }
 Action deselect_weapon(Handle timer, any client)
 {
