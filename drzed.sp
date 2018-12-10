@@ -719,6 +719,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 }
 
 //Max health doesn't seem very significant in CS:GO, since there's basically nothing that heals you.
+//(CJA 20181210: Well well well... now there is.)
 //But we set the health on spawn too, so it ends up applying.
 public void OnClientPutInServer(int client)
 {
