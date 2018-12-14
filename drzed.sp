@@ -421,7 +421,7 @@ public void OnGameFrame()
 	}
 	last_freeze = freeze;
 
-	for (int i = 0; i < nshowpos; ++i)
+	for (int i = 0; i < nshowpos; ++i) if (IsClientInGame(show_positions[i]))
 	{
 		float pos[3]; GetClientAbsOrigin(show_positions[i], pos);
 		float dist = GetVectorDistance(marked_pos, pos, false);
