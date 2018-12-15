@@ -731,10 +731,15 @@ public void OnClientPutInServer(int client)
 }
 public Action maxhealthcheck(int entity, int &maxhealth)
 {
-	//TODO: Check if this is actually being called
+	//TODO: Check if this is actually being called in classic modes (it is in DZ, I think?)
+	//TODO: Ensure that max_hitpoints of 0 works everywhere (meaning "unchanged")
 	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return Plugin_Continue;
-	maxhealth = GetConVarInt(sm_drzed_max_hitpoints) + GetConVarInt(sm_drzed_crippled_health);
-	return Plugin_Changed;
+	int maxhp = GetConVarInt(sm_drzed_max_hitpoints);
+	if (!maxhp) maxhp = maxhealth;
+	maxhp += GetConVarInt(sm_drzed_crippled_health);
+	//PrintToStream("Entity %d max health default %d now %d", entity, maxhealth, maxhp);
+	if (maxhp != maxhealth) {maxhealth = maxhp; return Plugin_Changed;}
+	return Plugin_Continue;
 }
 
 void sethealth(int entity)
