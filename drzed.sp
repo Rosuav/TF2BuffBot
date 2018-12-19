@@ -259,6 +259,12 @@ Action announce_weapon_drop(Handle timer, Handle params)
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
+	#if 0
+	char buf[128] = "Ammo:";
+	for (int off = 0; off < 32; ++off)
+		Format(buf, sizeof(buf), "%s %d", buf, GetEntProp(client, Prop_Data, "m_iAmmo", _, off));
+	PrintToStream(buf);
+	#endif
 	if (GetPlayerWeaponSlot(client, 2) != -1) return; //Normally you'll have a knife, and things are fine.
 	char weapon[64]; event.GetString("weapon", weapon, sizeof(weapon));
 	int ammo_offset = 0;
@@ -320,7 +326,7 @@ public Action add_bonus_health(Handle timer, int client)
 public Action CS_OnBuyCommand(int buyer, const char[] weap)
 {
 	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return Plugin_Continue;
-	char name[64]; GetClientName(buyer, name, sizeof(name));
+	//char name[64]; GetClientName(buyer, name, sizeof(name)); PrintToStream("%s attempted to buy %s", name, weap);
 	//Disallow defusers during warmup (they're useless anyway)
 	if (StrEqual(weap, "defuser") && GameRules_GetProp("m_bWarmupPeriod")) return Plugin_Stop;
 	if (StrEqual(weap, "heavyassaultsuit"))
@@ -331,6 +337,23 @@ public Action CS_OnBuyCommand(int buyer, const char[] weap)
 		if (!GetEntProp(buyer, Prop_Send, "m_bHasHeavyArmor"))
 			CreateTimer(0.05, add_bonus_health, buyer, TIMER_FLAG_NO_MAPCHANGE);
 	}
+	#if 0
+	//POC, untested.
+	if (StrEqual(weap, "tagrenade") || StrEqual(weap, "snowball")) //Sometimes, "buy tagrenade" comes through as "snowball" (?????)
+	{
+		//Replace the Tactical Advisory Grenade with a health shot
+		//(since we can't, to my knowledge, create entirely new buyables)
+		int money = GetEntProp(buyer, Prop_Send, "m_iAccount");
+		int current = GetEntProp(buyer, Prop_Data, "m_iAmmo", _, 25); //Ammo of health shots
+		if (money >= 1000) // && current < some cvar
+		{
+			SetEntProp(buyer, Prop_Send, "m_iAccount", money - 1000);
+			PrintToStream("%s bought a health shot", name);
+			GivePlayerItem(buyer, "weapon_healthshot");
+			return Plugin_Stop;
+		}
+	}
+	#endif
 	return Plugin_Continue;
 }
 
