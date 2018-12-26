@@ -273,6 +273,7 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	else if (!strcmp(weapon, "weapon_smokegrenade")) ammo_offset = 16;
 	else if (!strcmp(weapon, "weapon_molotov") || !strcmp(weapon, "weapon_incgrenade")) ammo_offset = 17;
 	else if (!strcmp(weapon, "weapon_decoy")) ammo_offset = 18;
+	else if (!strcmp(weapon, "weapon_snowball")) ammo_offset = 24; //Winter update 2018
 	else return; //Wasn't a grenade you just threw.
 
 	//Okay, you threw a grenade, and we know where to check its ammo.
@@ -288,6 +289,8 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		if (offset != ammo_offset && GetEntProp(client, Prop_Data, "m_iAmmo", _, offset) > 0)
 			//You have some other 'nade. Default behaviour is fine.
 			return;
+	if (ammo_offset != 24 && GetEntProp(client, Prop_Data, "m_iAmmo", _, 24) > 0)
+		return; //You have a snowball. Ditto.
 
 	//You don't have anything else. Unselect the current weapon, allowing you
 	//to reselect your one and only grenade.
