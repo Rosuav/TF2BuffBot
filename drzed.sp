@@ -969,3 +969,17 @@ TODO: Make sure you can't !heal while crippled
 
 TODO: Use Plugin_Handled rather than Plugin_Stop to disable damage??
 */
+
+
+/*
+Gaige-inspired deathmatch
+* sv_infinite_ammo 2 (so you don't run out awkwardly)
+* If you reload your weapon that isn't completely empty, you get reset to zero bonus
+* Dealing damage to an enemy with a gun flags that gun as bonus-worthy
+* Reloading a bonus-worthy gun adds a stacking bonus to your damage.
+
+Differences from the BL2 inspiration:
+* Killing an enemy doesn't give you the bonus. This is subject to review, but I worry that it'd create a "win-more" situation.
+* Engaging in battle, then backing off, and emptying your gun into the air DOES get you the bonus.
+* Emptying your gun into static targets does NOT get you the bonus.
+*/
