@@ -963,7 +963,7 @@ TODO: Is it okay for a crippled person to revive another crippled person?
 
 TODO: When you pick up a bot, you get set to primary weapon for some reason.
 Why? Weird. May be able to use bot_takeover event to detect, and then force to
-knife again.
+knife again. Or just disallow taking over a crippled bot.
 
 TODO: Make sure you can't !heal while crippled
 
