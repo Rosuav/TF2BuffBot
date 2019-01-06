@@ -104,6 +104,13 @@ four-player team might resent a fifth player joining, which is bad for the game 
 whole. Ideally, the numbers should be aimed at 3-5 players; there is no point playing a
 game with just one player, and then we should aim for the mid-range rather than the
 extremes.
+-- 20190106: Maybe this isn't *essential* but merely *highly desirable*. If the variance
+caused by a single player coming or going is enough to be felt without being too swingy,
+having one idler on the team wouldn't be too much of an issue. One possibility would be
+to aim for 4 players, and if you have 5, all robots get 20% damage reduction, and with
+6, the robots get 50% DR. Similarly, if you have only 3 players, the humans get 20% DR.
+TODO: Code this up and give it a whirl. Especially, be prepared to tweak the numbers -
+possibly put the whole kit and kaboodle into cvars.
 
 NOTE: The nature of co-op mode means that some dynamics change. For instance, if a solo
 kill is worth the same as an assisted kill (as is the default), a co-op assisted kill is
