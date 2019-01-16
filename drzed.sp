@@ -47,6 +47,13 @@ ConVar default_weapons[4];
 ConVar ammo_grenade_limit_total;
 Handle switch_weapon_call = null;
 
+//For anything that needs default health, we'll use this. Any time a character spawns,
+//we update the default health. To my knowledge, as of 20190117, the only change to a
+//player's max health is done by the game mode (Danger Zone has a default health of
+//120), and is applied to every player, so it's not going to break things to have a
+//single global default (which will be updated on map change once someone spawns).
+int default_health = 100;
+
 public void OnPluginStart()
 {
 	RegAdminCmd("zed_money", give_all_money, ADMFLAG_SLAY);
@@ -700,7 +707,13 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		//In theory, free healing could be a thing (since "no healing available" is best signalled
 		//by setting heal_max to zero). Would have to figure out an alternate cost (score? earned
 		//every time you get N kills?), but it's not fundamentally illogical on non-money modes.
-		int max_health = GetConVarInt(sm_drzed_heal_max);
+		//Or possibly it could all be done with sm_drzed_heal_cooldown; that would give everyone
+		//one free heal, but then it's on a really long cooldown (maybe 5 minutes). That might
+		//demand some sort of cooldown-is-ending report to prevent massive spam. (Can I create a
+		//progress bar?)
+		int max_healing = GetConVarInt(sm_drzed_heal_max);
+		int max_health = GetConVarInt(sm_drzed_max_hitpoints); if (!max_health) max_health = default_health;
+		if (max_healing < max_health) max_health = max_healing;
 		if (GetEntProp(target, Prop_Send, "m_bHasHeavyArmor"))
 			max_health += GetConVarInt(sm_drzed_suit_health_bonus);
 
@@ -710,6 +723,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int real_client = target;
 		if (GetEntProp(target, Prop_Send, "m_bIsControllingBot"))
 			real_client = GetEntProp(target, Prop_Send, "m_iControlledBotEntIndex");
+		//PrintToStream("Healing requested - max health %d+%d, current %d", max_health, healthbonus[real_client], GetClientHealth(target));
 		max_health += healthbonus[real_client];
 		if (max_health <= 0) return; //Healing not available on this map/game mode/etc
 		int tick = GetGameTickCount();
@@ -757,12 +771,10 @@ public void OnClientPutInServer(int client)
 }
 public Action maxhealthcheck(int entity, int &maxhealth)
 {
-	//TODO: Check if this is actually being called in classic modes (it is in DZ, I think?)
-	//TODO: Ensure that max_hitpoints of 0 works everywhere (meaning "unchanged")
 	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return Plugin_Continue;
 	int maxhp = GetConVarInt(sm_drzed_max_hitpoints);
 	if (!maxhp) maxhp = maxhealth;
-	maxhp += GetConVarInt(sm_drzed_crippled_health);
+	maxhp += GetConVarInt(sm_drzed_crippled_health) + healthbonus[entity];
 	//PrintToStream("Entity %d max health default %d now %d", entity, maxhealth, maxhp);
 	if (maxhp != maxhealth) {maxhealth = maxhp; return Plugin_Changed;}
 	return Plugin_Continue;
@@ -783,11 +795,12 @@ void sethealth(int entity)
 		reset_health_bonuses();
 	}
 	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return;
+	default_health = GetClientHealth(entity); //This happens only on spawn; we assume you're at full health right as you spawn.
 	int health = GetConVarInt(sm_drzed_max_hitpoints);
-	if (!health) health = 100; //TODO: Find out what the default would otherwise have been
+	if (!health) health = default_health;
 	health += GetConVarInt(sm_drzed_crippled_health);
 	//char name[64]; GetClientName(entity, name, sizeof(name));
-	//PrintToStream("Spawn %s (%d): %d + %d = %d hp", name, entity, health, healthbonus[entity], health + healthbonus[entity]);
+	//PrintToStream("Spawn %s (%d): %d + %d = %d hp (was %d)", name, entity, health, healthbonus[entity], health + healthbonus[entity], GetClientHealth(entity));
 	SetEntityHealth(entity, health + healthbonus[entity]);
 }
 
@@ -876,7 +889,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		//Example: Scale the damage according to how hurt you are
 		//Like the TF2 Equalizer, but done as a simple scaling of all damage.
 		int health = GetClientHealth(attacker) * 2;
-		int max = GetConVarInt(sm_drzed_max_hitpoints); if (!max) max = 100; //TODO
+		int max = GetConVarInt(sm_drzed_max_hitpoints); if (!max) max = default_health;
 		float factor = 2.0; //At max health, divide by this; at zero health, multiply by this.
 		if (health > max) damage /= factor * (health - max) / max;
 		else if (health < max) damage *= factor * health / max;
@@ -914,7 +927,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	//
 	int gate = GetConVarInt(sm_drzed_gate_health_left);
 	if (!gate) return Plugin_Continue; //Health gate not active
-	int full = GetConVarInt(sm_drzed_max_hitpoints); if (!full) full = 100;
+	int full = GetConVarInt(sm_drzed_max_hitpoints); if (!full) full = default_health;
 	full += GetConVarInt(sm_drzed_crippled_health);
 	int health = GetClientHealth(victim);
 	if (health < full) return Plugin_Continue; //Below the health gate
