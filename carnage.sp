@@ -1582,7 +1582,7 @@ Action heal_buildings(Handle timer, any target)
 	int team = GetClientTeam(target);
 	int maxentities = GetMaxEntities();
 	float yourpos[3]; GetEntPropVector(target, Prop_Send, "m_vecOrigin", yourpos);
-	for (int i = GetMaxClients() + 1; i <= maxentities; i++) if (IsValidEntity(i))
+	for (int i = MaxClients + 1; i <= maxentities; i++) if (IsValidEntity(i))
 	{
 		char cls[32];
 		GetEntityNetClass(i, cls, sizeof(cls));
