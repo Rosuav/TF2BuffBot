@@ -754,7 +754,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		//PrintToStream("Healing %s up to %d (bonus %d)", playername, max_health, healthbonus[target]);
 		SetEntProp(target, Prop_Send, "m_iAccount", money - price);
 		SetEntityHealth(target, max_health);
-		PrintToChat(target, "Now go kill some enemies for me!"); //TODO: Different messages T and CT?
+		PrintToChat(target, "Now go kill some enemies for me!"); //TODO: Different messages T and CT? Diff again in Danger Zone?
 	}
 }
 
