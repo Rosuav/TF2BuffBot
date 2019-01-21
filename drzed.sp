@@ -639,6 +639,23 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		PrintToChat(self, "Marked position: %f, %f, %f", marked_pos[0], marked_pos[1], marked_pos[2]);
 		return;
 	}
+	#if 0
+	if (!strcmp(msg, "!slow"))
+	{
+		SetEntPropFloat(self, Prop_Send, "m_flMaxspeed", 150.0);
+		PrintToChat(self, "Now slow (150)");
+	}
+	if (!strcmp(msg, "!normal"))
+	{
+		SetEntPropFloat(self, Prop_Send, "m_flMaxspeed", BASE_SPEED);
+		PrintToChat(self, "Now normal (%.0f)", BASE_SPEED);
+	}
+	if (!strcmp(msg, "!fast"))
+	{
+		SetEntPropFloat(self, Prop_Send, "m_flMaxspeed", 300.0);
+		PrintToChat(self, "Now fast (300)");
+	}
+	#endif
 	if (!strcmp(msg, "!showpos"))
 	{
 		for (int i = 0; i < nshowpos; ++i) if (show_positions[i] == self)
