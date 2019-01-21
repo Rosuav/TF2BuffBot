@@ -326,6 +326,9 @@ public Action add_bonus_health(Handle timer, int client)
 {
 	//If you now have a suit, give the health bonus. That way, if ANYTHING
 	//blocks the purchase, the health bonus won't happen.
+	//TODO: If the bonus health has already been added, don't add it again.
+	//In theory, it's possible to spam buy commands really fast and get the
+	//bonus more than once.
 	if (GetEntProp(client, Prop_Send, "m_bHasHeavyArmor"))
 	{
 		int hp = GetConVarInt(sm_drzed_suit_health_bonus);
