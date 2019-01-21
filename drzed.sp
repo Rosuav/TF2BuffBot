@@ -26,7 +26,7 @@ ConVar sm_drzed_gate_health_left = null; //(0) If nonzero, one-shots from full h
 ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much damage (after armor) ignore the health gate
 ConVar sm_drzed_crippled_health = null; //(0) If >0, you get this many hitpoints of extra health during which you're crippled.
 ConVar sm_drzed_crippled_revive_count = null; //(4) When someone has been crippled, it takes this many knife slashes to revive them.
-ConVar sm_drzed_crippled_speed = null; //(100) A crippled person moves no faster than this (knife = 250, Negev = 150, scoped AWP = 100)
+ConVar sm_drzed_crippled_speed = null; //(50) A crippled person moves no faster than this (knife = 250, Negev = 150, scoped AWP = 100)
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 #include "convars_drzed"
@@ -504,8 +504,8 @@ void cripple(int client)
 	if (!GetConVarInt(sm_drzed_crippled_health)) return;
 	SetEntityHealth(client, GetConVarInt(sm_drzed_crippled_health));
 	float spd = GetConVarFloat(sm_drzed_crippled_speed);
-	if (spd >= BASE_SPEED) spd = 100.0;
-	if (spd < 10.0) spd = 10.0;
+	if (spd >= BASE_SPEED) spd = 50.0;
+	if (spd < 1.0) spd = 10.0;
 	SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", spd);
 	SetEntProp(client, Prop_Send, "m_ArmorValue", 0);
 	//Switch to knife. If you have no knife, you switch to a non-weapon.
