@@ -507,7 +507,7 @@ void cripple(int client)
 	if (spd >= BASE_SPEED) spd = 50.0;
 	if (spd < 1.0) spd = 10.0;
 	SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", spd);
-	SetEntProp(client, Prop_Send, "m_ArmorValue", 0);
+	//SetEntProp(client, Prop_Send, "m_ArmorValue", 0); //If needed, remove armor from crippled people
 	//Switch to knife. If you have no knife, you switch to a non-weapon.
 	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(client, 2));
 	if (GetEntProp(client, Prop_Send, "m_bIsScoped"))
@@ -525,7 +525,7 @@ void uncripple(int client)
 	if (!GetConVarInt(sm_drzed_crippled_health)) return;
 	SetEntityHealth(client, GetConVarInt(sm_drzed_crippled_health) + 50);
 	SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", BASE_SPEED);
-	SetEntProp(client, Prop_Send, "m_ArmorValue", 5);
+	//SetEntProp(client, Prop_Send, "m_ArmorValue", 5); //Optionally give armor back (if it's removed on crippling)
 	crippled_status[client] = -1; //Give damage protection again on revive
 	CreateTimer(1.0, remove_cripple_prot, client, TIMER_FLAG_NO_MAPCHANGE);
 	//In case you have no weapon, try to switch back.
