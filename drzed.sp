@@ -994,16 +994,6 @@ Revival of Teammates mode:
 * Teammates can heal crippled players by knifing them. Once > 100 hp, no longer crippled.
 * A crippled player is unable to fire any weapons, and is reduced to crawling speed.
 
-NOTE: There can be weirdnesses if you toggle the heavy suit and you have some armor.
-So don't do that. When you toggle on the suit, also wipe the armor to zero, and don't
-allow the player to buy armor while in that state. In fact, don't allow buying any
-equipment or weapons (nor picking them up).
-
-NOTE: Incompatible with game modes using the heavy assault suit. If crippling is a
-thing, heavyarmor purchases will simply be denied. Recommend setting the cvar
-mp_weapons_allow_heavyassaultsuit to 1 to force the game to precache the appropriate
-models and textures.
-
 TODO: Is it okay for a crippled person to revive another crippled person?
 
 TODO: When you pick up a bot, you get set to primary weapon for some reason.

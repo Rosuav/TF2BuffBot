@@ -70,13 +70,12 @@ When the round ends, everyone on the winning team instantly revives, and
 everyone on the losing team is instantly slain. Dropping someone during the
 round-end period (exit fragging) instantly kills without cripping.
 
-Note that this game mode is incompatible with the normal use of the heavy
-assault suit, as it uses the suit to control crippled players.
-
 * sm_drzed_crippled_health: How many hitpoints you get while crippled
 * sm_drzed_crippled_revive_count: How many knife-slashes it takes to revive a
   teammate. Don't set this to 0; the behaviour if this is 0 may change in the
   future.
+* sm_drzed_crippled_speed: Maximum speed of a crippled player. For reference,
+  crouch-walking is about 50-100 HU/sec.
 
 ## Minor features
 
