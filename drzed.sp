@@ -575,7 +575,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		buttons & IN_GRENADE2 ? "IN_GRENADE2 " : "",
 		buttons & IN_ATTACK3 ? "IN_ATTACK3 " : ""
 	);*/
-	if (is_crippled(client))
+	if (IsPlayerAlive(client) && is_crippled(client))
 	{
 		//While you're crippled, you can't do certain things. There may be more restrictions to add.
 		//You can't defuse or pick up weapons (IN_USE). You can't change speed (walk mode, IN_SPEED).
