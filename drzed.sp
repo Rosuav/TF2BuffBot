@@ -26,6 +26,7 @@ ConVar sm_drzed_gate_health_left = null; //(0) If nonzero, one-shots from full h
 ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much damage (after armor) ignore the health gate
 ConVar sm_drzed_crippled_health = null; //(0) If >0, you get this many hitpoints of extra health during which you're crippled.
 ConVar sm_drzed_crippled_revive_count = null; //(4) When someone has been crippled, it takes this many knife slashes to revive them.
+ConVar sm_drzed_crippled_speed = null; //(100) A crippled person moves no faster than this (knife = 250, Negev = 150, scoped AWP = 100)
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 #include "convars_drzed"
@@ -53,6 +54,14 @@ Handle switch_weapon_call = null;
 //120), and is applied to every player, so it's not going to break things to have a
 //single global default (which will be updated on map change once someone spawns).
 int default_health = 100;
+
+//Crippling is done by reducing your character's max speed. Uncrippling means getting
+//you back to "normal" speed. In most situations, it won't matter exactly what this
+//speed is, as long as it's no less than your weapon's speed; as of 20190121, the top
+//speed available is 260 from having nothing equipped (or Bare Fists in Danger Zone).
+//(The highest speed in normally-configured classic modes is 250 with the knife/C4.)
+//TODO: Ascertain the actual default speed instead of assuming
+#define BASE_SPEED 260.0
 
 public void OnPluginStart()
 {
@@ -465,7 +474,7 @@ int last_attacker[MAXPLAYERS+1], last_inflictor[MAXPLAYERS+1], last_weapon[MAXPL
 int is_crippled(int client)
 {
 	if (!GetConVarInt(sm_drzed_crippled_health)) return 0; //Crippling isn't active, so you aren't crippled.
-	return GetEntProp(client, Prop_Send, "m_bHasHeavyArmor");
+	return GetEntPropFloat(client, Prop_Send, "m_flMaxspeed") < BASE_SPEED;
 }
 void kill_crippled_player(int client)
 {
@@ -494,7 +503,10 @@ void cripple(int client)
 {
 	if (!GetConVarInt(sm_drzed_crippled_health)) return;
 	SetEntityHealth(client, GetConVarInt(sm_drzed_crippled_health));
-	SetEntProp(client, Prop_Send, "m_bHasHeavyArmor", 1);
+	float spd = GetConVarFloat(sm_drzed_crippled_speed);
+	if (spd >= BASE_SPEED) spd = 100.0;
+	if (spd < 10.0) spd = 10.0;
+	SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", spd);
 	SetEntProp(client, Prop_Send, "m_ArmorValue", 0);
 	//Switch to knife. If you have no knife, you switch to a non-weapon.
 	SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(client, 2));
@@ -512,7 +524,7 @@ void uncripple(int client)
 {
 	if (!GetConVarInt(sm_drzed_crippled_health)) return;
 	SetEntityHealth(client, GetConVarInt(sm_drzed_crippled_health) + 50);
-	SetEntProp(client, Prop_Send, "m_bHasHeavyArmor", 0);
+	SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", BASE_SPEED);
 	SetEntProp(client, Prop_Send, "m_ArmorValue", 5);
 	crippled_status[client] = -1; //Give damage protection again on revive
 	CreateTimer(1.0, remove_cripple_prot, client, TIMER_FLAG_NO_MAPCHANGE);
