@@ -71,6 +71,7 @@ public void OnPluginStart()
 	HookEvent("round_end", uncripple_all);
 	HookEvent("bomb_planted", record_planter);
 	HookEvent("player_team", player_team);
+	//HookEvent("player_hurt", player_hurt);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
 	//player_falldamage: report whenever anyone falls, esp for a lot of dmg
@@ -620,6 +621,72 @@ int healthbonus[66]; //Has to be a bit bigger than MAXPLAYERS
 int heal_cooldown_tick[66];
 void reset_health_bonuses() {for (int i = 0; i < sizeof(healthbonus); ++i) healthbonus[i] = heal_cooldown_tick[i] = 0;}
 public void OnMapStart() {reset_health_bonuses();}
+
+bool filter_notself(int entity, int flags, int self) {PrintToServer("filter: %d/%d/%d", entity, flags, self); return entity != self;}
+public void player_hurt(Event event, const char[] name, bool dontBroadcast)
+{
+	/*
+	short	userid		player index who was hurt
+	short	attacker	player index who attacked
+	byte	health		remaining health points
+	byte	armor		remaining armor points
+	string	weapon		weapon name attacker used, if not the world
+	short	dmg_health	damage done to health
+	byte	dmg_armor	damage done to armor
+	byte	hitgroup	hitgroup that was damaged
+	*/
+	int victim = GetClientOfUserId(event.GetInt("userid"));
+	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	char vicname[64]; GetClientName(victim, vicname, sizeof(vicname));
+	char atkname[64]; GetClientName(attacker, atkname, sizeof(atkname));
+	char weapon[64]; event.GetString("weapon", weapon, sizeof(weapon));
+	//Regions: Head = 1, Chest, Stomach, Left Arm, Right Arm, Left Leg, Right Leg = 7
+	char region[][] = {"unknown", "head", "chest", "stomach",
+		"left arm", "right arm", "left leg", "right leg"};
+	//Multipliers: [1.0, 4.0, 1.0, 1.25, 1.0, 1.0, 0.75, 0.75]
+	//Dealing X damage to a particular region will actually cost X * multiplier
+	//hitpoints. That's why you want dem headshots! (Legs are unarmored. Other
+	//than that, legshots suck. You knew that.)
+	//Reciprocals: [60, 15, 60, 48, 60, 60, 80, 80]
+	//Multiplying the actual damage done by the reciprocal of the multiplier
+	//will get back to a consistent value. These reciprocals are, in effect,
+	//fractions of sixty; to get back to "base damage", you would need to then
+	//divide by 60. As with many calculations, though, we don't need the pure
+	//base value, just something consistent (cf "distance squared" calcs).
+	int scaling[] = {60, 15, 60, 48, 60, 60, 80, 80};
+	int location = event.GetInt("hitgroup");
+	int mindamage = event.GetInt("dmg_health") + event.GetInt("dmg_armor") * 2;
+	int maxdamage = mindamage;
+	if (event.GetInt("dmg_armor"))
+	{
+		//Armor takes off half the damage, and the damage to armor is half
+		//what it prevented. That introduces more rounding error, but the
+		//damages are ALWAYS rounded down, so we can cap it.
+		maxdamage += 2;
+		if (maxdamage > event.GetInt("dmg_health") * 2) maxdamage = event.GetInt("dmg_health") * 2;
+	}
+	maxdamage++; //There could be up to 1hp of rounding in the base damage.
+	PrintToStream("%s hit %s in %s with %s: %dhp+%dac: %d-%d",
+		atkname, vicname, region[location], weapon,
+		event.GetInt("dmg_health"), event.GetInt("dmg_armor"),
+		mindamage * scaling[location], maxdamage * scaling[location]
+	);
+
+	//-- the below is broken, don't trust it --
+	//Calculate the distance the shot travelled before landing:
+	//1) Get attacker eye position and angles
+	float pos[3]; GetClientEyePosition(attacker, pos);
+	float angle[3]; GetClientEyeAngles(attacker, angle);
+	//2) Trace from there, RayType_Infinite
+	TR_TraceRayFilter(pos, angle, MASK_SHOT, RayType_EndPoint, filter_notself, attacker);
+	if (!TR_DidHit(INVALID_HANDLE)) {PrintToStream("-- didn't hit --"); return;}
+	//3) TR_GetFraction for distance
+	float target[3]; TR_GetEndPosition(target, INVALID_HANDLE);
+	float len = GetVectorDistance(pos, target, false);
+	//4) Validate TR_GetHitGroup and TR_GetEntityIndex
+	PrintToStream("Shot range: %.2f --- Hit %d/%d in the %d/%d", len,
+		TR_GetEntityIndex(INVALID_HANDLE), victim, TR_GetHitGroup(INVALID_HANDLE), location);
+}
 
 public void player_team(Event event, const char[] name, bool dontBroadcast)
 {
