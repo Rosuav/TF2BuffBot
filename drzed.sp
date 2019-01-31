@@ -903,7 +903,8 @@ void spawncheck(int entity)
 	//PrintToStream("Spawn %s (%d): %d + %d = %d hp (was %d)", name, entity, health, healthbonus[entity], health + healthbonus[entity], GetClientHealth(entity));
 	SetEntityHealth(entity, health + healthbonus[entity]);
 
-	//Bots in Danger Zone need weapons.
+	//Bots in Danger Zone need weapons. At least, I think that's why they get stuck.
+	//Part of the problem is that they need a better nav mesh, though.
 	char weap[64]; GetConVarString(bots_get_empty_weapon, weap, sizeof(weap));
 	if (IsFakeClient(entity) && strlen(weap))
 	{
