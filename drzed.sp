@@ -864,7 +864,7 @@ public void OnClientPutInServer(int client)
 {
 	healthbonus[client] = 0;
 	SDKHookEx(client, SDKHook_GetMaxHealth, maxhealthcheck);
-	SDKHookEx(client, SDKHook_SpawnPost, sethealth);
+	SDKHookEx(client, SDKHook_SpawnPost, spawncheck);
 	SDKHookEx(client, SDKHook_OnTakeDamageAlive, healthgate);
 	SDKHookEx(client, SDKHook_WeaponCanSwitchTo, weaponlock);
 }
@@ -879,7 +879,7 @@ public Action maxhealthcheck(int entity, int &maxhealth)
 	return Plugin_Continue;
 }
 
-void sethealth(int entity)
+void spawncheck(int entity)
 {
 	//I do not understand why I can't just compare GetProp to the stored value.
 	//It's probably something to do with the almost-but-not-quite-sane type
