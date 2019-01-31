@@ -29,6 +29,7 @@ ConVar sm_drzed_crippled_revive_count = null; //(4) When someone has been crippl
 ConVar sm_drzed_crippled_speed = null; //(50) A crippled person moves no faster than this (knife = 250, Negev = 150, scoped AWP = 100)
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
+ConVar bots_get_empty_weapon = null; //("") Give bots an ammo-less weapon on startup (eg weapon_glock). Use only if they wouldn't get a weapon in that slot.
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
@@ -901,6 +902,15 @@ void spawncheck(int entity)
 	//char name[64]; GetClientName(entity, name, sizeof(name));
 	//PrintToStream("Spawn %s (%d): %d + %d = %d hp (was %d)", name, entity, health, healthbonus[entity], health + healthbonus[entity], GetClientHealth(entity));
 	SetEntityHealth(entity, health + healthbonus[entity]);
+
+	//Bots in Danger Zone need weapons.
+	char weap[64]; GetConVarString(bots_get_empty_weapon, weap, sizeof(weap));
+	if (IsFakeClient(entity) && strlen(weap))
+	{
+		int weapon = GivePlayerItem(entity, weap);
+		SetEntProp(weapon, Prop_Send, "m_iClip1", 0);
+		SetEntProp(weapon, Prop_Send, "m_iPrimaryReserveAmmoCount", 0);
+	}
 }
 
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
