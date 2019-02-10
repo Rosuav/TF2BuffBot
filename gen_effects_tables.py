@@ -77,14 +77,14 @@ effects = {
 notable_kills = {
 	# TODO: Put better names on them
 	"TF_CUSTOM_TAUNT_HADOUKEN": "Taunt kill! Hadouken!",
-	"TF_CUSTOM_FLARE_PELLET": "Taunt kill! [FLARE_PELLET]",
+	"TF_CUSTOM_FLARE_PELLET": "Taunt kill! [FLARE_PELLET]", # Scorch Shot "Execution" taunt kill
 	"TF_CUSTOM_TAUNT_GRAND_SLAM": "Taunt kill! Knock him out of the park!",
 	"TF_CUSTOM_TAUNT_HIGH_NOON": "Taunt kill! This map ain't big enough for both of us...",
 	"TF_CUSTOM_TAUNT_FENCING": "Taunt kill! Someone just got turned into a Cornish game hen.",
-	"TF_CUSTOM_TAUNT_GRENADE": "Taunt kill! [GRENADE]",
+	"TF_CUSTOM_TAUNT_GRENADE": "Taunt kill! KAMIKAZE!", # Escape Plan / Equalizer
 	"TF_CUSTOM_TAUNT_ARROW_STAB": "Taunt kill! Schtab schtab schtab!",
-	"TF_CUSTOM_TAUNTATK_GASBLAST": "Taunt kill! [GASBLAST]",
-	"TF_CUSTOM_TAUNT_BARBARIAN_SWING": "Taunt kill! [BARBARIAN]",
+	"TF_CUSTOM_TAUNTATK_GASBLAST": "Taunt kill! [GASBLAST]", # Thermal Thruster
+	"TF_CUSTOM_TAUNT_BARBARIAN_SWING": "Taunt kill! [BARBARIAN]", # Eyelander etc
 	"TF_CUSTOM_TAUNT_UBERSLICE": "Taunt kill! Dem bones got sawed through...",
 	"TF_CUSTOM_TAUNT_ENGINEER_SMASH": "Taunt kill! That's one jarring guitar riff...",
 	"TF_CUSTOM_TAUNT_ENGINEER_ARM": "Taunt kill! You got killed by a lawnmower...",
@@ -92,8 +92,8 @@ notable_kills = {
 	"TF_CUSTOM_TAUNT_ALLCLASS_GUITAR_RIFF": "Taunt kill! [GUITAR_RIFF]",
 	# Some non-taunt kills are also worth bonus points
 	"TF_CUSTOM_TELEFRAG": "Telefrag!",
-	"TF_CUSTOM_COMBO_PUNCH": "That's four gunslingers in a row!", # Gunslinger. TODO: Check if it's four or three (per wiki) - I think the message is wrong?
-	"TF_CUSTOM_BOOTS_STOMP": "Mantreads stomp!!", # Mantreads
+	"TF_CUSTOM_COMBO_PUNCH": "That's three gunslingers in a row!", # Gunslinger. Applies only if the third hit kills.
+	"TF_CUSTOM_BOOTS_STOMP": "Mantreads stomp!!", # Mantreads or Thermal Thruster
 }
 # Other kill types to check for: TF_CUSTOM_WRENCH_FIX, TF_CUSTOM_PENETRATE_ALL_PLAYERS,
 # TF_CUSTOM_PENETRATE_HEADSHOT, TF_CUSTOM_FLYINGBURN, TF_CUSTOM_AEGIS_ROUND,
