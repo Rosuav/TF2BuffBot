@@ -92,7 +92,7 @@ notable_kills = {
 	"TF_CUSTOM_TAUNT_ALLCLASS_GUITAR_RIFF": "Taunt kill! [GUITAR_RIFF]",
 	# Some non-taunt kills are also worth bonus points
 	"TF_CUSTOM_TELEFRAG": "Telefrag!",
-	"TF_CUSTOM_COMBO_PUNCH": "That's four gunslingers in a row!", # Gunslinger
+	"TF_CUSTOM_COMBO_PUNCH": "That's four gunslingers in a row!", # Gunslinger. TODO: Check if it's four or three (per wiki) - I think the message is wrong?
 	"TF_CUSTOM_BOOTS_STOMP": "Mantreads stomp!!", # Mantreads
 }
 # Other kill types to check for: TF_CUSTOM_WRENCH_FIX, TF_CUSTOM_PENETRATE_ALL_PLAYERS,
