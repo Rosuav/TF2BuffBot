@@ -27,6 +27,8 @@ ConVar sm_drzed_gate_overkill = null; //(200) One-shots of at least this much da
 ConVar sm_drzed_crippled_health = null; //(0) If >0, you get this many hitpoints of extra health during which you're crippled.
 ConVar sm_drzed_crippled_revive_count = null; //(4) When someone has been crippled, it takes this many knife slashes to revive them.
 ConVar sm_drzed_crippled_speed = null; //(50) A crippled person moves no faster than this (knife = 250, Negev = 150, scoped AWP = 100)
+ConVar sm_drzed_max_anarchy = null; //(0) Maximum Anarchy stacks - 0 to disable anarchy
+ConVar sm_drzed_anarchy_bonus = null; //(5) Percent bonus to damage per anarchy stack. There's no accuracy penalty though.
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 ConVar bots_get_empty_weapon = null; //("") Give bots an ammo-less weapon on startup (eg weapon_glock). Use only if they wouldn't get a weapon in that slot.
@@ -72,6 +74,7 @@ public void OnPluginStart()
 	HookEvent("round_end", uncripple_all);
 	HookEvent("bomb_planted", record_planter);
 	HookEvent("player_team", player_team);
+	HookEvent("weapon_reload", weapon_reload);
 	//HookEvent("player_hurt", player_hurt);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
@@ -273,10 +276,39 @@ Action announce_weapon_drop(Handle timer, Handle params)
 	CloseHandle(fp);
 }
 
+int anarchy[66];
+int anarchy_available[66];
+Action add_anarchy(Handle timer, any client)
+{
+	ignore(timer);
+	//Check if the player (or maybe the weapon) has drawn blood.
+	//~ PrintToStream("Potentially adding anarchy: av %d", anarchy_available[client]);
+	if (!anarchy_available[client]) return;
+	anarchy_available[client] = 0; anarchy[client]++;
+	char player[64]; GetClientName(client, player, sizeof(player));
+	PrintCenterText(client, "You now have %d anarchy!", anarchy[client]);
+}
+
 //If you throw a grenade and it's the only thing you have, unselect.
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
+	//If you empty your clip completely, add a stack of Anarchy
+	if (anarchy[client] < GetConVarInt(sm_drzed_max_anarchy))
+	{
+		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		int clip = GetEntProp(weap, Prop_Send, "m_iClip1");
+		int burst = GetEntProp(weap, Prop_Send, "m_bBurstMode");
+		if (clip <= (burst  ? 3 : 1)) //As of 20190301, all burst-fire weapons in CS:GO fire three shots.
+		{
+			//The weapon is about to empty its magazine. In case it's a burst
+			//~ PrintToStream("Emptied magazine: av %d", anarchy_available[client]);
+			CreateTimer(burst ? 0.2 : 0.01, add_anarchy, client, TIMER_FLAG_NO_MAPCHANGE);
+		}
+		//~ char player[64]; GetClientName(client, player, sizeof(player));
+		//~ char weapname[64]; describe_weapon(weap, weapname, sizeof(weapname));
+		//~ PrintToStream("Weapon fire: %s fired %s with %d in clip (burst %d)", player, weapname, clip, burst);
+	}
 	#if 0
 	char buf[128] = "Ammo:";
 	for (int off = 0; off < 32; ++off)
@@ -689,6 +721,19 @@ public void player_hurt(Event event, const char[] name, bool dontBroadcast)
 		TR_GetEntityIndex(INVALID_HANDLE), victim, TR_GetHitGroup(INVALID_HANDLE), location);
 }
 
+public void weapon_reload(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	//This event happens only if you press R (not if you fully empty your clip),
+	//and only if you didn't have a full mag already - unless you're running a
+	//shotgun, in which case pressing R will spam a few spurious events - unless
+	//you're using a MAG-7, which behaves like other magazinned weapons. It's
+	//like figuring out if it's a leap year.
+	//So if you're running a Sawed-Off, Nova, or XM1014, don't tap R.
+	if (anarchy[client]) PrintCenterText(client, "You reloaded prematurely, wasting %d anarchy!", anarchy[client]);
+	anarchy[client] = 0; anarchy_available[client] = 0;
+}
+
 public void player_team(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
@@ -863,7 +908,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 //But we set the health on spawn too, so it ends up applying.
 public void OnClientPutInServer(int client)
 {
-	healthbonus[client] = 0;
+	healthbonus[client] = 0; anarchy[client] = 0; anarchy_available[client] = 0;
 	SDKHookEx(client, SDKHook_GetMaxHealth, maxhealthcheck);
 	SDKHookEx(client, SDKHook_SpawnPost, spawncheck);
 	SDKHookEx(client, SDKHook_OnTakeDamageAlive, healthgate);
@@ -917,6 +962,14 @@ void spawncheck(int entity)
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
 	int &weapon, float damageForce[3], float damagePosition[3])
 {
+	//If the attacking weapon is one you're currently wielding (ie not a grenade etc)
+	//in one of your first two slots (no knife etc), flag the user (or maybe gun) as
+	//being anarchy-ready. TODO: De-flag if the gun is changed?
+	if (attacker && attacker < MAXPLAYERS && weapon == GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon"))
+	{
+		if (weapon == GetPlayerWeaponSlot(attacker, 0)) anarchy_available[attacker] |= 1; //Primary weapon
+		else if (weapon == GetPlayerWeaponSlot(attacker, 1)) anarchy_available[attacker] |= 2; //Secondary weapon
+	}
 	//Log all damage to a file that gets processed by a Python script
 	int vicweap = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
 	char atkcls[64]; describe_weapon(weapon > 0 ? weapon : inflictor, atkcls, sizeof(atkcls));
@@ -1014,6 +1067,18 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		return Plugin_Changed;
 	}
 
+	if (attacker && attacker < MAXPLAYERS)
+	{
+		int anarchy_bonus = GetConVarInt(sm_drzed_anarchy_bonus) * anarchy[attacker];
+		float newdmg = damage * (100 + anarchy_bonus) / 100.0;
+		if (newdmg >= damage + 1.0) //Unless you gain at least 1 whole point of damage, don't log anything.
+		{
+			//PrintToStream("Damage increased from %.0f to %.0f", damage, newdmg);
+			damage = newdmg;
+			return Plugin_Changed;
+		}
+	}
+
 	//
 	if (cripplepoint)
 	{
@@ -1087,18 +1152,22 @@ TODO: Use Plugin_Handled rather than Plugin_Stop to disable damage??
 /*
 Gaige-inspired deathmatch
 * sv_infinite_ammo 2 (so you don't run out awkwardly)
-* If you reload your weapon that isn't completely empty, you get reset to zero bonus
+* If you reload your weapon that isn't completely empty, you lose all Anarchy
 * Dealing damage to an enemy with a gun flags that gun as bonus-worthy
-* Reloading a bonus-worthy gun adds a stacking bonus to your damage.
+* Reloading a bonus-worthy empty gun adds one Anarchy
+* Each Anarchy you have grants an additive percentage bonus to your damage
 
 Differences from the BL2 inspiration:
 * Killing an enemy doesn't give you the bonus. This is subject to review, but I worry that it'd create a "win-more" situation.
 * Engaging in battle, then backing off, and emptying your gun into the air DOES get you the bonus.
 * Emptying your gun into static targets does NOT get you the bonus.
+* Dying doesn't lose ALL your Anarchy. TODO: Figure out exactly how much you lose.
 
 A bonus-worthy gun remains so only while it's equipped. So if you draw blood, then toss that gun down and get
 another, it's been reset. So effectively, it can be seen as two flags on the player (primary and secondary),
 which get cleared if you change what's in that slot. (Selecting a different weapon changes nothing; if you
 draw blood with an AWP, then switch to your pistol, empty the clip at nothing, then switch back, and empty
 the AWP, you get the bonus for the AWP but not the pistol.)
+
+TODO: Dying wipes your anarchy_available, and sheds some percentage (cvar maybe) of anarchy
 */
