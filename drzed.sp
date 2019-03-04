@@ -29,6 +29,8 @@ ConVar sm_drzed_crippled_revive_count = null; //(4) When someone has been crippl
 ConVar sm_drzed_crippled_speed = null; //(50) A crippled person moves no faster than this (knife = 250, Negev = 150, scoped AWP = 100)
 ConVar sm_drzed_max_anarchy = null; //(0) Maximum Anarchy stacks - 0 to disable anarchy
 ConVar sm_drzed_anarchy_bonus = null; //(5) Percent bonus to damage per anarchy stack. There's no accuracy penalty though.
+ConVar sm_drzed_anarchy_kept_on_death = null; //(0) Percentage of anarchy stacks saved on death (rounded down).
+ConVar sm_drzed_anarchy_per_kill = null; //(0) Whether you gain anarchy for getting a kill
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 ConVar bots_get_empty_weapon = null; //("") Give bots an ammo-less weapon on startup (eg weapon_glock). Use only if they wouldn't get a weapon in that slot.
@@ -940,6 +942,19 @@ void spawncheck(int entity)
 		reset_health_bonuses();
 	}
 	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return;
+
+	anarchy_available[entity] = 0;
+	if (anarchy[entity])
+	{
+		int keep = anarchy[entity] * GetConVarInt(sm_drzed_anarchy_kept_on_death) / 100;
+		if (keep < anarchy[entity]) //No, setting kept_on_death higher than 100 will NOT increase anarchy stacks LUL
+		{
+			if (!keep) PrintToChat(entity, "You died, and lost your %d Anarchy.", anarchy[entity] - keep);
+			else PrintToChat(entity, "You died, and lost %d Anarchy (now %d).", anarchy[entity] - keep, keep);
+			anarchy[entity] = keep;
+		}
+	}
+
 	default_health = GetClientHealth(entity); //This happens only on spawn; we assume you're at full health right as you spawn.
 	int health = GetConVarInt(sm_drzed_max_hitpoints);
 	if (!health) health = default_health;
@@ -969,6 +984,12 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	{
 		if (weapon == GetPlayerWeaponSlot(attacker, 0)) anarchy_available[attacker] |= 1; //Primary weapon
 		else if (weapon == GetPlayerWeaponSlot(attacker, 1)) anarchy_available[attacker] |= 2; //Secondary weapon
+		if (damage >= GetClientHealth(victim) && GetConVarInt(sm_drzed_anarchy_per_kill))
+		{
+			anarchy[attacker]++;
+			char player[64]; GetClientName(attacker, player, sizeof(player));
+			PrintCenterText(attacker, "You now have %d anarchy!", anarchy[attacker]);
+		}
 	}
 	//Log all damage to a file that gets processed by a Python script
 	int vicweap = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
@@ -1168,6 +1189,4 @@ another, it's been reset. So effectively, it can be seen as two flags on the pla
 which get cleared if you change what's in that slot. (Selecting a different weapon changes nothing; if you
 draw blood with an AWP, then switch to your pistol, empty the clip at nothing, then switch back, and empty
 the AWP, you get the bonus for the AWP but not the pistol.)
-
-TODO: Dying wipes your anarchy_available, and sheds some percentage (cvar maybe) of anarchy
 */
