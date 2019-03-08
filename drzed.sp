@@ -175,10 +175,17 @@ public void record_planter(Event event, const char[] name, bool dontBroadcast)
 
 public Action give_all_money(int initiator, int args)
 {
+	bool nobots = false;
+	if (args)
+	{
+		char arg[64]; GetCmdArg(1, arg, sizeof(arg));
+		if (!strcmp(arg, "humans")) {nobots = true; PrintToChatAll("Giving money to all humans!");}
+	}
 	PrintToChatAll("Giving money to everyone!");
 	for (int client = 1; client < MaxClients; ++client)
 	{
 		if (!IsClientInGame(client)) continue;
+		if (nobots && IsFakeClient(client)) continue;
 		int money = GetEntProp(client, Prop_Send, "m_iAccount") + 1000;
 		PrintToChat(client, "You now have $%d", money);
 		SetEntProp(client, Prop_Send, "m_iAccount", money);
@@ -1192,7 +1199,6 @@ the AWP, you get the bonus for the AWP but not the pistol.)
 */
 
 /* TODO 20190308:
-Allow zed_money to give to all humans (I mean, all non-fake clients)
 Will bots ever upgrade weapons?
 - If a bot wins a round, will he take his victim's weapon?
 - Ditto ditto, will he take his teammate's weapon?
