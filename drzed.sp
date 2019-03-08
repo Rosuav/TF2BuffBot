@@ -181,7 +181,7 @@ public Action give_all_money(int initiator, int args)
 		char arg[64]; GetCmdArg(1, arg, sizeof(arg));
 		if (!strcmp(arg, "humans")) {nobots = true; PrintToChatAll("Giving money to all humans!");}
 	}
-	PrintToChatAll("Giving money to everyone!");
+	if (!nobots) PrintToChatAll("Giving money to everyone!");
 	for (int client = 1; client < MaxClients; ++client)
 	{
 		if (!IsClientInGame(client)) continue;
