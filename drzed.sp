@@ -1174,6 +1174,8 @@ knife again. Or just disallow taking over a crippled bot.
 TODO: Make sure you can't !heal while crippled
 
 TODO: Use Plugin_Handled rather than Plugin_Stop to disable damage??
+
+m_iBlockingUseActionInProgress -- can that be used to manage crippledness??
 */
 
 
@@ -1198,14 +1200,23 @@ draw blood with an AWP, then switch to your pistol, empty the clip at nothing, t
 the AWP, you get the bonus for the AWP but not the pistol.)
 */
 
-/* TODO 20190308:
+/*
 Will bots ever upgrade weapons?
-- If a bot wins a round, will he take his victim's weapon?
-- Ditto ditto, will he take his teammate's weapon?
-- What about pistols?
-- How far out of his way will a bot go to fetch a weapon?
-- Will he pick up a loose grenade?
-Can bots manage without weapons, on maps with good nav?
-- Will they do anything at all, or just stand there?
-- Do they have any goals, even as simple as "run up and punch"?
+- Basically no. They won't see weapon upgrades as goals.
+- If he would roll over a weapon, he'll get it. That's about it.
+
+Danger Zone AI proposal:
+- Stateless
+- Potential goal: if weapon nearby better than currently-equipped, fetch it
+- Potential goal: if identical weapon nearby, extract ammo
+- Potential goal: if openable case nearby, open it (lower prio than killing enemies, but otherwise just do it)
+- Potential goal: if ammo box nearby, approach it
+- Required handling: if ammo box in reach, select whichever weapon has fewer spare mags and fill it
+  - If equal mag count (esp zero), split it two and two btwn primary and secondary
+- Required nav: Perform standard tour of any lootable region (eg "Alpha and surrounds" could be one region)
+- Optional nav: After performing one standard tour, find another
+- Never buy weapons from the tablet (for simplicity)
+- Optional: Maybe buy ammo from tablet, but only on higher difficulties
+- If not at all under threat or near enemy, check tablet for nearest cell with enemy and go hunting
+  - Otherwise ignore the tablet and just explore with eyeballs
 */
