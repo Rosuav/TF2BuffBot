@@ -1182,11 +1182,24 @@ Differences from the BL2 inspiration:
 * Killing an enemy doesn't give you the bonus. This is subject to review, but I worry that it'd create a "win-more" situation.
 * Engaging in battle, then backing off, and emptying your gun into the air DOES get you the bonus.
 * Emptying your gun into static targets does NOT get you the bonus.
-* Dying doesn't lose ALL your Anarchy. TODO: Figure out exactly how much you lose.
+* Dying doesn't lose ALL your Anarchy. Controlled by cvar.
 
 A bonus-worthy gun remains so only while it's equipped. So if you draw blood, then toss that gun down and get
 another, it's been reset. So effectively, it can be seen as two flags on the player (primary and secondary),
 which get cleared if you change what's in that slot. (Selecting a different weapon changes nothing; if you
 draw blood with an AWP, then switch to your pistol, empty the clip at nothing, then switch back, and empty
 the AWP, you get the bonus for the AWP but not the pistol.)
+*/
+
+/* TODO 20190308:
+Allow zed_money to give to all humans (I mean, all non-fake clients)
+Will bots ever upgrade weapons?
+- If a bot wins a round, will he take his victim's weapon?
+- Ditto ditto, will he take his teammate's weapon?
+- What about pistols?
+- How far out of his way will a bot go to fetch a weapon?
+- Will he pick up a loose grenade?
+Can bots manage without weapons, on maps with good nav?
+- Will they do anything at all, or just stand there?
+- Do they have any goals, even as simple as "run up and punch"?
 */
