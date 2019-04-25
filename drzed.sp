@@ -34,6 +34,7 @@ ConVar sm_drzed_anarchy_per_kill = null; //(0) Whether you gain anarchy for gett
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 ConVar bots_get_empty_weapon = null; //("") Give bots an ammo-less weapon on startup (eg weapon_glock). Use only if they wouldn't get a weapon in that slot.
+ConVar bot_purchase_delay = null; //(0.0) Delay bot primary weapon purchases by this many seconds
 ConVar damage_scale_humans = null; //(1.0) Scale all damage dealt by humans
 ConVar damage_scale_bots = null; //(1.0) Scale all damage dealt by bots
 #include "convars_drzed"
@@ -51,6 +52,7 @@ public void PrintToStream(const char[] fmt, any ...)
 }
 
 StringMap weapon_names;
+StringMap weapon_is_primary;
 ConVar default_weapons[4];
 ConVar ammo_grenade_limit_total;
 Handle switch_weapon_call = null;
@@ -161,6 +163,35 @@ public void OnPluginStart()
 	SetTrieString(weapon_names, "weapon_knifegg", "Gold Knife"); //Arms Race mode only
 	SetTrieString(weapon_names, "weapon_c4", "C4"); //The carried C4
 	SetTrieString(weapon_names, "planted_c4", "C4"); //When the bomb goes off.... bladabooooom
+
+	weapon_is_primary = CreateTrie();
+	//Weapons not mentioned are not primary weapons. If the mapped value is 2, say "an %s".
+	//SMGs
+	SetTrieValue(weapon_is_primary, "mp9", 2);
+	SetTrieValue(weapon_is_primary, "mp7", 2);
+	SetTrieValue(weapon_is_primary, "ump45", 1);
+	SetTrieValue(weapon_is_primary, "p90", 1);
+	SetTrieValue(weapon_is_primary, "bizon", 1);
+	SetTrieValue(weapon_is_primary, "mac10", 1);
+	//Assault Rifles
+	SetTrieValue(weapon_is_primary, "ak47", 2);
+	SetTrieValue(weapon_is_primary, "galilar", 1);
+	SetTrieValue(weapon_is_primary, "famas", 1);
+	SetTrieValue(weapon_is_primary, "m4a1", 2);
+	SetTrieValue(weapon_is_primary, "m4a1_silencer", 2);
+	SetTrieValue(weapon_is_primary, "aug", 2);
+	SetTrieValue(weapon_is_primary, "sg556", 1);
+	//Snipers
+	SetTrieValue(weapon_is_primary, "ssg08", 2);
+	SetTrieValue(weapon_is_primary, "awp", 2);
+	SetTrieValue(weapon_is_primary, "scar20", 1);
+	SetTrieValue(weapon_is_primary, "g3sg1", 1);
+	//Shotties and LMGs
+	SetTrieValue(weapon_is_primary, "nova", 1);
+	SetTrieValue(weapon_is_primary, "xm1014", 2);
+	SetTrieValue(weapon_is_primary, "mag7", 1);
+	SetTrieValue(weapon_is_primary, "m249", 2);
+	SetTrieValue(weapon_is_primary, "negev", 1);
 
 	default_weapons[0] = FindConVar("mp_ct_default_primary");
 	default_weapons[1] = FindConVar("mp_t_default_primary");
@@ -397,6 +428,18 @@ public Action add_bonus_health(Handle timer, int client)
 	}
 }
 
+Action bot_delayed_purchase(Handle timer, Handle params)
+{
+	ignore(timer);
+	int client = ReadPackCell(params);
+	int primary = ReadPackCell(params);
+	SetEntityRenderFx(client, RENDERFX_NONE);
+	if (GetPlayerWeaponSlot(client, 0) != primary) return;
+	char desired[64]; ReadPackString(params, desired, sizeof(desired));
+	char command[68]; FormatEx(command, sizeof(command), "buy %s", desired);
+	FakeClientCommandEx(client, command);
+}
+
 public Action CS_OnBuyCommand(int buyer, const char[] weap)
 {
 	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return Plugin_Continue;
@@ -407,12 +450,39 @@ public Action CS_OnBuyCommand(int buyer, const char[] weap)
 	//4) If, subsequently, the bot-don't-buy command is re-entered, redo the buy. Maybe.
 	//NOTE: The bot_autobuy_nades check must be done after this delay, and be disabled if
 	//the command is entered.
-	//char name[64]; GetClientName(buyer, name, sizeof(name)); PrintToStream("%s attempted to buy %s", name, weap);
+	float time_since_freeze = (GetGameTickCount() - freeze_started) * GetTickInterval();
+	//char name[64]; GetClientName(buyer, name, sizeof(name));
+	//PrintToStream("[%.2f] %s%s attempted to buy %s", time_since_freeze, IsFakeClient(buyer) ? "BOT " : "", name, weap);
 	//Disallow defusers during warmup (they're useless anyway)
 	if (StrEqual(weap, "defuser") && GameRules_GetProp("m_bWarmupPeriod")) return Plugin_Stop;
+	//Make bots wait before buying, if they're buying within the first few seconds of freeze
+	float delay = GetConVarFloat(bot_purchase_delay) - time_since_freeze;
+	if (!GameRules_GetProp("m_bWarmupPeriod") && IsFakeClient(buyer) && delay > 0.0)
+	{
+		//See if the weapon is a primary
+		int use_a_or_an = 0;
+		if (!GetTrieValue(weapon_is_primary, weap, use_a_or_an)) return Plugin_Continue;
+		//If you're already waiting on a purchase, deny without deferring.
+		if (GetEntityRenderFx(buyer) != RENDERFX_NONE) return Plugin_Stop;
+		//Announce in team chat "I'm going to buy a/an " + weap
+		char command[100]; FormatEx(command, sizeof(command), "say_team I was going to buy %s %s",
+			use_a_or_an == 1 ? "a" : "an", weap);
+		FakeClientCommandEx(buyer, command);
+		SetEntityRenderFx(buyer, RENDERFX_STROBE_FASTER);
+		Handle params;
+		CreateDataTimer(delay, bot_delayed_purchase, params, TIMER_FLAG_NO_MAPCHANGE);
+		WritePackCell(params, buyer);
+		//See what primary, if any, the bot has
+		int primary = GetPlayerWeaponSlot(buyer, 0);
+		WritePackCell(params, primary);
+		WritePackString(params, weap);
+		ResetPack(params);
+		return Plugin_Stop; //Don't buy it yet
+	}
 	if (StrEqual(weap, "heavyassaultsuit"))
 	{
 		//Crippling mode uses the suit, so when that's happening, you can't buy the suit.
+		//TODO: This is no longer the case - can this check be removed?
 		if (GetConVarInt(sm_drzed_crippled_health)) return Plugin_Stop;
 		//If this purchase succeeds, grant a health bonus.
 		if (!GetEntProp(buyer, Prop_Send, "m_bHasHeavyArmor"))
@@ -507,13 +577,13 @@ public Action buy_nades(Handle timer, any ignore) {jayne(0);}
 public void OnGameFrame()
 {
 	int freeze = GameRules_GetProp("m_bFreezePeriod");
-	if (freeze && !last_freeze && GetConVarInt(bot_autobuy_nades))
+	if (freeze && !last_freeze)
 	{
 		freeze_started = GetGameTickCount();
 		//When we go into freeze time, wait half a second, then get the bots to buy nades.
 		//Note that they won't buy nades if we're out of freeze time, so you need at least
 		//one full second of freeze in order to do this reliably.
-		CreateTimer(0.5, buy_nades, 0, TIMER_FLAG_NO_MAPCHANGE);
+		if (GetConVarInt(bot_autobuy_nades)) CreateTimer(0.5, buy_nades, 0, TIMER_FLAG_NO_MAPCHANGE);
 	}
 	last_freeze = freeze;
 
@@ -1232,4 +1302,10 @@ Danger Zone AI proposal:
 - Optional: Maybe buy ammo from tablet, but only on higher difficulties
 - If not at all under threat or near enemy, check tablet for nearest cell with enemy and go hunting
   - Otherwise ignore the tablet and just explore with eyeballs
+*/
+
+/* Player attributes to inspect:
+m_fOnTarget
+m_iAmmo[32] - what do they all mean?
+
 */
