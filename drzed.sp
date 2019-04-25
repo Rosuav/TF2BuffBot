@@ -34,6 +34,8 @@ ConVar sm_drzed_anarchy_per_kill = null; //(0) Whether you gain anarchy for gett
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 ConVar bots_get_empty_weapon = null; //("") Give bots an ammo-less weapon on startup (eg weapon_glock). Use only if they wouldn't get a weapon in that slot.
+ConVar damage_scale_humans = null; //(1.0) Scale all damage dealt by humans
+ConVar damage_scale_bots = null; //(1.0) Scale all damage dealt by bots
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
@@ -1053,17 +1055,18 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	int cd = RoundToFloor(GetConVarFloat(sm_drzed_heal_damage_cd) / GetTickInterval());
 	if (heal_cooldown_tick[victim] < tick + cd) heal_cooldown_tick[victim] = tick + cd;
 
+	//Scale damage according to who's dealing with it (non-hackily)
+	Action ret = Plugin_Continue;
+	float proportion;
+	if (IsFakeClient(attacker)) proportion = GetConVarFloat(damage_scale_bots);
+	else proportion = GetConVarFloat(damage_scale_humans);
+	if (proportion != 1.0) {ret = Plugin_Changed; damage *= proportion;}
+
 	int hack = GetConVarInt(sm_drzed_hack);
 	if (hack && attacker && attacker < MAXPLAYERS)
 	{
 		//Mess with damage based on who's dealing it. This is a total hack, and
 		//can change at any time while I play around with testing stuff.
-		if (hack == 2)
-		{
-			//Quickly prove that stuff is working
-			if (IsFakeClient(attacker)) damage = 0.0; else damage = 100.0;
-			return Plugin_Changed;
-		}
 		if (hack == 3)
 		{
 			//Damage only while flashed
@@ -1074,9 +1077,9 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 				damage /= 10.0;
 				return Plugin_Changed;
 			}
-			return Plugin_Continue;
+			return ret;
 		}
-		if (IsFakeClient(attacker)) return Plugin_Continue; //Example: Bots are unaffected
+		if (IsFakeClient(attacker)) return ret; //Example: Bots are unaffected
 		//Example: Scale the damage according to how hurt you are
 		//Like the TF2 Equalizer, but done as a simple scaling of all damage.
 		int health = GetClientHealth(attacker) * 2;
@@ -1120,7 +1123,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 			{
 				//During warmup and end-of-round, crippled people just instadie
 				SetEntityHealth(victim, GetClientHealth(victim) - cripplepoint);
-				return Plugin_Continue; //and then the normal damage goes through
+				return ret; //and then the normal damage goes through
 			}
 			last_attacker[victim] = attacker; last_inflictor[victim] = inflictor; last_weapon[victim] = weapon;
 			cripple(victim);
@@ -1129,21 +1132,21 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	}
 	//
 	int gate = GetConVarInt(sm_drzed_gate_health_left);
-	if (!gate) return Plugin_Continue; //Health gate not active
+	if (!gate) return ret; //Health gate not active
 	int full = GetConVarInt(sm_drzed_max_hitpoints); if (!full) full = default_health;
 	full += GetConVarInt(sm_drzed_crippled_health);
 	int health = GetClientHealth(victim);
-	if (health < full) return Plugin_Continue; //Below the health gate
+	if (health < full) return ret; //Below the health gate
 	int dmg = RoundToFloor(damage);
-	if (dmg < health) return Plugin_Continue; //Wouldn't kill you
+	if (dmg < health) return ret; //Wouldn't kill you
 	char cls[64]; describe_weapon(weapon, cls, sizeof(cls));
-	if (!strcmp(cls, "Knife")) return Plugin_Continue; //No health-gating knife backstabs
+	if (!strcmp(cls, "Knife")) return ret; //No health-gating knife backstabs
 	char name[64]; GetClientName(attacker, name, sizeof(name));
 	int overkill = GetConVarInt(sm_drzed_gate_overkill);
 	if (dmg >= overkill)
 	{
 		PrintToChat(victim, "BEWM! %s overkilled you with his %s (%d damage).", name, cls, dmg);
-		return Plugin_Continue;
+		return ret;
 	}
 	damage = 0.0 + health - gate; //Leave you on the health gate
 	//NOTE: This won't change the denting of the armor. Probably doesn't matter; anything
