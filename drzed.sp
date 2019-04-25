@@ -62,6 +62,13 @@ Handle switch_weapon_call = null;
 //single global default (which will be updated on map change once someone spawns).
 int default_health = 100;
 
+//Note that the mark is global; one player can mark and another can check pos.
+float marked_pos[3];
+int show_positions[MAXPLAYERS + 1];
+int nshowpos = 0;
+int last_freeze = -1;
+int freeze_started = 0;
+
 //Crippling is done by reducing your character's max speed. Uncrippling means getting
 //you back to "normal" speed. In most situations, it won't matter exactly what this
 //speed is, as long as it's no less than your weapon's speed; as of 20190121, the top
@@ -393,6 +400,13 @@ public Action add_bonus_health(Handle timer, int client)
 public Action CS_OnBuyCommand(int buyer, const char[] weap)
 {
 	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return Plugin_Continue;
+	//If a bot buys a primary weapon, announce it to team chat, wait a cvar-controlled time, and then:
+	//1) If the bot's state has not changed, repeat the buy
+	//2) If the bot now has a primary weapon that he did not previously have, do nothing.
+	//3) If a command has been entered to stop bots buying at all, do nothing.
+	//4) If, subsequently, the bot-don't-buy command is re-entered, redo the buy. Maybe.
+	//NOTE: The bot_autobuy_nades check must be done after this delay, and be disabled if
+	//the command is entered.
 	//char name[64]; GetClientName(buyer, name, sizeof(name)); PrintToStream("%s attempted to buy %s", name, weap);
 	//Disallow defusers during warmup (they're useless anyway)
 	if (StrEqual(weap, "defuser") && GameRules_GetProp("m_bWarmupPeriod")) return Plugin_Stop;
@@ -490,16 +504,12 @@ void jayne(int team)
 }
 public Action buy_nades(Handle timer, any ignore) {jayne(0);}
 
-//Note that the mark is global; one player can mark and another can check pos.
-float marked_pos[3];
-int show_positions[MAXPLAYERS + 1];
-int nshowpos = 0;
-int last_freeze = -1;
 public void OnGameFrame()
 {
 	int freeze = GameRules_GetProp("m_bFreezePeriod");
 	if (freeze && !last_freeze && GetConVarInt(bot_autobuy_nades))
 	{
+		freeze_started = GetGameTickCount();
 		//When we go into freeze time, wait half a second, then get the bots to buy nades.
 		//Note that they won't buy nades if we're out of freeze time, so you need at least
 		//one full second of freeze in order to do this reliably.
