@@ -1137,10 +1137,13 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 
 	//Scale damage according to who's dealing with it (non-hackily)
 	Action ret = Plugin_Continue;
-	float proportion;
-	if (IsFakeClient(attacker)) proportion = GetConVarFloat(damage_scale_bots);
-	else proportion = GetConVarFloat(damage_scale_humans);
-	if (proportion != 1.0) {ret = Plugin_Changed; damage *= proportion;}
+	if (attacker && attacker < MAXPLAYERS)
+	{
+		float proportion;
+		if (IsFakeClient(attacker)) proportion = GetConVarFloat(damage_scale_bots);
+		else proportion = GetConVarFloat(damage_scale_humans);
+		if (proportion != 1.0) {ret = Plugin_Changed; damage *= proportion;}
+	}
 
 	int hack = GetConVarInt(sm_drzed_hack);
 	if (hack && attacker && attacker < MAXPLAYERS)
