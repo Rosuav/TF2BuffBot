@@ -15,6 +15,9 @@ public Plugin myinfo =
 	url = "https://github.com/Rosuav/TF2BuffBot",
 };
 
+//Note: To regenerate netprops.txt, go into the server and run: sm_dump_netprops netprops.txt
+//then excise uninteresting data with: sed -i 's/(offset [0-9]*) //' steamcmd_linux/csgo/csgo/netprops.txt
+
 ConVar sm_drzed_max_hitpoints = null; //(0) Number of hitpoints a normal character has (w/o Assault Suit) - 0 to leave at default
 ConVar sm_drzed_heal_max = null; //(0) If nonzero, healing can be bought up to that many hitpoints (100 is normal maximum)
 ConVar sm_drzed_heal_price = null; //(0) If nonzero, healing can be bought for that much money
@@ -700,6 +703,19 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		buttons & IN_GRENADE2 ? "IN_GRENADE2 " : "",
 		buttons & IN_ATTACK3 ? "IN_ATTACK3 " : ""
 	);*/
+	/*if (buttons & IN_JUMP)
+	{
+		//Hack - show stuff every time you jump
+		PrintToStream("Addons: %X, %d, %d  Passives: %d/%d/%d/%d",
+			GetEntProp(client, Prop_Send, "m_iAddonBits"),
+			GetEntProp(client, Prop_Send, "m_iPrimaryAddon"),
+			GetEntProp(client, Prop_Send, "m_iSecondaryAddon"),
+			GetEntProp(client, Prop_Send, "m_passiveItems", _, 0),
+			GetEntProp(client, Prop_Send, "m_passiveItems", _, 1),
+			GetEntProp(client, Prop_Send, "m_passiveItems", _, 2),
+			GetEntProp(client, Prop_Send, "m_passiveItems", _, 3)
+		);
+	}*/
 	if (IsPlayerAlive(client) && is_crippled(client))
 	{
 		//While you're crippled, you can't do certain things. There may be more restrictions to add.
@@ -1310,11 +1326,33 @@ Danger Zone AI proposal:
 /* Player attributes to inspect:
 m_fOnTarget
 m_iAmmo[32] - what do they all mean?
+14-18 are grenades - HE/frag, flash, smoke, molly/inc, decoy/diversion
+21: Health Shot
+24: Snowball
+Bump mines, exojump, and parachute do not show up.
 
+Also, a drone (CDrone, DT_Drone) gained a few attributes as of Sirocco:
++ Member: m_bPilotTakeoverAllowed (offset 1896) (type integer) (bits 1) (Unsigned)
++ Member: m_hPotentialCargo (offset 1900) (type integer) (bits 21) (Unsigned|NoScale)
++ Member: m_hCurrentPilot (offset 1904) (type integer) (bits 21) (Unsigned|NoScale)
++ Member: m_vecTagPositions (offset 1908) (type vector) (bits 0) (NoScale|InsideArray)
++ Member: m_vecTagPositions (offset 0) (type array) (bits 0) ()
++ Member: m_vecTagIncrements (offset 2196) (type integer) (bits 32) (NoScale|InsideArray)
++ Member: m_vecTagIncrements (offset 0) (type array) (bits 0) ()
+
+At the same time, players lost m_bHasParachute and instead gained a four-element m_passiveItems
+They correspond to Parachute, Exojump, Bonus Explore Money, Bonus Wave Money
+
+Is tablet_dronepilot visible anywhere? Can't find it. But then, I also can't find any
+evidence of the other tablet upgrades (drones, zone predic, high res), and they clearly
+DO function correctly, and are associated with the tablet somehow.
 */
 
 /*
 TODO: Allow multijump. Each player has a jump counter that is reset whenever on ground, including jumping when on ground. Attempting to jump
 while in mid-air (defined as transitioning from "not jumping" to "jumping" while not on the ground) will increment this counter. A cvar caps
 the counter; possibly have a separate cap for if you have an exojump equipped. When multijumping, create a "psssshhht" sound as per exojump.
+
+Hmm. Would be incompatible with a parachute, but that's probably not a critical problem. Or maybe this can take over the parachute's hook
+somehow? Call it an "Aperture Science Active Parachute" or something?
 */
