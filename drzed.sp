@@ -1312,3 +1312,9 @@ m_fOnTarget
 m_iAmmo[32] - what do they all mean?
 
 */
+
+/*
+TODO: Allow multijump. Each player has a jump counter that is reset whenever on ground, including jumping when on ground. Attempting to jump
+while in mid-air (defined as transitioning from "not jumping" to "jumping" while not on the ground) will increment this counter. A cvar caps
+the counter; possibly have a separate cap for if you have an exojump equipped. When multijumping, create a "psssshhht" sound as per exojump.
+*/
