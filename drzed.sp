@@ -1331,7 +1331,7 @@ m_iAmmo[32] - what do they all mean?
 24: Snowball
 Bump mines, exojump, and parachute do not show up.
 
-Also, a drone (CDrone, DT_Drone) gained a few attributes as of Sirocco:
+Also, a "drone" (CDrone, DT_Drone) gained a few attributes as of Sirocco:
 + Member: m_bPilotTakeoverAllowed (offset 1896) (type integer) (bits 1) (Unsigned)
 + Member: m_hPotentialCargo (offset 1900) (type integer) (bits 21) (Unsigned|NoScale)
 + Member: m_hCurrentPilot (offset 1904) (type integer) (bits 21) (Unsigned|NoScale)
@@ -1339,6 +1339,10 @@ Also, a drone (CDrone, DT_Drone) gained a few attributes as of Sirocco:
 + Member: m_vecTagPositions (offset 0) (type array) (bits 0) ()
 + Member: m_vecTagIncrements (offset 2196) (type integer) (bits 32) (NoScale|InsideArray)
 + Member: m_vecTagIncrements (offset 0) (type array) (bits 0) ()
+
+The takeover bit seems to be zero before the drone has made a delivery and one after. Not
+sure what that actually means, since the preview on the web site shows the drone carrying
+something. OTOH, maybe that's just an easy way to recognize whether it's incoming or outgoing.
 
 At the same time, players lost m_bHasParachute and instead gained a four-element m_passiveItems
 They correspond to Parachute, Exojump, Bonus Explore Money, Bonus Wave Money
