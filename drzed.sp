@@ -594,7 +594,7 @@ public void OnGameFrame()
 	{
 		float pos[3]; GetClientAbsOrigin(show_positions[i], pos);
 		float dist = GetVectorDistance(marked_pos, pos, false);
-		PrintCenterText(show_positions[i], "Distance from marked pos: %.2f", dist);
+		PrintHintText(show_positions[i], "Distance from marked pos: %.2f", dist);
 	}
 }
 
