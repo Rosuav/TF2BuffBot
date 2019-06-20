@@ -69,10 +69,12 @@ int default_health = 100;
 
 //Note that the mark is global; one player can mark and another can check pos.
 float marked_pos[3];
+float marked_pos2[3];
 int show_positions[MAXPLAYERS + 1];
 int nshowpos = 0;
 int last_freeze = -1;
 int freeze_started = 0;
+int last_money[MAXPLAYERS + 1];
 
 //Crippling is done by reducing your character's max speed. Uncrippling means getting
 //you back to "normal" speed. In most situations, it won't matter exactly what this
@@ -592,9 +594,27 @@ public void OnGameFrame()
 
 	for (int i = 0; i < nshowpos; ++i) if (IsClientInGame(show_positions[i]))
 	{
+		int money = GetEntProp(show_positions[i], Prop_Send, "m_iAccount");
+		//Define this to show positions in chat rather than as a hint message
+		//#define POS_ONLY_WHEN_MONEY
+		#if defined(POS_ONLY_WHEN_MONEY)
+		if (last_money[show_positions[i]] == money) continue;
+		#endif
 		float pos[3]; GetClientAbsOrigin(show_positions[i], pos);
 		float dist = GetVectorDistance(marked_pos, pos, false);
-		PrintHintText(show_positions[i], "Distance from marked pos: %.2f", dist);
+		float dist2 = GetVectorDistance(marked_pos2, pos, false);
+		char distances[64];
+		if (marked_pos2[0] || marked_pos2[1] || marked_pos2[2])
+			Format(distances, sizeof(distances), "%.2f / %.2f", dist, dist2);
+		else Format(distances, sizeof(distances), "%.2f", dist);
+		if (last_money[show_positions[i]] == -1)
+			PrintHintText(show_positions[i], "Distance from marked pos: %s", distances);
+		else
+			PrintToChat(show_positions[i], "Gained $ %d. Distance from marked pos: %s",
+				money - last_money[show_positions[i]], distances);
+		#if defined(POS_ONLY_WHEN_MONEY)
+		last_money[show_positions[i]] = money;
+		#endif
 	}
 }
 
@@ -859,6 +879,12 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		PrintToChat(self, "Marked position: %f, %f, %f", marked_pos[0], marked_pos[1], marked_pos[2]);
 		return;
 	}
+	if (!strcmp(msg, "!mark2"))
+	{
+		GetClientAbsOrigin(self, marked_pos2);
+		PrintToChat(self, "Marked position #2: %f, %f, %f", marked_pos2[0], marked_pos2[1], marked_pos2[2]);
+		return;
+	}
 	#if 0
 	if (!strcmp(msg, "!slow"))
 	{
@@ -884,7 +910,12 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			return;
 		}
 		show_positions[nshowpos++] = self;
+		last_money[self] = -1;
+		#if defined(POS_ONLY_WHEN_MONEY)
+		PrintToChat(self, "Will show pos each time money changes.");
+		#else
 		PrintToChat(self, "Will show pos each frame.");
+		#endif
 		return;
 	}
 	if (!strcmp(msg, "!unshowpos"))
