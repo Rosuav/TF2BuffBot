@@ -1974,12 +1974,27 @@ void apply_effect(int target, TFCond condition, int duration=0)
 	}
 	else if (condition == TFCond_RestrictToMelee)
 	{
-		//The cond stops you switching away from melee, but it doesn't actually
-		//select your melee weapon. So we do that as a separate operation.
-		//TODO: Check if Heavy is spun up, Sniper is scoped in, etc. This seems to
-		//cause some issues - Heavy retains the spun-up sound (and may be stuck in
-		//the T-pose), Sniper crashes the game and discons with Steam failure 6!
+		//TODO: Certain states (spun-up minigun, zoomed sniper rifle) can reduce
+		//your maximum speed. Getting restricted to melee does not currently give
+		//back your normal max speed. It would be nice to fix that, some time.
 		int curweap = GetEntPropEnt(target, Prop_Send, "m_hActiveWeapon");
+		switch (TF2_GetPlayerClass(target))
+		{
+			case TFClass_Heavy:
+			{
+				//If a Heavy is spun up, he gets stuck with the spun-up sound
+				//(and may also get stuck in the T-pose).
+				char cls[32]; GetEdictClassname(curweap, cls, sizeof(cls));
+				if (!strcmp(cls, "tf_weapon_minigun"))
+					SetEntProp(curweap, Prop_Send, "m_iWeaponState", 0);
+			}
+			case TFClass_Sniper:
+			{
+				//If a sniper is scoped in, it can crash the client hard!
+				TF2_RemoveCondition(target, TFCond_Zoomed);
+			}
+		}
+		//Remember the last-used weapon so we can reset it later
 		for (int slot = 0; slot < 6; ++slot)
 		{
 			if (curweap == GetPlayerWeaponSlot(target, slot))
@@ -1988,6 +2003,8 @@ void apply_effect(int target, TFCond condition, int duration=0)
 				meleerestrict_entity[target] = curweap;
 			}
 		}
+		//The cond stops you switching away from melee, but it doesn't actually
+		//select your melee weapon. So we do that as a separate operation.
 		int weapon = GetPlayerWeaponSlot(target, TFWeaponSlot_Melee);
 		SetEntPropEnt(target, Prop_Send, "m_hActiveWeapon", weapon);
 		//So... what would happen if we said that your active weapon was one that
