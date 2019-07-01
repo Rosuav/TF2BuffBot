@@ -1963,6 +1963,8 @@ void apply_effect(int target, TFCond condition, int duration=0)
 	{
 		//The cond stops you switching away from melee, but it doesn't actually
 		//select your melee weapon. So we do that as a separate operation.
+		//TODO: Check if Heavy is spun up, Sniper is scoped in, etc. This seems to
+		//cause some issues.
 		int weapon = GetPlayerWeaponSlot(target, TFWeaponSlot_Melee);
 		SetEntPropEnt(target, Prop_Send, "m_hActiveWeapon", weapon);
 		//So... what would happen if we said that your active weapon was one that
