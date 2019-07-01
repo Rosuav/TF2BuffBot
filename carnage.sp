@@ -1794,6 +1794,8 @@ public void TF2_OnConditionAdded(int client, TFCond cond)
 	}*/
 }
 
+//Slot number is 1 for primary, 2 for secondary - not zero-based. Zero means "none selected".
+int meleerestrict_slot[65], meleerestrict_entity[65];
 public void TF2_OnConditionRemoved(int client, TFCond cond)
 {
 	//PrintToChatAll("%d removed cond %d", client, cond);
@@ -1804,6 +1806,17 @@ public void TF2_OnConditionRemoved(int client, TFCond cond)
 		GetClientName(client, targetname, sizeof(targetname));
 		PrintToChatAll("%s stops blast jumping", targetname);
 	}*/
+	if (cond == TFCond_RestrictToMelee)
+	{
+		if (meleerestrict_slot[client])
+		{
+			int weap = GetPlayerWeaponSlot(client, meleerestrict_slot[client] - 1);
+			if (weap == meleerestrict_entity[client])
+				//Only reset if the exact same entity is in the same slot.
+				SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", weap);
+			meleerestrict_slot[client] = meleerestrict_entity[client] = 0;
+		}
+	}
 }
 
 void apply_effect(int target, TFCond condition, int duration=0)
@@ -1964,7 +1977,17 @@ void apply_effect(int target, TFCond condition, int duration=0)
 		//The cond stops you switching away from melee, but it doesn't actually
 		//select your melee weapon. So we do that as a separate operation.
 		//TODO: Check if Heavy is spun up, Sniper is scoped in, etc. This seems to
-		//cause some issues.
+		//cause some issues - Heavy retains the spun-up sound (and may be stuck in
+		//the T-pose), Sniper crashes the game and discons with Steam failure 6!
+		int curweap = GetEntPropEnt(target, Prop_Send, "m_hActiveWeapon");
+		for (int slot = 0; slot < 6; ++slot)
+		{
+			if (curweap == GetPlayerWeaponSlot(target, slot))
+			{
+				meleerestrict_slot[target] = slot + 1;
+				meleerestrict_entity[target] = curweap;
+			}
+		}
 		int weapon = GetPlayerWeaponSlot(target, TFWeaponSlot_Melee);
 		SetEntPropEnt(target, Prop_Send, "m_hActiveWeapon", weapon);
 		//So... what would happen if we said that your active weapon was one that
