@@ -1385,8 +1385,11 @@ Is tablet_dronepilot visible anywhere? Can't find it. But then, I also can't fin
 evidence of the other tablet upgrades (drones, zone predic, high res), and they clearly
 DO function correctly, and are associated with the tablet somehow.
 
-Is m_hPotentialCargo the entity of the thing you'd grab if you click, and if so, is it zero up
-until you're low enough to grab it? Might help with teaching drone piloting - "Okay now grab!".
+Note that m_hPotentialCargo isn't always the thing you'd grab if you click. It will show a
+highlight marker for an object that's *forward* of where you are - ie it's the thing you're
+looking at. If there's no such thing, it will usually show what you'd be capable of grabbing,
+but this isn't guaranteed (it's possible for hPotentialCargo to be -1 but clicking still does
+get something). Of course, m_hDeliveryCargo always accurately records carried items.
 */
 
 /*
