@@ -1374,6 +1374,9 @@ Also, a "drone" (CDrone, DT_Drone) gained a few attributes as of Sirocco:
 The takeover bit seems to be zero before the drone has made a delivery and one after. Not
 sure what that actually means, since the preview on the web site shows the drone carrying
 something. OTOH, maybe that's just an easy way to recognize whether it's incoming or outgoing.
+- 20190708: Of course, we now understand exactly what's going on here: you cannot take control
+- of a drone that's doing a delivery. The aforementioned preview requires that you grab an
+- empty drone, then pick something up. Turns out, the prerelease info was pretty accurate.
 
 At the same time, players lost m_bHasParachute and instead gained a four-element m_passiveItems
 They correspond to Parachute, Exojump, Bonus Explore Money, Bonus Wave Money
