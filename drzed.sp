@@ -982,6 +982,54 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	}
 	if (!strcmp(msg, "!heal"))
 	{
+		#if 0
+		int drone = -1;
+		while ((drone = FindEntityByClassname(drone, "drone")) != -1)
+		{
+			char carrying[64] = "";
+			int load = GetEntPropEnt(drone, Prop_Send, "m_hDeliveryCargo");
+			if (load != -1)
+			{
+				describe_weapon(load, carrying, sizeof(carrying));
+				Format(carrying, sizeof(carrying), ", carrying %s", carrying);
+			}
+			else if ((load = GetEntPropEnt(drone, Prop_Send, "m_hPotentialCargo")) != -1)
+			{
+				describe_weapon(load, carrying, sizeof(carrying));
+				Format(carrying, sizeof(carrying), ", could get %s", carrying);
+			}
+			char dest[64] = "";
+			int target = GetEntPropEnt(drone, Prop_Send, "m_hMoveToThisEntity");
+			if (target != -1)
+			{
+				int owner = GetEntPropEnt(target, Prop_Send, "m_hOwner");
+				if (owner == -1) Format(dest, sizeof(dest), ", moving to unowned tablet %d", target);
+				else if (owner <= MAXPLAYERS)
+				{
+					GetClientName(owner, dest, sizeof(dest));
+					Format(dest, sizeof(dest), ", moving to %s", dest);
+				}
+				else Format(dest, sizeof(dest), ", moving to tablet %d owned by %d", target, owner); //Shouldn't happen? I think?
+			}
+			char piloted[64] = "unpiloted drone";
+			int pilot = GetEntPropEnt(drone, Prop_Send, "m_hCurrentPilot");
+			if (pilot == -1)
+			{
+				if (GetEntProp(drone, Prop_Send, "m_bPilotTakeoverAllowed"))
+					piloted = "claimable drone";
+			}
+			else if (pilot <= MAXPLAYERS)
+			{
+				GetClientName(pilot, piloted, sizeof(piloted));
+				Format(piloted, sizeof(piloted), "drone piloted by %s", piloted);
+				dest = "";
+			}
+			else Format(piloted, sizeof(piloted), "drone piloted by %d", pilot);
+			PrintToChat(self, "Found a %s%s%s", piloted, dest, carrying);
+		}
+		if (self) return;
+		#endif
+
 		int target = self; //Should players be able to request healing for each other? For now, no.
 		if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
 		if (GameRules_GetProp("m_iRoundWinStatus")) return; //Can't heal when the round is over.
