@@ -1384,6 +1384,9 @@ They correspond to Parachute, Exojump, Bonus Explore Money, Bonus Wave Money
 Is tablet_dronepilot visible anywhere? Can't find it. But then, I also can't find any
 evidence of the other tablet upgrades (drones, zone predic, high res), and they clearly
 DO function correctly, and are associated with the tablet somehow.
+
+Is m_hPotentialCargo the entity of the thing you'd grab if you click, and if so, is it zero up
+until you're low enough to grab it? Might help with teaching drone piloting - "Okay now grab!".
 */
 
 /*
