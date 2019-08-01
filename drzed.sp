@@ -35,6 +35,7 @@ ConVar sm_drzed_anarchy_bonus = null; //(5) Percent bonus to damage per anarchy 
 ConVar sm_drzed_anarchy_kept_on_death = null; //(0) Percentage of anarchy stacks saved on death (rounded down).
 ConVar sm_drzed_anarchy_per_kill = null; //(0) Whether you gain anarchy for getting a kill
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
+ConVar sm_drzed_allow_recall = null; //(0) Set to 1 to enable !recall and !recall2.
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 ConVar bots_get_empty_weapon = null; //("") Give bots an ammo-less weapon on startup (eg weapon_glock). Use only if they wouldn't get a weapon in that slot.
 ConVar bot_purchase_delay = null; //(0.0) Delay bot primary weapon purchases by this many seconds
@@ -70,6 +71,8 @@ int default_health = 100;
 //Note that the mark is global; one player can mark and another can check pos.
 float marked_pos[3];
 float marked_pos2[3];
+float marked_angle[3];
+float marked_angle2[3];
 int show_positions[MAXPLAYERS + 1];
 int nshowpos = 0;
 int last_freeze = -1;
@@ -876,13 +879,29 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	if (!strcmp(msg, "!mark"))
 	{
 		GetClientAbsOrigin(self, marked_pos);
+		GetClientEyeAngles(self, marked_angle);
 		PrintToChat(self, "Marked position: %f, %f, %f", marked_pos[0], marked_pos[1], marked_pos[2]);
 		return;
 	}
 	if (!strcmp(msg, "!mark2"))
 	{
 		GetClientAbsOrigin(self, marked_pos2);
+		GetClientEyeAngles(self, marked_angle2);
 		PrintToChat(self, "Marked position #2: %f, %f, %f", marked_pos2[0], marked_pos2[1], marked_pos2[2]);
+		return;
+	}
+	if (!strcmp(msg, "!recall") && GetConVarInt(sm_drzed_allow_recall))
+	{
+		PrintToChat(self, "Returning to %f, %f, %f", marked_pos[0], marked_pos[1], marked_pos[2]);
+		float not_moving[3] = {0.0, 0.0, 0.0};
+		TeleportEntity(self, marked_pos, marked_angle, not_moving);
+		return;
+	}
+	if (!strcmp(msg, "!recall2") && GetConVarInt(sm_drzed_allow_recall))
+	{
+		PrintToChat(self, "Returning to %f, %f, %f", marked_pos2[0], marked_pos2[1], marked_pos2[2]);
+		float not_moving[3] = {0.0, 0.0, 0.0};
+		TeleportEntity(self, marked_pos2, marked_angle2, not_moving);
 		return;
 	}
 	#if 0
