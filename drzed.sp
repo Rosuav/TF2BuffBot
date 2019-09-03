@@ -1469,7 +1469,7 @@ somehow? Call it an "Aperture Science Active Parachute" or something?
 */
 
 /*
-Phylactery mode
+Phylactery mode - Danger Zone
 * For every new human, add a bot (can I do that? test)
 * Team them up
 * Have to kill human and phylactery at once
