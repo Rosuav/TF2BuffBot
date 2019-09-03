@@ -1467,3 +1467,10 @@ the counter; possibly have a separate cap for if you have an exojump equipped. W
 Hmm. Would be incompatible with a parachute, but that's probably not a critical problem. Or maybe this can take over the parachute's hook
 somehow? Call it an "Aperture Science Active Parachute" or something?
 */
+
+/*
+Phylactery mode
+* For every new human, add a bot (can I do that? test)
+* Team them up
+* Have to kill human and phylactery at once
+*/
