@@ -431,9 +431,9 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 					smoke_first_bounce[learn - 1][0][1] < y && y < smoke_first_bounce[learn - 1][1][1] &&
 					smoke_first_bounce[learn - 1][0][2] < z && z < smoke_first_bounce[learn - 1][1][2])
 						on_target = true;
-				PrintToChat(client, "%sgrenade_bounce %d: (%.2f, %.2f, %.2f)",
+				PrintToChat(client, "%sgrenade_bounce: (%.2f, %.2f, %.2f)",
 					on_target ? "Promising! " : "",
-					ent, x, y, z);
+					x, y, z);
 			}
 			break;
 		}
@@ -477,6 +477,8 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	{
 		//If you just fired a smoke, record timestamp for the sake of a jump-throw.
 		int now = GetGameTickCount();
+		float angle[3]; GetClientEyeAngles(client, angle);
+		PrintToChat(client, "Smoked looking (%.2f, %.2f)", angle[0], angle[1]);
 		if (now == last_jump[client])
 			PrintToChat(client, "You jumped and smoked simultaneously");
 		else if (now < last_jump[client] + 32)
