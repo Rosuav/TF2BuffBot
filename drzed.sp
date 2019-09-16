@@ -478,7 +478,7 @@ public void player_jump(Event event, const char[] name, bool dontBroadcast)
 			PrintToChat(client, "You smoked and jumped simultaneously");
 		else
 			PrintToChat(client, "You smoked -%d before jumping", now - last_smoke[client]);
-		SmokeLog("[%d-B] JumpThrow -%d", client, now - last_smoke[client]); //Unconditionally log it (even with insane values)
+		SmokeLog("[%d-B] JumpThrow -%d", client, now - last_smoke[client]);
 	}
 	last_jump[client] = now;
 }
@@ -503,7 +503,7 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 				PrintToChat(client, "You jumped and smoked simultaneously");
 			else
 				PrintToChat(client, "You smoked +%d after jumping", now - last_jump[client]);
-			SmokeLog("[%d-B] JumpThrow +%d", client, now - last_jump[client]); //As above, unconditional
+			SmokeLog("[%d-B] JumpThrow +%d", client, now - last_jump[client]);
 		}
 		last_smoke[client] = now;
 	}
