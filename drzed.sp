@@ -99,6 +99,7 @@ public void OnPluginStart()
 	HookEvent("grenade_bounce", smoke_bounce);
 	HookEvent("player_team", player_team);
 	HookEvent("weapon_reload", weapon_reload);
+	HookEvent("player_jump", player_jump);
 	//HookEvent("player_hurt", player_hurt);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
@@ -392,12 +393,6 @@ public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
 }
 
 /*
-To learn to jump-throw:
-1) Record tick number for weapon_fire if smokegrenade
-2) Record tick number for player_jump
-3) If the recorded number for either of these is within 32 (half a second), report it
-*/
-/*
 To learn to aim:
 1) Record eye positions for weapon_fire if smokegrenade
 2) If on_target, print eye positions
@@ -455,12 +450,39 @@ public void OnEntityCreated(int entity, const char[] cls)
 	}
 }
 
+//Tick number when you last jumped or last threw a smoke grenade
+int last_jump[64];
+int last_smoke[64];
+public void player_jump(Event event, const char[] name, bool dontBroadcast)
+{
+	int learn = GetConVarInt(learn_smoke);
+	if (!learn) return;
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	//Record timestamp for the sake of a jump-throw. If you then throw a smoke,
+	//or if you just recently did, report it.
+	int now = GetGameTickCount();
+	if (now == last_smoke[client])
+		PrintToChat(client, "You smoked and jumped simultaneously");
+	else if (now < last_smoke[client] + 32)
+		PrintToChat(client, "You smoked -%d before jumping", now - last_smoke[client]);
+	last_jump[client] = now;
+}
+
 //If you throw a grenade and it's the only thing you have, unselect.
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	char weapon[64]; event.GetString("weapon", weapon, sizeof(weapon));
-	//TODO: If you just fired a smoke grenade, flag you so the next grenade bounce is reported.
+	if (GetConVarInt(learn_smoke) && !strcmp(weapon, "weapon_smokegrenade"))
+	{
+		//If you just fired a smoke, record timestamp for the sake of a jump-throw.
+		int now = GetGameTickCount();
+		if (now == last_jump[client])
+			PrintToChat(client, "You jumped and smoked simultaneously");
+		else if (now < last_jump[client] + 32)
+			PrintToChat(client, "You smoked +%d after jumping", now - last_jump[client]);
+		last_smoke[client] = now;
+	}
 
 	//If you empty your clip completely, add a stack of Anarchy
 	if (anarchy[client] < GetConVarInt(sm_drzed_max_anarchy))
