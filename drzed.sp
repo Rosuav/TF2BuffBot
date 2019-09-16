@@ -359,6 +359,15 @@ public Action player_pinged(int client, const char[] command, int argc)
 	//PrintCenterText(client, "You pinged!");
 }
 
+public void SmokeLog(const char[] fmt, any ...)
+{
+	char buffer[4096];
+	VFormat(buffer, sizeof(buffer), fmt, 2);
+	File fp = OpenFile("learn_smoke.log", "a");
+	WriteFileLine(fp, buffer);
+	CloseHandle(fp);
+}
+
 //Would it be better to have six float cvars to define the box??
 float smoke_targets[1][2][3] = { //Unfortunately the size has to be specified :(
 	//1: Dust II Xbox
@@ -387,9 +396,10 @@ public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
 			smoke_targets[learn - 1][0][2] < z && z < smoke_targets[learn - 1][1][2])
 				on_target = true;
 	}
-	PrintToChat(client, "%sYour smoke popped at (%.2f,%.2f,%.2f)",
+	PrintToChat(client, "%sYour smoke popped at (%.2f, %.2f, %.2f)",
 		on_target ? "Nailed it! " : "",
 		x, y, z);
+	SmokeLog("[%d-D] Pop (%.2f, %.2f, %.2f) - %s", client, x, y, z, on_target ? "GOOD" : "FAIL");
 }
 
 /*
@@ -434,6 +444,7 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 				PrintToChat(client, "%sgrenade_bounce: (%.2f, %.2f, %.2f)",
 					on_target ? "Promising! " : "",
 					x, y, z);
+				SmokeLog("[%d-C] Bounce (%.2f, %.2f, %.2f) - %s", client, x, y, z, on_target ? "PROMISING" : "MISSED");
 			}
 			break;
 		}
@@ -461,10 +472,14 @@ public void player_jump(Event event, const char[] name, bool dontBroadcast)
 	//Record timestamp for the sake of a jump-throw. If you then throw a smoke,
 	//or if you just recently did, report it.
 	int now = GetGameTickCount();
-	if (now == last_smoke[client])
-		PrintToChat(client, "You smoked and jumped simultaneously");
-	else if (now < last_smoke[client] + 32)
-		PrintToChat(client, "You smoked -%d before jumping", now - last_smoke[client]);
+	if (now < last_smoke[client] + 32)
+	{
+		if (now == last_smoke[client])
+			PrintToChat(client, "You smoked and jumped simultaneously");
+		else
+			PrintToChat(client, "You smoked -%d before jumping", now - last_smoke[client]);
+		SmokeLog("[%d-B] JumpThrow -%d", client, now - last_smoke[client]); //Unconditionally log it (even with insane values)
+	}
 	last_jump[client] = now;
 }
 
@@ -477,12 +492,19 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	{
 		//If you just fired a smoke, record timestamp for the sake of a jump-throw.
 		int now = GetGameTickCount();
+		float pos[3]; GetClientEyePosition(client, pos);
 		float angle[3]; GetClientEyeAngles(client, angle);
-		PrintToChat(client, "Smoked looking (%.2f, %.2f)", angle[0], angle[1]);
-		if (now == last_jump[client])
-			PrintToChat(client, "You jumped and smoked simultaneously");
-		else if (now < last_jump[client] + 32)
-			PrintToChat(client, "You smoked +%d after jumping", now - last_jump[client]);
+		PrintToChat(client, "Smoked (%.2f, %.2f, %.2f) looking (%.2f, %.2f)",
+			pos[0], pos[1], pos[2], angle[0], angle[1]);
+		SmokeLog("[%d-A] Smoke (%.2f, %.2f)", client, angle[0], angle[1]);
+		if (now < last_jump[client] + 32)
+		{
+			if (now == last_jump[client])
+				PrintToChat(client, "You jumped and smoked simultaneously");
+			else
+				PrintToChat(client, "You smoked +%d after jumping", now - last_jump[client]);
+			SmokeLog("[%d-B] JumpThrow +%d", client, now - last_jump[client]); //As above, unconditional
+		}
 		last_smoke[client] = now;
 	}
 
