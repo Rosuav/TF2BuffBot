@@ -415,6 +415,9 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
+	char weapon[64]; event.GetString("weapon", weapon, sizeof(weapon));
+	//TODO: If you just fired a smoke grenade, flag you so the next grenade bounce is reported.
+
 	//If you empty your clip completely, add a stack of Anarchy
 	if (anarchy[client] < GetConVarInt(sm_drzed_max_anarchy))
 	{
@@ -438,7 +441,6 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	PrintToStream(buf);
 	#endif
 	if (GetPlayerWeaponSlot(client, 2) != -1) return; //Normally you'll have a knife, and things are fine.
-	char weapon[64]; event.GetString("weapon", weapon, sizeof(weapon));
 	int ammo_offset = 0;
 	if (!strcmp(weapon, "weapon_hegrenade")) ammo_offset = 14;
 	else if (!strcmp(weapon, "weapon_flashbang")) ammo_offset = 15;
