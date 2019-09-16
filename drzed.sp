@@ -100,6 +100,7 @@ public void OnPluginStart()
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
 	//player_falldamage: report whenever anyone falls, esp for a lot of dmg
+	AddCommandListener(player_pinged, "player_ping");
 	//As per carnage.sp, convars are created by the Python script.
 	CreateConVars();
 
@@ -344,6 +345,14 @@ Action add_anarchy(Handle timer, any client)
 	anarchy_available[client] = 0; anarchy[client]++;
 	char player[64]; GetClientName(client, player, sizeof(player));
 	PrintCenterText(client, "You now have %d anarchy!", anarchy[client]);
+}
+
+public Action player_pinged(int client, const char[] command, int argc)
+{
+	//Put code here to be able to easily trigger it from the client
+	//By default, "player_ping" is bound to mouse3, and anyone who
+	//plays Danger Zone will have it accessible somewhere.
+	//PrintCenterText(client, "You pinged!");
 }
 
 //If you throw a grenade and it's the only thing you have, unselect.
