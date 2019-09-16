@@ -384,6 +384,22 @@ public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
 	PrintToChat(client, "Your smoke popped at (%.2f,%.2f,%.2f)", x, y, z);
 }
 
+/*
+To learn to jump-throw:
+1) Record tick number for weapon_fire if smokegrenade
+2) Record tick number for player_jump
+3) If the recorded number for either of these is within 32 (half a second), report it
+*/
+/*
+To learn to aim:
+1) Record eye positions for weapon_fire if smokegrenade
+2) If on_target, print eye positions
+3) Can probably dial in a "rectangle" of valid eye positions that have the potential to be on_target
+
+Is it possible to trace a ray through every eye position that succeeds and put a dot on the screen??
+Maybe mark that in response to player_ping.
+*/
+
 //If you throw a grenade and it's the only thing you have, unselect.
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {
