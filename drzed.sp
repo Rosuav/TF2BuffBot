@@ -361,7 +361,7 @@ public Action player_pinged(int client, const char[] command, int argc)
 //Would it be better to have six float cvars to define the box??
 float smoke_targets[1][2][3] = { //Unfortunately the size has to be specified :(
 	//1: Dust II Xbox
-	{{-400.0, 1350.0, -27.0}, {-270.0, 1475.0, -24.0}},
+	{{-400.0, 1350.0, -27.0}, {-257.0, 1475.0, -24.0}},
 	//Add others as needed - {{x1,y1,z1},{x2,y2,z2}} where the
 	//second coords are all greater than the firsts.
 };
