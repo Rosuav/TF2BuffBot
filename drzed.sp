@@ -365,6 +365,11 @@ float smoke_targets[1][2][3] = { //Unfortunately the size has to be specified :(
 	//Add others as needed - {{x1,y1,z1},{x2,y2,z2}} where the
 	//second coords are all greater than the firsts.
 };
+float smoke_first_bounce[1][2][3] = {
+	//1: Dust II Xbox
+	{{-320.0, 1130.0, -120.0}, {-257.0, 1280.0, -80.0}},
+	//As above.
+};
 
 public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
 {
@@ -380,9 +385,10 @@ public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
 			smoke_targets[learn - 1][0][1] < y && y < smoke_targets[learn - 1][1][1] &&
 			smoke_targets[learn - 1][0][2] < z && z < smoke_targets[learn - 1][1][2])
 				on_target = true;
-		if (on_target) PrintToChat(client, "Nailed it!");
 	}
-	PrintToChat(client, "Your smoke popped at (%.2f,%.2f,%.2f)", x, y, z);
+	PrintToChat(client, "%sYour smoke popped at (%.2f,%.2f,%.2f)",
+		on_target ? "Nailed it! " : "",
+		x, y, z);
 }
 
 /*
@@ -401,13 +407,13 @@ Is it possible to trace a ray through every eye position that succeeds and put a
 Maybe mark that in response to player_ping.
 */
 
+bool smoke_not_bounced[4096];
 public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 {
 	int learn = GetConVarInt(learn_smoke);
 	if (!learn) return;
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	float x = event.GetFloat("x"), y = event.GetFloat("y"), z = event.GetFloat("z"); //Undocumented event parameters!
-	PrintToChat(client, "grenade_bounce: (%.2f, %.2f, %.2f)", x, y, z);
 	//So, this is where things get REALLY stupid
 	//I want to know if this is the *first* bounce. Unfortunately, there's no
 	//entity ID in the event. So... we search the entire server for any smoke
@@ -421,10 +427,33 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 	{
 		float pos[3]; GetEntPropVector(ent, Prop_Send, "m_vecOrigin", pos);
 		if (pos[0] == x && pos[1] == y && pos[2] == z)
-			PrintToChat(client, "found ent %d at %.2f, %.2f, %.2f", ent, pos[0], pos[1], pos[2]);
+		{
+			if (smoke_not_bounced[ent])
+			{
+				smoke_not_bounced[ent] = false;
+				bool on_target = false;
+				if (smoke_first_bounce[learn - 1][0][0] < x && x < smoke_first_bounce[learn - 1][1][0] &&
+					smoke_first_bounce[learn - 1][0][1] < y && y < smoke_first_bounce[learn - 1][1][1] &&
+					smoke_first_bounce[learn - 1][0][2] < z && z < smoke_first_bounce[learn - 1][1][2])
+						on_target = true;
+				PrintToChat(client, "%sgrenade_bounce %d: (%.2f, %.2f, %.2f)",
+					on_target ? "Promising! " : "",
+					ent, x, y, z);
+			}
+			break;
+		}
 	}
 }
-//First bounce between 1280 and 1130 on the Y axis
+
+public void OnEntityCreated(int entity, const char[] cls)
+{
+	if (!strcmp(cls, "smokegrenade_projectile"))
+	{
+		//It's a newly-thrown smoke grenade. Mark it so we'll report its
+		//first bounce (if we're reporting grenade bounces).
+		smoke_not_bounced[entity] = true;
+	}
+}
 
 //If you throw a grenade and it's the only thing you have, unselect.
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
