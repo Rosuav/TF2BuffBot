@@ -96,6 +96,7 @@ public void OnPluginStart()
 	HookEvent("round_end", uncripple_all);
 	HookEvent("bomb_planted", record_planter);
 	HookEvent("smokegrenade_detonate", smoke_popped);
+	HookEvent("grenade_bounce", smoke_bounce);
 	HookEvent("player_team", player_team);
 	HookEvent("weapon_reload", weapon_reload);
 	//HookEvent("player_hurt", player_hurt);
@@ -399,6 +400,16 @@ To learn to aim:
 Is it possible to trace a ray through every eye position that succeeds and put a dot on the screen??
 Maybe mark that in response to player_ping.
 */
+
+public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
+{
+	int learn = GetConVarInt(learn_smoke);
+	if (!learn) return;
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	float x = event.GetFloat("x"), y = event.GetFloat("y"), z = event.GetFloat("z"); //Undocumented event parameters!
+	PrintToChat(client, "grenade_bounce: (%.2f,%.2f,%.2f)", x, y, z);
+}
+//First bounce between 1280 and 1130 on the Y axis
 
 //If you throw a grenade and it's the only thing you have, unselect.
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
