@@ -407,7 +407,22 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 	if (!learn) return;
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	float x = event.GetFloat("x"), y = event.GetFloat("y"), z = event.GetFloat("z"); //Undocumented event parameters!
-	PrintToChat(client, "grenade_bounce: (%.2f,%.2f,%.2f)", x, y, z);
+	PrintToChat(client, "grenade_bounce: (%.2f, %.2f, %.2f)", x, y, z);
+	//So, this is where things get REALLY stupid
+	//I want to know if this is the *first* bounce. Unfortunately, there's no
+	//entity ID in the event. So... we search the entire server for any smoke
+	//grenade projectiles. (I've no idea how to reliably expand this to other
+	//grenade types.) If we find that there's an entity at the exact same pos
+	//as the bounce sound just emanated from, then we have found it. Then, we
+	//look that up in a table of known grenades, and if we haven't reported a
+	//bounce for it yet, we flag it and report it. (TODO on that last bit.)
+	int ent = -1;
+	while ((ent = FindEntityByClassname(ent, "smokegrenade_projectile")) != -1)
+	{
+		float pos[3]; GetEntPropVector(ent, Prop_Send, "m_vecOrigin", pos);
+		if (pos[0] == x && pos[1] == y && pos[2] == z)
+			PrintToChat(client, "found ent %d at %.2f, %.2f, %.2f", ent, pos[0], pos[1], pos[2]);
+	}
 }
 //First bounce between 1280 and 1130 on the Y axis
 
