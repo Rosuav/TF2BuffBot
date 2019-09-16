@@ -41,6 +41,7 @@ ConVar bots_get_empty_weapon = null; //("") Give bots an ammo-less weapon on sta
 ConVar bot_purchase_delay = null; //(0.0) Delay bot primary weapon purchases by this many seconds
 ConVar damage_scale_humans = null; //(1.0) Scale all damage dealt by humans
 ConVar damage_scale_bots = null; //(1.0) Scale all damage dealt by bots
+ConVar learn_smoke = null; //(0) Set things up to learn a particular smoke (1 = Dust II Xbox)
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
@@ -94,6 +95,7 @@ public void OnPluginStart()
 	HookEvent("weapon_fire", Event_weapon_fire);
 	HookEvent("round_end", uncripple_all);
 	HookEvent("bomb_planted", record_planter);
+	HookEvent("smokegrenade_detonate", smoke_popped);
 	HookEvent("player_team", player_team);
 	HookEvent("weapon_reload", weapon_reload);
 	//HookEvent("player_hurt", player_hurt);
@@ -353,6 +355,32 @@ public Action player_pinged(int client, const char[] command, int argc)
 	//By default, "player_ping" is bound to mouse3, and anyone who
 	//plays Danger Zone will have it accessible somewhere.
 	//PrintCenterText(client, "You pinged!");
+}
+
+float smoke_targets[1][2][3] = { //Unfortunately the size has to be specified :(
+	//1: Dust II Xbox
+	{{-400.0, 1350.0, -27.0}, {-275.0, 1475.0, -24.0}},
+	//Add others as needed - {{x1,y1,z1},{x2,y2,z2}} where the
+	//second coords are all greater than the firsts.
+};
+
+public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
+{
+	int learn = GetConVarInt(learn_smoke);
+	if (!learn) return;
+	float x = event.GetFloat("x"), y = event.GetFloat("y"), z = event.GetFloat("z");
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	bool on_target = false;
+	if (learn <= sizeof(smoke_targets))
+	{
+		//Is there an easier way to ask if a point is inside a cube?
+		if (smoke_targets[learn - 1][0][0] < x && x < smoke_targets[learn - 1][1][0] &&
+			smoke_targets[learn - 1][0][1] < y && y < smoke_targets[learn - 1][1][1] &&
+			smoke_targets[learn - 1][0][2] < z && z < smoke_targets[learn - 1][1][2])
+				on_target = true;
+		if (on_target) PrintToChat(client, "Nailed it!");
+	}
+	PrintToChat(client, "Your smoke popped at (%.2f,%.2f,%.2f)", x, y, z);
 }
 
 //If you throw a grenade and it's the only thing you have, unselect.
