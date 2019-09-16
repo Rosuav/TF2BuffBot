@@ -399,7 +399,9 @@ public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
 	PrintToChat(client, "%sYour smoke popped at (%.2f, %.2f, %.2f)",
 		on_target ? "Nailed it! " : "",
 		x, y, z);
-	SmokeLog("[%d-D] Pop (%.2f, %.2f, %.2f) - %s", client, x, y, z, on_target ? "GOOD" : "FAIL");
+	SmokeLog("[%d-E-%d] Pop (%.2f, %.2f, %.2f) - %s", client,
+		event.GetInt("entityid"),
+		x, y, z, on_target ? "GOOD" : "FAIL");
 }
 
 /*
@@ -444,7 +446,8 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 				PrintToChat(client, "%sgrenade_bounce: (%.2f, %.2f, %.2f)",
 					on_target ? "Promising! " : "",
 					x, y, z);
-				SmokeLog("[%d-C] Bounce (%.2f, %.2f, %.2f) - %s", client, x, y, z, on_target ? "PROMISING" : "MISSED");
+				SmokeLog("[%d-D-%d] Bounce (%.2f, %.2f, %.2f) - %s", client, ent,
+					x, y, z, on_target ? "PROMISING" : "MISSED");
 			}
 			break;
 		}
@@ -453,12 +456,20 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 
 public void OnEntityCreated(int entity, const char[] cls)
 {
-	if (!strcmp(cls, "smokegrenade_projectile"))
+	if (GetConVarInt(learn_smoke) && !strcmp(cls, "smokegrenade_projectile"))
 	{
 		//It's a newly-thrown smoke grenade. Mark it so we'll report its
 		//first bounce (if we're reporting grenade bounces).
 		smoke_not_bounced[entity] = true;
+		CreateTimer(0.01, report_grenade, entity, TIMER_FLAG_NO_MAPCHANGE);
 	}
+}
+
+Action report_grenade(Handle timer, any entity)
+{
+	ignore(timer);
+	int client = GetEntPropEnt(entity, Prop_Send, "m_hThrower");
+	SmokeLog("[%d-C-%d] Spawn", client, entity);
 }
 
 //Tick number when you last jumped or last threw a smoke grenade
@@ -494,9 +505,9 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		int now = GetGameTickCount();
 		float pos[3]; GetClientEyePosition(client, pos);
 		float angle[3]; GetClientEyeAngles(client, angle);
-		PrintToChat(client, "Smoked (%.2f, %.2f, %.2f) looking (%.2f, %.2f)",
+		PrintToChat(client, "Smoked looking (%.2f, %.2f)", angle[0], angle[1]);
+		SmokeLog("[%d-A] Smoke (%.2f, %.2f, %.2f) - (%.2f, %.2f)", client,
 			pos[0], pos[1], pos[2], angle[0], angle[1]);
-		SmokeLog("[%d-A] Smoke (%.2f, %.2f)", client, angle[0], angle[1]);
 		if (now < last_jump[client] + 32)
 		{
 			if (now == last_jump[client])
