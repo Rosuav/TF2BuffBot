@@ -36,9 +36,9 @@ int main()
 		{
 			clients[client] = ({x, y, z, a1, a2}) + ({""})*9;
 		}
-		else if (sscanf(line, "[%d-B] JumpThrow %d", int client, int timing) == 2)
+		else if (sscanf(line, "[%d-B] JumpThrow %s", int client, string timing) == 2)
 		{
-			clients[client][5] = timing;
+			clients[client][5] = timing; //Note that this will be a string, which allows "+0" and "-0" to be distinguished
 		}
 		else if (sscanf(line, "[%d-C-%d] Spawn", int client, int entity) == 2)
 		{
