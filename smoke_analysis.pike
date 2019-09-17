@@ -38,7 +38,7 @@ int main()
 		}
 		else if (sscanf(line, "[%d-B] JumpThrow %s", int client, string timing) == 2)
 		{
-			clients[client][5] = timing; //Note that this will be a string, which allows "+0" and "-0" to be distinguished
+			if (clients[client]) clients[client][5] = timing; //Note that this will be a string, which allows "+0" and "-0" to be distinguished
 		}
 		else if (sscanf(line, "[%d-C-%d] Spawn", int client, int entity) == 2)
 		{
