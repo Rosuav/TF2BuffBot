@@ -59,7 +59,7 @@ int main()
 			nades[entity][11] = y;
 			nades[entity][12] = z;
 			nades[entity][13] = status;
-			if (status == "GOOD" && nades[entity][9] == "PROMISING") write("%{%8.2f %}\n", nades[entity][..4]);
+			if (status == "GOOD" && nades[entity][9] == "PROMISING") write("%{%8.2f %}   %s\n", nades[entity][..4], nades[entity][5]);
 			throws += ({m_delete(nades, entity)});
 		}
 	}
