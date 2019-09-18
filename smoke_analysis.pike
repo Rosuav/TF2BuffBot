@@ -1,10 +1,18 @@
 //Analyze the smoke logs from drzed
 
 mapping(string:object) scatterplots = ([]);
+//Scale the resulting image such that the edges of the display are these values
+constant top = -16.0, bottom = -14.0, left = 88.0, right = 91.0;
+constant img_width = 800, img_height = 600;
+constant colors = ([
+	"GOOD": ({0, 255, 0}),
+	"FAIL": ({192, 0, 0}),
+]);
+
 float a1_min = 361.0, a1_max = -361.0, a2_min = 361.0, a2_max = -361.0;
 void place_marker(string timing, float a1, float a2, string type)
 {
-	if (!scatterplots[timing]) scatterplots[timing] = Image.Image(800, 600);
+	if (!scatterplots[timing]) scatterplots[timing] = Image.Image(img_width, img_height);
 	//Convert the angles into pixel positions.
 	//Angle a1 determines elevation so we use that for the y axis
 	//Angle a2 effectively determines the left-right positioning of the throw,
@@ -16,6 +24,15 @@ void place_marker(string timing, float a1, float a2, string type)
 		a2_min = min(a2_min, a2);
 		a2_max = max(a2_max, a2);
 	}
+	int x = (int)(img_width * (a2 - left) / (right - left));
+	int y = (int)(img_height * (a1 - top) / (bottom - top));
+	scatterplots[timing]->setcolor(@colors[type])->polyfill(({
+		//Create a sort of plus-shaped marker surrounding (x,y)
+		x-3, y+1, x-1, y+1, x-1, y+3, x, y+5,
+		x+1, y+3, x+1, y+1, x+3, y+1, x+5, y,
+		x+3, y-1, x+1, y-1, x+1, y-3, x, y-5,
+		x-1, y-3, x-1, y-1, x-3, y-1, x-5, y,
+	}));
 }
 
 //See if the throw location was near enough to our specified point
@@ -92,4 +109,12 @@ int main()
 	}
 	Stdio.write_file("smoke_analysis.csv", sprintf("%{%O,%}\n", throws[*]) * ""); //Yeah, it puts a trailing comma on each line. Whatevs.
 	write("Good throws are all within (%.2f, %.2f) - (%.2f, %.2f)\n", a1_min, a2_min, a1_max, a2_max);
+	foreach (scatterplots; string timing; object plot)
+	{
+		//For some reason my PNG encoder is broken.
+		//Stdio.write_file("plot" + timing + ".png", Image.PNG.encode(plot));
+		Stdio.write_file("tmp.tiff", Image.TIFF.encode(plot));
+		Process.create_process(({"/usr/bin/convert", "tmp.tiff", "plot" + timing + ".png"}))->wait();
+	}
+	rm("tmp.tiff");
 }
