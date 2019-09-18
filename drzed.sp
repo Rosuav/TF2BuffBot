@@ -486,7 +486,7 @@ public void player_jump(Event event, const char[] name, bool dontBroadcast)
 	//Record timestamp for the sake of a jump-throw. If you then throw a smoke,
 	//or if you just recently did, report it.
 	int now = GetGameTickCount();
-	if (now < last_smoke[client] + 32)
+	if (now < last_smoke[client] + 32 && now >= last_smoke[client])
 	{
 		if (now == last_smoke[client])
 			PrintToChat(client, "You smoked and jumped simultaneously");
@@ -511,7 +511,7 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		PrintToChat(client, "Smoked looking (%.2f, %.2f)", angle[0], angle[1]);
 		SmokeLog("[%d-A] Smoke (%.2f, %.2f, %.2f) - (%.2f, %.2f)", client,
 			pos[0], pos[1], pos[2], angle[0], angle[1]);
-		if (now < last_jump[client] + 32)
+		if (now < last_jump[client] + 32 && now >= last_jump[client])
 		{
 			if (now == last_jump[client])
 				PrintToChat(client, "You jumped and smoked simultaneously");
