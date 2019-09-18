@@ -1,5 +1,29 @@
 //Analyze the smoke logs from drzed
 
+mapping(string:object) scatterplots = ([]);
+float a1_min = 361.0, a1_max = -361.0, a2_min = 361.0, a2_max = -361.0;
+void place_marker(string timing, float a1, float a2, string type)
+{
+	if (!scatterplots[timing]) scatterplots[timing] = Image.Image(800, 600);
+	//Convert the angles into pixel positions.
+	//Angle a1 determines elevation so we use that for the y axis
+	//Angle a2 effectively determines the left-right positioning of the throw,
+	//since we're working with a fairly narrow band of valid angles.
+	if (type == "GOOD")
+	{
+		a1_min = min(a1_min, a1);
+		a1_max = max(a1_max, a1);
+		a2_min = min(a2_min, a2);
+		a2_max = max(a2_max, a2);
+	}
+}
+
+//See if the throw location was near enough to our specified point
+int near_enough(float x, float y)
+{
+	return ((x - -299.96) ** 2 + (y - -1163.96) ** 2) < 1;
+}
+
 int main()
 {
 	//Each throw is an array:
@@ -55,13 +79,17 @@ int main()
 		else if (sscanf(line, "[%d-E-%d] Pop (%f, %f, %f) - %s",
 			int client, int entity, float x, float y, float z, string status) == 6)
 		{
-			nades[entity][10] = x;
-			nades[entity][11] = y;
-			nades[entity][12] = z;
-			nades[entity][13] = status;
-			if (status == "GOOD" && nades[entity][9] == "PROMISING") write("%{%8.2f %}   %s\n", nades[entity][..4], nades[entity][5]);
-			throws += ({m_delete(nades, entity)});
+			array nade = m_delete(nades, entity);
+			nade[10] = x;
+			nade[11] = y;
+			nade[12] = z;
+			nade[13] = status;
+			//if (status == "GOOD" && nade[9] == "PROMISING") write("%{%8.2f %}   %s\n", nade[..4], nade[5]);
+			if (near_enough(nade[0], nade[1]) && nade[5] != "")
+				place_marker(nade[5], nade[3], nade[4], status);
+			throws += ({nade});
 		}
 	}
 	Stdio.write_file("smoke_analysis.csv", sprintf("%{%O,%}\n", throws[*]) * ""); //Yeah, it puts a trailing comma on each line. Whatevs.
+	write("Good throws are all within (%.2f, %.2f) - (%.2f, %.2f)\n", a1_min, a2_min, a1_max, a2_max);
 }
