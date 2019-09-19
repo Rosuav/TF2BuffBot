@@ -489,7 +489,7 @@ public void player_jump(Event event, const char[] name, bool dontBroadcast)
 	if (now < last_smoke[client] + 32 && now >= last_smoke[client])
 	{
 		if (now == last_smoke[client])
-			PrintToChat(client, "You smoked and jumped simultaneously");
+			PrintToChat(client, "You smoked and jumped simultaneously (-0)");
 		else
 			PrintToChat(client, "You smoked -%d before jumping", now - last_smoke[client]);
 		SmokeLog("[%d-B] JumpThrow -%d", client, now - last_smoke[client]);
@@ -514,7 +514,7 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		if (now < last_jump[client] + 32 && now >= last_jump[client])
 		{
 			if (now == last_jump[client])
-				PrintToChat(client, "You jumped and smoked simultaneously");
+				PrintToChat(client, "You jumped and smoked simultaneously (+0)");
 			else
 				PrintToChat(client, "You smoked +%d after jumping", now - last_jump[client]);
 			SmokeLog("[%d-B] JumpThrow +%d", client, now - last_jump[client]);
