@@ -1075,6 +1075,34 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		TeleportEntity(self, marked_pos2, marked_angle2, not_moving);
 		return;
 	}
+	if (!strcmp(msg, "!swap") && GetConVarInt(sm_drzed_allow_recall))
+	{
+		float tmp_pos[3], tmp_ang[3];
+		GetClientAbsOrigin(self, tmp_pos);
+		GetClientEyeAngles(self, tmp_ang);
+		PrintToChat(self, "Swapping %f, %f, %f with %f, %f, %f",
+			tmp_pos[0], tmp_pos[1], tmp_pos[2],
+			marked_pos[0], marked_pos[1], marked_pos[2]);
+		float not_moving[3] = {0.0, 0.0, 0.0};
+		TeleportEntity(self, marked_pos, marked_angle, not_moving);
+		marked_pos[0] = tmp_pos[0]; marked_pos[1] = tmp_pos[1]; marked_pos[2] = tmp_pos[2];
+		marked_angle[0] = tmp_ang[0]; marked_angle[1] = tmp_ang[1]; marked_angle[2] = tmp_ang[2];
+		return;
+	}
+	if (!strcmp(msg, "!swap2") && GetConVarInt(sm_drzed_allow_recall))
+	{
+		float tmp_pos[3], tmp_ang[3];
+		GetClientAbsOrigin(self, tmp_pos);
+		GetClientEyeAngles(self, tmp_ang);
+		PrintToChat(self, "Swapping %f, %f, %f with %f, %f, %f",
+			tmp_pos[0], tmp_pos[1], tmp_pos[2],
+			marked_pos2[0], marked_pos2[1], marked_pos2[2]);
+		float not_moving[3] = {0.0, 0.0, 0.0};
+		TeleportEntity(self, marked_pos2, marked_angle2, not_moving);
+		marked_pos2[0] = tmp_pos[0]; marked_pos2[1] = tmp_pos[1]; marked_pos2[2] = tmp_pos[2];
+		marked_angle2[0] = tmp_ang[0]; marked_angle2[1] = tmp_ang[1]; marked_angle2[2] = tmp_ang[2];
+		return;
+	}
 	#if 0
 	if (!strcmp(msg, "!slow"))
 	{
