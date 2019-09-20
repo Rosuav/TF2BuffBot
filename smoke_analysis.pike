@@ -83,7 +83,8 @@ int main()
 		}
 		else if (sscanf(line, "[%d-C-%d] Spawn", int client, int entity) == 2)
 		{
-			nades[entity] = m_delete(clients, client);
+			//Note that sv_rethrow_last_grenade will spawn one with an owner of 0.
+			if (client > 0) nades[entity] = m_delete(clients, client);
 		}
 		else if (sscanf(line, "[%d-D-%d] Bounce (%f, %f, %f) - %s",
 			int client, int entity, float x, float y, float z, string status) == 6)

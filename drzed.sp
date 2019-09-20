@@ -472,7 +472,7 @@ Action report_grenade(Handle timer, any entity)
 {
 	ignore(timer);
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hThrower");
-	SmokeLog("[%d-C-%d] Spawn", client, entity);
+	if (client != -1) SmokeLog("[%d-C-%d] Spawn", client, entity);
 }
 
 //Tick number when you last jumped or last threw a smoke grenade
