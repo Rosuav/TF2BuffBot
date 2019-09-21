@@ -55,7 +55,7 @@ int main()
 	array throws = ({ "x1 y1 z1 a1 a2 timing x2 y2 z2 bounce x3 y3 z3 result"/" " });
 	mapping(int:array) clients = ([]); //Pending throws that we don't have entity IDs for
 	mapping(int:array) nades = ([]); //Active throws that haven't popped yet (by entity ID)
-	foreach (Stdio.read_file("../tf2server/steamcmd_linux/csgo/csgo/learn_smoke.log") / "\n", string line)
+	foreach (Stdio.read_file("../tf2server/steamcmd_linux/csgo/csgo/learn_smoke.log") / "\n"; int lno; string line)
 	{
 		/*
 		A grenade sequence consists of (up to) five lines, with a single
@@ -75,7 +75,7 @@ int main()
 		if (sscanf(line, "[%d-A] Smoke (%f, %f, %f) - (%f, %f)",
 			int client, float x, float y, float z, float a1, float a2) == 6)
 		{
-			clients[client] = ({x, y, z, a1, a2}) + ({""})*9;
+			clients[client] = ({x, y, z, a1, a2}) + ({""})*9 + ({lno});
 		}
 		else if (sscanf(line, "[%d-B] JumpThrow %s", int client, string timing) == 2)
 		{
@@ -89,6 +89,7 @@ int main()
 		else if (sscanf(line, "[%d-D-%d] Bounce (%f, %f, %f) - %s",
 			int client, int entity, float x, float y, float z, string status) == 6)
 		{
+			if (!nades[entity]) continue;
 			nades[entity][6] = x;
 			nades[entity][7] = y;
 			nades[entity][8] = z;
@@ -98,6 +99,7 @@ int main()
 			int client, int entity, float x, float y, float z, string status) == 6)
 		{
 			array nade = m_delete(nades, entity);
+			nade += ({lno - nade[-1]});
 			nade[10] = x;
 			nade[11] = y;
 			nade[12] = z;
