@@ -1069,7 +1069,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		//Pick a bomb site at random, assuming we have two
 		GetEntPropVector(FindEntityByClassname(-1, "cs_player_manager"), Prop_Send,
 			GetURandomFloat() < 0.5 ? "m_bombsiteCenterA" : "m_bombsiteCenterB", site);
-		float down[3] = {89.0, 0.0, 0.0}; //No, it's not (0,0,-1); this is actually a direction, not a delta-position.
+		float down[3] = {90.0, 0.0, 0.0}; //No, it's not (0,0,-1); this is actually a direction, not a delta-position.
 		TR_TraceRay(site, down, MASK_SOLID, RayType_Infinite);
 		if (TR_DidHit(INVALID_HANDLE)) TR_GetEndPosition(site, INVALID_HANDLE);
 		TeleportEntity(bomb, site, NULL_VECTOR, NULL_VECTOR);
