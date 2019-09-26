@@ -1061,6 +1061,19 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		}
 		return;
 	}
+	if (!strcmp(msg, "!bomb"))
+	{
+		int bomb = CreateEntityByName("planted_c4");
+		DispatchSpawn(bomb);
+		float loc[3] = {1131.7, 2506.0, 95.5}; //Dust II A site. TODO: Find a random bomb site.
+		TeleportEntity(bomb, loc, NULL_VECTOR, NULL_VECTOR);
+		SetEntProp(bomb, Prop_Send, "m_bBombTicking", 1);
+		PrintToChatAll("Planted. Blow %.2f timer %.2f now %.2f",
+			GetEntPropFloat(bomb, Prop_Send, "m_flC4Blow"),
+			GetEntPropFloat(bomb, Prop_Send, "m_flTimerLength"),
+			GetGameTime());
+		return;
+	}
 	if (!strcmp(msg, "!mark"))
 	{
 		GetClientAbsOrigin(self, marked_pos);
@@ -1504,7 +1517,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	{
 		//If the bomb kills a CT, credit the kill to the bomb planter.
 		//(Don't penalize for team kills or suicide though.)
-		if (IsClientInGame(bomb_planter)) attacker = bomb_planter;
+		if (bomb_planter > 0 && IsClientInGame(bomb_planter)) attacker = bomb_planter;
 		return Plugin_Changed;
 	}
 
