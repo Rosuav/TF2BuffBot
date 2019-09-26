@@ -1053,8 +1053,11 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int spawns = 0;
 		while ((ent = FindEntityByClassname(ent, "info_deathmatch_spawn")) != -1)
 		{
-			//TODO: Show its coordinates
-			PrintToChat(self, "Found spawn #%d: %d", ++spawns, ent);
+			float pos[3];
+			GetEntPropVector(ent, Prop_Data, "m_vecOrigin", pos);
+			PrintToChat(self, "Found spawn #%d at (%.2f,%.2f,%.2f): %x %s", ++spawns,
+				pos[0], pos[1], pos[2],
+				ent, IsEntNetworkable(ent) ? "(networkable)" : "(not edict)");
 		}
 		return;
 	}
@@ -1697,6 +1700,12 @@ understand the next part of the code!
 * Attempting to defuse the bomb creates a chat message to the defuser only. Until the code is entered, the exact same
   message will be produced for every attempt.
   - "The code is the magazine size of my SMG", so you have to find a SMG somewhere on the map and call its clip size
+  - Or for the demo...
+    - "How many hundred dollars does my pistol cost?" -- it's a Deagle (7)
+    - "How many bullets before I reload my rifle?" -- it's a Galil (35)
+    - "My grenades are scattered around. What's missing? How much will I have to pay?" -- smoke and flash (5)
+    - "What's the armor penetration of this SMG?" -- it's an MP9 (60)
+    - "How many shotguns are there on the ground?" -- just count 'em (8)
   - Prevent items from being picked up. People don't need any items (not even knives).
 * Spawn the corresponding item at a random location.
   - Can I use the deathmatch spawns?
