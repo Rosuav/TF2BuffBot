@@ -42,6 +42,7 @@ ConVar bot_purchase_delay = null; //(0.0) Delay bot primary weapon purchases by 
 ConVar damage_scale_humans = null; //(1.0) Scale all damage dealt by humans
 ConVar damage_scale_bots = null; //(1.0) Scale all damage dealt by bots
 ConVar learn_smoke = null; //(0) Set things up to learn a particular smoke (1 = Dust II Xbox)
+ConVar bomb_defusal_puzzles = null; //(0) Issue this many puzzles before allowing the bomb to be defused
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
@@ -763,6 +764,7 @@ public void OnGameFrame()
 		//Note that they won't buy nades if we're out of freeze time, so you need at least
 		//one full second of freeze in order to do this reliably.
 		if (GetConVarInt(bot_autobuy_nades)) CreateTimer(0.5, buy_nades, 0, TIMER_FLAG_NO_MAPCHANGE);
+		if (GetConVarInt(bomb_defusal_puzzles)) plant_bomb();
 	}
 	last_freeze = freeze;
 
@@ -1041,6 +1043,22 @@ public void player_team(Event event, const char[] name, bool dontBroadcast)
 	healthbonus[client] = heal_cooldown_tick[client] = 0;
 }
 
+int plant_bomb()
+{
+	int bomb = CreateEntityByName("planted_c4");
+	DispatchSpawn(bomb);
+	float site[3];
+	//Pick a bomb site at random, assuming we have two
+	GetEntPropVector(FindEntityByClassname(-1, "cs_player_manager"), Prop_Send,
+		GetURandomFloat() < 0.5 ? "m_bombsiteCenterA" : "m_bombsiteCenterB", site);
+	float down[3] = {90.0, 0.0, 0.0}; //No, it's not (0,0,-1); this is actually a direction, not a delta-position.
+	TR_TraceRay(site, down, MASK_SOLID, RayType_Infinite);
+	if (TR_DidHit(INVALID_HANDLE)) TR_GetEndPosition(site, INVALID_HANDLE);
+	TeleportEntity(bomb, site, NULL_VECTOR, NULL_VECTOR);
+	SetEntProp(bomb, Prop_Send, "m_bBombTicking", 1);
+	return bomb;
+}
+
 public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 {
 	//if (!event.GetBool("teamonly")) return; //Require team chat (not working - there's no "teamonly" so it always returns 0)
@@ -1063,17 +1081,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	}
 	if (!strcmp(msg, "!bomb"))
 	{
-		int bomb = CreateEntityByName("planted_c4");
-		DispatchSpawn(bomb);
-		float site[3];
-		//Pick a bomb site at random, assuming we have two
-		GetEntPropVector(FindEntityByClassname(-1, "cs_player_manager"), Prop_Send,
-			GetURandomFloat() < 0.5 ? "m_bombsiteCenterA" : "m_bombsiteCenterB", site);
-		float down[3] = {90.0, 0.0, 0.0}; //No, it's not (0,0,-1); this is actually a direction, not a delta-position.
-		TR_TraceRay(site, down, MASK_SOLID, RayType_Infinite);
-		if (TR_DidHit(INVALID_HANDLE)) TR_GetEndPosition(site, INVALID_HANDLE);
-		TeleportEntity(bomb, site, NULL_VECTOR, NULL_VECTOR);
-		SetEntProp(bomb, Prop_Send, "m_bBombTicking", 1);
+		int bomb = plant_bomb();
 		PrintToChatAll("Planted. Blow %.2f timer %.2f now %.2f",
 			GetEntPropFloat(bomb, Prop_Send, "m_flC4Blow"),
 			GetEntPropFloat(bomb, Prop_Send, "m_flTimerLength"),
