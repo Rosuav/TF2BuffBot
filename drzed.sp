@@ -1047,6 +1047,17 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	int self = GetClientOfUserId(event.GetInt("userid"));
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
+	if (!strcmp(msg, "!spawns"))
+	{
+		int ent = -1;
+		int spawns = 0;
+		while ((ent = FindEntityByClassname(ent, "info_deathmatch_spawn")) != -1)
+		{
+			//TODO: Show its coordinates
+			PrintToChat(self, "Found spawn #%d: %d", ++spawns, ent);
+		}
+		return;
+	}
 	if (!strcmp(msg, "!mark"))
 	{
 		GetClientAbsOrigin(self, marked_pos);
@@ -1672,4 +1683,25 @@ Phylactery mode - Danger Zone
 * For every new human, add a bot (can I do that? test)
 * Team them up
 * Have to kill human and phylactery at once
+*/
+
+/*
+Scavenger hunt.
+
+The bomb has been planted, there are no terrorists, but it's not a standard bomb. Your bomb defusal kit isn't enough.
+Search the map (as a team) for clues to the bomb's defusal code. Enter the code (via chat) to defuse the bomb. Pressing
+E on the bomb will show some information, but then someone needs to locate an item somewhere on the map to help you
+understand the next part of the code!
+
+* Set bomb timer to something long, or use the round timer and trigger a bomb detonation when it expires.
+* Attempting to defuse the bomb creates a chat message to the defuser only. Until the code is entered, the exact same
+  message will be produced for every attempt.
+  - "The code is the magazine size of my SMG", so you have to find a SMG somewhere on the map and call its clip size
+  - Prevent items from being picked up. People don't need any items (not even knives).
+* Spawn the corresponding item at a random location.
+  - Can I use the deathmatch spawns?
+  - The info_deathmatch_spawn entities don't exist when not in deathmatch - cvar controlled?
+* Difficulty can be increased by having more actions to be done.
+* Teamwork will be essential. You can't run all over the map solo in time. Someone should defuse, the rest explore.
+* Yes, of course it's KTANE inspired, got a problem with that? :)
 */
