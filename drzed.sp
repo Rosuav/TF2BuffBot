@@ -1065,8 +1065,14 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	{
 		int bomb = CreateEntityByName("planted_c4");
 		DispatchSpawn(bomb);
-		float loc[3] = {1131.7, 2506.0, 95.5}; //Dust II A site. TODO: Find a random bomb site.
-		TeleportEntity(bomb, loc, NULL_VECTOR, NULL_VECTOR);
+		float site[3];
+		//Pick a bomb site at random, assuming we have two
+		GetEntPropVector(FindEntityByClassname(-1, "cs_player_manager"), Prop_Send,
+			GetURandomFloat() < 0.5 ? "m_bombsiteCenterA" : "m_bombsiteCenterB", site);
+		float down[3] = {89.0, 0.0, 0.0}; //No, it's not (0,0,-1); this is actually a direction, not a delta-position.
+		TR_TraceRay(site, down, MASK_SOLID, RayType_Infinite);
+		if (TR_DidHit(INVALID_HANDLE)) TR_GetEndPosition(site, INVALID_HANDLE);
+		TeleportEntity(bomb, site, NULL_VECTOR, NULL_VECTOR);
 		SetEntProp(bomb, Prop_Send, "m_bBombTicking", 1);
 		PrintToChatAll("Planted. Blow %.2f timer %.2f now %.2f",
 			GetEntPropFloat(bomb, Prop_Send, "m_flC4Blow"),
