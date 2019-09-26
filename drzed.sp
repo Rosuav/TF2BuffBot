@@ -764,7 +764,11 @@ public void OnGameFrame()
 		//Note that they won't buy nades if we're out of freeze time, so you need at least
 		//one full second of freeze in order to do this reliably.
 		if (GetConVarInt(bot_autobuy_nades)) CreateTimer(0.5, buy_nades, 0, TIMER_FLAG_NO_MAPCHANGE);
-		if (GetConVarInt(bomb_defusal_puzzles)) plant_bomb();
+	}
+	if (!freeze && last_freeze)
+	{
+		if (!GameRules_GetProp("m_bWarmupPeriod") && GetConVarInt(bomb_defusal_puzzles))
+			plant_bomb();
 	}
 	last_freeze = freeze;
 
