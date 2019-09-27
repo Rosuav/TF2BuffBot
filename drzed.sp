@@ -101,6 +101,7 @@ public void OnPluginStart()
 	HookEvent("player_team", player_team);
 	HookEvent("weapon_reload", weapon_reload);
 	HookEvent("player_jump", player_jump);
+	HookEvent("bomb_begindefuse", puzzle_defuse);
 	//HookEvent("player_hurt", player_hurt);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
@@ -607,7 +608,7 @@ public Action add_bonus_health(Handle timer, int client)
 		if (hp) SetEntityHealth(client, GetClientHealth(client) + hp);
 	}
 }
-
+	
 Action bot_delayed_purchase(Handle timer, Handle params)
 {
 	ignore(timer);
@@ -753,6 +754,17 @@ void jayne(int team)
 	}
 }
 public Action buy_nades(Handle timer, any ignore) {jayne(0);}
+
+public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
+{
+	int puzzles = GetConVarInt(bomb_defusal_puzzles);
+	if (!puzzles) return;
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	PrintToChat(client, "puzzle_defuse");
+	//TODO: See how many puzzles the attempting defuser has solved
+	//If >= puzzles, permit the defusal. Otherwise, show hint for puzzle N,
+	//and block the defusal.
+}
 
 public void OnGameFrame()
 {
