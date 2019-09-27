@@ -758,6 +758,7 @@ public Action buy_nades(Handle timer, any ignore) {jayne(0);}
 int puzzles_solved[65];
 #define MAX_PUZZLES 16
 #define MAX_PUZZLE_SOLUTION 64
+char puzzle_clue[MAX_PUZZLES][MAX_PUZZLE_SOLUTION];
 char puzzle_solution[MAX_PUZZLES][MAX_PUZZLE_SOLUTION];
 public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 {
@@ -770,7 +771,7 @@ public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 	if (puzzles_solved[client] < puzzles)
 	{
 		PrintToChat(client, "It's time to solve puzzle %d", puzzles_solved[client] + 1);
-		PrintToChat(client, "Solution is: %s", puzzle_solution[puzzles_solved[client]]);
+		PrintToChat(client, "%s", puzzle_clue[puzzles_solved[client]]);
 	}
 	else
 	{
@@ -827,7 +828,6 @@ public void OnGameFrame()
 			for (int i = 0; i < puzzles; ++i)
 			{
 				//Pick a random puzzle
-				Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %d", i + 1);
 				float pos[3];
 				int advance = RoundToFloor(GetURandomFloat() * 3) + 1;
 				while (advance--)
@@ -841,6 +841,9 @@ public void OnGameFrame()
 				int clue = CreateEntityByName("weapon_ak47");
 				DispatchSpawn(clue);
 				TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
+				//Come up with a clue and a solution
+				Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION, "Type this: !solve %d", i + 1);
+				Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %d", i + 1);
 			}
 		}
 	}
