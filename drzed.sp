@@ -382,7 +382,7 @@ float smoke_first_bounce[1][2][3] = {
 	//NOTE: If the bounce is extremely close to the wall (-265 to -257), the
 	//smoke will bounce off the wall and miss. The actual boundary is somewhere
 	//between -260 and -265.
-	{{-320.0, 1130.0, -120.0}, {-265.0, 1280.0, -80.0}},
+	{{-321.0, 1130.0, -120.0}, {-265.0, 1280.0, -80.0}},
 	//As above.
 };
 
