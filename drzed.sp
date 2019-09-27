@@ -755,7 +755,7 @@ void jayne(int team)
 }
 public Action buy_nades(Handle timer, any ignore) {jayne(0);}
 
-int puzzles_solved[65]; //TODO: Zero each of these as a client connects (to prevent residual data)
+int puzzles_solved[65];
 public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 {
 	int puzzles = GetConVarInt(bomb_defusal_puzzles);
@@ -1398,7 +1398,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 //But we set the health on spawn too, so it ends up applying.
 public void OnClientPutInServer(int client)
 {
-	healthbonus[client] = 0; anarchy[client] = 0; anarchy_available[client] = 0;
+	healthbonus[client] = 0; anarchy[client] = 0; anarchy_available[client] = 0; puzzles_solved[client] = 0;
 	SDKHookEx(client, SDKHook_GetMaxHealth, maxhealthcheck);
 	SDKHookEx(client, SDKHook_SpawnPost, spawncheck);
 	SDKHookEx(client, SDKHook_OnTakeDamageAlive, healthgate);
