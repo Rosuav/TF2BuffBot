@@ -756,7 +756,6 @@ void jayne(int team)
 public Action buy_nades(Handle timer, any ignore) {jayne(0);}
 
 int puzzles_solved[65]; //TODO: Zero each of these as a client connects (to prevent residual data)
-int defuse_blocked_until[65];
 public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 {
 	int puzzles = GetConVarInt(bomb_defusal_puzzles);
@@ -765,11 +764,32 @@ public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 	PrintToChat(client, "puzzle_defuse");
 	//TODO: See how many puzzles the attempting defuser has solved
 	//If >= puzzles, permit the defusal. Otherwise, show hint for puzzle N,
-	//and block the defusal.
-	defuse_blocked_until[client] = GetGameTickCount() + 64;
-	int flg = GetEntProp(client, Prop_Data, "m_nButtons");
-	PrintToChatAll("Client %d block defuse until %d (flags %x)", client, defuse_blocked_until[client], flg);
-	SetEntProp(client, Prop_Data, "m_nButtons", flg &~ IN_USE);
+	//and teleport the bomb away briefly.
+	//Attempting to cancel the defusal seems to be really unreliable, but
+	//simply moving the bomb away appears to work every time.
+	int bomb = FindEntityByClassname(-1, "planted_c4");
+	if (bomb == -1) return;
+	float pos[3]; GetEntPropVector(bomb, Prop_Send, "m_vecOrigin", pos);
+	//For the most part, moving the bomb a long way away should break the
+	//defuse and force a reset. We move it a crazy long way because it's
+	//supposed to be inaccessible, and deep deep down into the earth in
+	//case of a nuke - specifically, de_nuke and its multi-level style.
+	pos[0] -= 2000.0;
+	pos[1] -= 2000.0;
+	pos[2] -= 2000.0;
+	TeleportEntity(bomb, pos, NULL_VECTOR, NULL_VECTOR);
+	CreateTimer(5.0, return_bomb, bomb, TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public Action return_bomb(Handle timer, any bomb)
+{
+	ignore(timer);
+	if (!IsValidEntity(bomb)) return;
+	float pos[3]; GetEntPropVector(bomb, Prop_Send, "m_vecOrigin", pos);
+	pos[0] += 2000.0;
+	pos[1] += 2000.0;
+	pos[2] += 2000.0;
+	TeleportEntity(bomb, pos, NULL_VECTOR, NULL_VECTOR);
 }
 
 public void OnGameFrame()
@@ -952,19 +972,6 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			return Plugin_Changed;
 		}
 	}
-	int puzzles = GetConVarInt(bomb_defusal_puzzles);
-	if (puzzles)
-	{
-		if (buttons & IN_USE)
-		{
-			//PrintToChatAll("Client %d IN_USE %d, %d", client, tickcount, defuse_blocked_until[client]);
-			if (tickcount < defuse_blocked_until[client])
-			{
-				buttons &= ~IN_USE;
-				return Plugin_Changed;
-			}
-		}
-	}
 	return Plugin_Continue;
 }
 public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
@@ -1093,7 +1100,6 @@ int plant_bomb()
 	TR_TraceRay(site, down, MASK_SOLID, RayType_Infinite);
 	if (TR_DidHit(INVALID_HANDLE)) TR_GetEndPosition(site, INVALID_HANDLE);
 	TeleportEntity(bomb, site, NULL_VECTOR, NULL_VECTOR);
-	PrintToChatAll("Defuser: %d", GetEntPropEnt(bomb, Prop_Send, "m_hBombDefuser"));
 	SetEntProp(bomb, Prop_Send, "m_bBombTicking", 1);
 	return bomb;
 }
