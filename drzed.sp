@@ -761,10 +761,18 @@ public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 	int puzzles = GetConVarInt(bomb_defusal_puzzles);
 	if (!puzzles) return;
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	PrintToChat(client, "puzzle_defuse");
 	//TODO: See how many puzzles the attempting defuser has solved
 	//If >= puzzles, permit the defusal. Otherwise, show hint for puzzle N,
 	//and teleport the bomb away briefly.
+	if (puzzles_solved[client] < puzzles)
+	{
+		PrintToChat(client, "It's time to solve puzzle %d", puzzles_solved[client] + 1);
+	}
+	else
+	{
+		PrintToChat(client, "The code has been entered! Stick the defuse!");
+		return;
+	}
 	//Attempting to cancel the defusal seems to be really unreliable, but
 	//simply moving the bomb away appears to work every time.
 	int bomb = FindEntityByClassname(-1, "planted_c4");
@@ -1110,6 +1118,12 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	int self = GetClientOfUserId(event.GetInt("userid"));
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
+	if (!strcmp(msg, "!solve"))
+	{
+		puzzles_solved[self]++;
+		PrintToChat(self, "You've solved puzzle %d! Go tap the bomb again!", puzzles_solved[self]);
+		return;
+	}
 	if (!strcmp(msg, "!spawns"))
 	{
 		int ent = -1;
@@ -1431,6 +1445,7 @@ void spawncheck(int entity)
 	}
 	if (entity > MaxClients || !IsClientInGame(entity) || !IsPlayerAlive(entity)) return;
 
+	puzzles_solved[entity] = 0;
 	anarchy_available[entity] = 0;
 	if (anarchy[entity])
 	{
