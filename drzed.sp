@@ -756,6 +756,9 @@ void jayne(int team)
 public Action buy_nades(Handle timer, any ignore) {jayne(0);}
 
 int puzzles_solved[65];
+#define MAX_PUZZLES 16
+#define MAX_PUZZLE_SOLUTION 64
+char puzzle_solution[MAX_PUZZLES][MAX_PUZZLE_SOLUTION];
 public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 {
 	int puzzles = GetConVarInt(bomb_defusal_puzzles);
@@ -767,6 +770,7 @@ public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 	if (puzzles_solved[client] < puzzles)
 	{
 		PrintToChat(client, "It's time to solve puzzle %d", puzzles_solved[client] + 1);
+		PrintToChat(client, "Solution is: %s", puzzle_solution[puzzles_solved[client]]);
 	}
 	else
 	{
@@ -813,8 +817,17 @@ public void OnGameFrame()
 	}
 	if (!freeze && last_freeze)
 	{
-		if (!GameRules_GetProp("m_bWarmupPeriod") && GetConVarInt(bomb_defusal_puzzles))
+		int puzzles = GetConVarInt(bomb_defusal_puzzles);
+		if (puzzles && !GameRules_GetProp("m_bWarmupPeriod"))
+		{
 			plant_bomb();
+			if (puzzles > MAX_PUZZLES) puzzles = MAX_PUZZLES;
+			for (int i = 0; i < puzzles; ++i)
+			{
+				//Pick a random puzzle
+				Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %d", i + 1);
+			}
+		}
 	}
 	last_freeze = freeze;
 
@@ -1118,7 +1131,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	int self = GetClientOfUserId(event.GetInt("userid"));
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
-	if (!strcmp(msg, "!solve"))
+	int puzzles = GetConVarInt(bomb_defusal_puzzles);
+	if (puzzles_solved[self] < puzzles && !strcmp(msg, puzzle_solution[puzzles_solved[self]]))
 	{
 		puzzles_solved[self]++;
 		PrintToChat(self, "You've solved puzzle %d! Go tap the bomb again!", puzzles_solved[self]);
