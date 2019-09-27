@@ -1152,7 +1152,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		}
 		return;
 	}
-	if (!strcmp(msg, "!bomb"))
+	if (0 && !strcmp(msg, "!bomb"))
 	{
 		int bomb = plant_bomb();
 		PrintToChatAll("Planted. Blow %.2f timer %.2f now %.2f",
