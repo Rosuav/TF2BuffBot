@@ -822,10 +822,25 @@ public void OnGameFrame()
 		{
 			plant_bomb();
 			if (puzzles > MAX_PUZZLES) puzzles = MAX_PUZZLES;
+			int spawn = FindEntityByClassname(spawn, "info_deathmatch_spawn");
+			if (spawn == -1) puzzles = 0; //If there aren't any deathmatch spawn locations, we can't do puzzles.
 			for (int i = 0; i < puzzles; ++i)
 			{
 				//Pick a random puzzle
 				Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %d", i + 1);
+				float pos[3];
+				int advance = RoundToFloor(GetURandomFloat() * 3) + 1;
+				while (advance--)
+					while ((spawn = FindEntityByClassname(spawn, "info_deathmatch_spawn")) == -1)
+						pos[0] = 0.0; //Actually I just want an empty statement here, but that's an error in SP.
+				//This should advance us 1-4 positions each time. Once we reach the
+				//end of the chain of spawn points, we cycle back to the start.
+				//NOTE: This will infinitely loop if they all get destroyed. Don't.
+				GetEntPropVector(spawn, Prop_Data, "m_vecOrigin", pos);
+				PrintToChatAll("Found spawn at (%.2f,%.2f,%.2f)", pos[0], pos[1], pos[2]);
+				int clue = CreateEntityByName("weapon_ak47");
+				DispatchSpawn(clue);
+				TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
 			}
 		}
 	}
@@ -1431,6 +1446,7 @@ public void OnClientPutInServer(int client)
 	SDKHookEx(client, SDKHook_SpawnPost, spawncheck);
 	SDKHookEx(client, SDKHook_OnTakeDamageAlive, healthgate);
 	SDKHookEx(client, SDKHook_WeaponCanSwitchTo, weaponlock);
+	SDKHookEx(client, SDKHook_WeaponCanUse, weaponusecheck);
 }
 public Action maxhealthcheck(int entity, int &maxhealth)
 {
@@ -1669,6 +1685,13 @@ Action weaponlock(int client, int weapon)
 {
 	ignore(weapon);
 	if (is_crippled(client)) return Plugin_Stop;
+	return Plugin_Continue;
+}
+Action weaponusecheck(int client, int weapon)
+{
+	ignore(weapon);
+	//When we're doing puzzle games, you don't use weapons normally.
+	if (GetConVarInt(bomb_defusal_puzzles)) return Plugin_Stop;
 	return Plugin_Continue;
 }
 /*
