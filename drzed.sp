@@ -823,7 +823,7 @@ public void OnGameFrame()
 		{
 			plant_bomb();
 			if (puzzles > MAX_PUZZLES) puzzles = MAX_PUZZLES;
-			int spawn = FindEntityByClassname(spawn, "info_deathmatch_spawn");
+			int spawn = FindEntityByClassname(-1, "info_deathmatch_spawn");
 			if (spawn == -1) puzzles = 0; //If there aren't any deathmatch spawn locations, we can't do puzzles.
 			for (int i = 0; i < puzzles; ++i)
 			{
