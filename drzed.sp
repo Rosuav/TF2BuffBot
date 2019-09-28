@@ -837,6 +837,7 @@ public void OnGameFrame()
 			int ent = -1;
 			while ((ent = FindEntityByClassname(ent, "info_deathmatch_spawn")) != -1)
 			{
+				//TODO: Skip this one if there's a player there
 				int pos = RoundToFloor(GetURandomFloat() * ++numspawns);
 				spawnpoints[numspawns - 1] = spawnpoints[pos];
 				spawnpoints[pos] = ent;
