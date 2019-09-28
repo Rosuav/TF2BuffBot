@@ -823,20 +823,34 @@ public void OnGameFrame()
 		{
 			plant_bomb();
 			if (puzzles > MAX_PUZZLES) puzzles = MAX_PUZZLES;
-			int spawn = FindEntityByClassname(-1, "info_deathmatch_spawn");
-			if (spawn == -1) puzzles = 0; //If there aren't any deathmatch spawn locations, we can't do puzzles.
+			//Find some random spawn points
+			//Note that we're shuffling the list of entities, not the actual locations;
+			//we assume that the entities are sufficiently spaced that we don't have to
+			//worry about actual collisions, but this does still mean we can't make any
+			//deductions about proximity. Still, it's a LOT easier in SourcePawn to use
+			//integers for most of the work, and then find vectors only at the end.
+			#define MAX_CLUE_SPAWNS 64
+			int spawnpoints[MAX_CLUE_SPAWNS];
+			int numspawns = 0;
+			//Variant of Fisher-Yates shuffle, building a randomized array one by one as
+			//we find entities to add to it
+			int ent = -1;
+			while ((ent = FindEntityByClassname(ent, "info_deathmatch_spawn")) != -1)
+			{
+				int pos = RoundToFloor(GetURandomFloat() * ++numspawns);
+				spawnpoints[numspawns - 1] = spawnpoints[pos];
+				spawnpoints[pos] = ent;
+				if (numspawns == MAX_CLUE_SPAWNS) break;
+			}
+			if (!numspawns) puzzles = 0; //If there aren't any deathmatch spawn locations, we can't do puzzles.
 			for (int i = 0; i < puzzles; ++i)
 			{
 				//Pick a random puzzle
 				float pos[3];
-				int advance = RoundToFloor(GetURandomFloat() * 3) + 1;
-				while (advance--)
-					while ((spawn = FindEntityByClassname(spawn, "info_deathmatch_spawn")) == -1)
-						pos[0] = 0.0; //Actually I just want an empty statement here, but that's an error in SP.
-				//This should advance us 1-4 positions each time. Once we reach the
-				//end of the chain of spawn points, we cycle back to the start.
-				//NOTE: This will infinitely loop if they all get destroyed. Don't.
-				GetEntPropVector(spawn, Prop_Data, "m_vecOrigin", pos);
+				//Example: "This is my rifle. There are none quite like it. How many shots till I reload?"
+				//There could be three AKs, two M4A4s, and seven FAMASes, but there's only one
+				//Galil, so that's what you care about.
+				GetEntPropVector(spawnpoints[--numspawns], Prop_Data, "m_vecOrigin", pos);
 				PrintToChatAll("Found spawn at (%.2f,%.2f,%.2f)", pos[0], pos[1], pos[2]);
 				int clue = CreateEntityByName("weapon_ak47");
 				DispatchSpawn(clue);
