@@ -1856,3 +1856,13 @@ understand the next part of the code!
 * Teamwork will be essential. You can't run all over the map solo in time. Someone should defuse, the rest explore.
 * Yes, of course it's KTANE inspired, got a problem with that? :)
 */
+
+/*
+Messing with people
+- Flag the person as floating. Constantly keep the person out of the FL_ONGROUND state,
+  which will (I think) keep their accuracy in "jump" state. May end up not triggering
+  until their first jump though.
+- Where are the attributes that carry recoil and its corresponding recovery?
+  - m_flRecoilIndex, m_fAccuracyPenalty, maybe m_fLastShotTime?
+  - These are on the weapon, not the player, so there'd need to be a check on weapon switch.
+*/
