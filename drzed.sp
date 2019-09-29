@@ -768,6 +768,7 @@ public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 	//TODO: See how many puzzles the attempting defuser has solved
 	//If >= puzzles, permit the defusal. Otherwise, show hint for puzzle N,
 	//and teleport the bomb away briefly.
+	//TODO: Show the time left, and maybe the puzzles left
 	if (puzzles_solved[client] < puzzles)
 	{
 		PrintToChat(client, "It's time to solve puzzle %d", puzzles_solved[client] + 1);
