@@ -1856,6 +1856,11 @@ understand the next part of the code!
 * Difficulty can be increased by having more actions to be done.
 * Teamwork will be essential. You can't run all over the map solo in time. Someone should defuse, the rest explore.
 * Yes, of course it's KTANE inspired, got a problem with that? :)
+* If a "three strikes and you're out" mode is offered, then rather than changing the bomb timer, just
+  start dropping smokes randomly. After one strike, there'll be a random smoke every 10 seconds; after
+  two, three random smokes every 8 seconds. Use the same deathmatch spawn points that are used for the
+  clues, so there's a high chance that a clue will be smoked over.
+
 */
 
 /*
