@@ -84,6 +84,7 @@ for weapon, data in info["prefabs"].items():
 		"max player speed": "260",
 		"in game price": "-1",
 		"kill award": "300",
+		"bullets": "1", # Shotguns have this >1
 	}.items():
 		print("\t%s => %s" % (attr, data["attributes"].get(attr, dflt)))
 	print("\tarmor penetration => %.2f" % (float(data["attributes"]["armor ratio"]) * 50))
