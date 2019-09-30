@@ -806,6 +806,7 @@ public Action return_bomb(Handle timer, any bomb)
 	TeleportEntity(bomb, pos, NULL_VECTOR, NULL_VECTOR);
 }
 
+#include "cs_weapons.inc"
 public void OnGameFrame()
 {
 	int freeze = GameRules_GetProp("m_bFreezePeriod");
@@ -844,7 +845,7 @@ public void OnGameFrame()
 				spawnpoints[pos] = ent;
 				if (numspawns == MAX_CLUE_SPAWNS) break;
 			}
-			if (!numspawns) puzzles = 0; //If there aren't any deathmatch spawn locations, we can't do puzzles.
+			if (puzzles > numspawns) puzzles = numspawns; //If there aren't any deathmatch spawn locations, we can't do puzzles.
 			for (int i = 0; i < puzzles; ++i)
 			{
 				//Pick a random puzzle
@@ -854,7 +855,7 @@ public void OnGameFrame()
 				//Galil, so that's what you care about.
 				GetEntPropVector(spawnpoints[--numspawns], Prop_Data, "m_vecOrigin", pos);
 				PrintToChatAll("Found spawn at (%.2f,%.2f,%.2f)", pos[0], pos[1], pos[2]);
-				int clue = CreateEntityByName("weapon_ak47");
+				int clue = CreateEntityByName(weapondata_item_name[i]);
 				DispatchSpawn(clue);
 				TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
 				//Come up with a clue and a solution
