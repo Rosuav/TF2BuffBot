@@ -92,7 +92,7 @@ class Cat(Flag):
 	Equipment = auto() # Not currently being listed
 	Automatic = auto()
 	Scoped = auto()
-	Starter = auto() # Not currently detected
+	Starter = auto()
 	NonDamaging = auto() # Not currently detected (will only be on grenade/equip)
 	# Create some aliases used by the weapon_type lookup
 	SubMachinegun = SMG
@@ -121,6 +121,7 @@ for weapon, data in info["prefabs"].items():
 	if int(data["attributes"].get("bullets", "1")) > 1: cat |= Cat.Shotgun
 	if int(data["attributes"].get("is full auto", "0")): cat |= Cat.Automatic
 	if int(data["attributes"].get("zoom levels", "0")): cat |= Cat.Scoped
+	if data["item_class"] in {"weapon_hkp2000", "weapon_glock"}: cat |= Cat.Starter
 	arrays["category"].append(cat.value)
 # pprint(list(info["prefabs"]))
 
