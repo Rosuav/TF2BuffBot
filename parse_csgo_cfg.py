@@ -71,5 +71,20 @@ def parse_cfg(data):
 with open(fn) as f: data = f.read()
 info = parse_cfg(data)
 
-print("Got info:")
-pprint(list(info["prefabs"]))
+for weapon, data in info["prefabs"].items():
+	if "item_class" not in data or "attributes" not in data: continue
+	# This is a sneaky way to restrict it to just "normal weapons", since
+	# you can't apply a sticker to your fists or your tablet :)
+	if "stickers" not in data: continue
+	print(weapon.replace("_prefab", "") + ":") # NOTE: This isn't always the same as the weapon_class (cf CZ75a).
+	for attr, dflt in {
+		"primary clip size": "-1",
+		"primary reserve ammo max": "-1",
+		"is full auto": "0",
+		"max player speed": "260",
+		"in game price": "-1",
+		"kill award": "300",
+	}.items():
+		print("\t%s => %s" % (attr, data["attributes"].get(attr, dflt)))
+	print("\tarmor penetration => %.2f" % (float(data["attributes"]["armor ratio"]) * 50))
+# pprint(list(info["prefabs"]))
