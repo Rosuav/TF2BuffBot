@@ -1,3 +1,5 @@
+# NOTE: For stable output, this should be run on a Python version that
+# guarantees dict order (3.7+).
 import re
 import os.path
 from pprint import pprint
