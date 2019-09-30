@@ -65,7 +65,7 @@ def parse_cfg(data):
 	skip_ws()
 	assert data[pos] == '"' # The file should always start with a string
 	title = parse_str()
-	print("GOT TITLE:", title, pos)
+	print("GOT TITLE:", title)
 	return parse_value(title)
 
 with open(fn) as f: data = f.read()
