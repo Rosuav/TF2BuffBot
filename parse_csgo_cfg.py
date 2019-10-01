@@ -118,7 +118,7 @@ for weapon, data in info["prefabs"].items():
 		arrays[attr.replace(" ", "_")].append(data["attributes"].get(attr, dflt))
 	arrays["armor_pen"].append(float(data["attributes"]["armor ratio"]) * 50)
 	cat = Cat[data["visuals"]["weapon_type"]]
-	if int(data["attributes"].get("bullets", "1")) > 1: cat |= Cat.Shotgun
+	if int(data["attributes"].get("bullets", "1")) > 1: cat |= Cat.Shotgun # Probably don't actually need this
 	if int(data["attributes"].get("is full auto", "0")): cat |= Cat.Automatic
 	if int(data["attributes"].get("zoom levels", "0")): cat |= Cat.Scoped
 	if data["item_class"] in {"weapon_hkp2000", "weapon_glock"}: cat |= Cat.Starter
