@@ -43,7 +43,7 @@ weapons have all of these attributes:
 * Armor penetration: the percentage of damage that ignores armor ("90")
 * Price: the cost in dollars to purchase the weapon ("3300")
 * Kill award: the number of dollars earned for one single kill ("300")
-* Mobility: the fastest you can run while holding this weapon( ("220")
+* Mobility: the fastest you can run while holding this weapon ("220")
 * Keyword: the identifier that can be used in a buy command ("aug")
 * Menu sequence: the keys to press to purchase this weapon ("b44")
 * Burst: number of shots that can be fired in a burst ("1")
