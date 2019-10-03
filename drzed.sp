@@ -860,9 +860,12 @@ public void OnGameFrame()
 				DispatchSpawn(clue);
 				TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
 				//Come up with a clue and a solution
-				Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION, "Type this: !solve %d", i + 1);
-				puzzle_value[i] = -1.0;
-				Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %d", i + 1);
+				int n1 = RoundToFloor(GetURandomFloat() * 10) + 1;
+				int n2 = RoundToFloor(GetURandomFloat() * 10) + 1;
+				Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION, "What is %d + %d?", n1, n2);
+				puzzle_value[i] = n1 + n2 + 0.0;
+				//Or:
+				//puzzle_value[i] = -1.0; Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %d", i + 1);
 			}
 		}
 		num_puzzles = puzzles; //Record the number of puzzles we actually got
