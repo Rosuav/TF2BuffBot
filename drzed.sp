@@ -1167,6 +1167,9 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	int self = GetClientOfUserId(event.GetInt("userid"));
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
+	//TODO some time: Break out all these handlers into functions, and build a
+	//hashtable of "!heal" ==> function. Split the message on the first space,
+	//look it up in the misnamed "trie", and then call the function.
 	if (puzzles_solved[self] < num_puzzles && !strcmp(msg, puzzle_solution[puzzles_solved[self]]))
 	{
 		puzzles_solved[self]++;
