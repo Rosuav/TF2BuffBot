@@ -42,7 +42,7 @@ ConVar bot_purchase_delay = null; //(0.0) Delay bot primary weapon purchases by 
 ConVar damage_scale_humans = null; //(1.0) Scale all damage dealt by humans
 ConVar damage_scale_bots = null; //(1.0) Scale all damage dealt by bots
 ConVar learn_smoke = null; //(0) Set things up to learn a particular smoke (1 = Dust II Xbox)
-ConVar bomb_defusal_puzzles = null; //(0) Issue this many puzzles before allowing the bomb to be defused
+ConVar bomb_defusal_puzzles = null; //(0) Issue this many puzzles before allowing the bomb to be defused (can't be changed during a round)
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
@@ -758,12 +758,12 @@ public Action buy_nades(Handle timer, any ignore) {jayne(0);}
 int puzzles_solved[65];
 #define MAX_PUZZLES 16
 #define MAX_PUZZLE_SOLUTION 64
+int num_puzzles; //Normally equal to GetConVarInt(bomb_defusal_puzzles) as of round start
 char puzzle_clue[MAX_PUZZLES][MAX_PUZZLE_SOLUTION];
 char puzzle_solution[MAX_PUZZLES][MAX_PUZZLE_SOLUTION];
 public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 {
-	int puzzles = GetConVarInt(bomb_defusal_puzzles);
-	if (!puzzles) return;
+	if (!num_puzzles) return;
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	//TODO: See how many puzzles the attempting defuser has solved
 	//If >= puzzles, permit the defusal. Otherwise, show hint for puzzle N,
@@ -820,8 +820,8 @@ public void OnGameFrame()
 	}
 	if (!freeze && last_freeze)
 	{
-		int puzzles = GetConVarInt(bomb_defusal_puzzles);
-		if (puzzles && !GameRules_GetProp("m_bWarmupPeriod"))
+		int puzzles = GameRules_GetProp("m_bWarmupPeriod") ? 0 : GetConVarInt(bomb_defusal_puzzles);
+		if (puzzles)
 		{
 			plant_bomb();
 			if (puzzles > MAX_PUZZLES) puzzles = MAX_PUZZLES;
@@ -863,6 +863,7 @@ public void OnGameFrame()
 				Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %d", i + 1);
 			}
 		}
+		num_puzzles = puzzles; //Record the number of puzzles we actually got
 	}
 	last_freeze = freeze;
 
@@ -1166,8 +1167,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	int self = GetClientOfUserId(event.GetInt("userid"));
 	char msg[64];
 	event.GetString("text", msg, sizeof(msg));
-	int puzzles = GetConVarInt(bomb_defusal_puzzles);
-	if (puzzles_solved[self] < puzzles && !strcmp(msg, puzzle_solution[puzzles_solved[self]]))
+	if (puzzles_solved[self] < num_puzzles && !strcmp(msg, puzzle_solution[puzzles_solved[self]]))
 	{
 		puzzles_solved[self]++;
 		PrintToChat(self, "You've solved puzzle %d! Go tap the bomb again!", puzzles_solved[self]);
@@ -1711,7 +1711,7 @@ Action weaponusecheck(int client, int weapon)
 {
 	ignore(weapon);
 	//When we're doing puzzle games, you don't use weapons normally.
-	if (GetConVarInt(bomb_defusal_puzzles)) return Plugin_Stop;
+	if (num_puzzles) return Plugin_Stop;
 	return Plugin_Continue;
 }
 /*
