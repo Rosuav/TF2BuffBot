@@ -760,6 +760,7 @@ int puzzles_solved[65];
 #define MAX_PUZZLE_SOLUTION 64
 int num_puzzles; //Normally equal to GetConVarInt(bomb_defusal_puzzles) as of round start
 char puzzle_clue[MAX_PUZZLES][MAX_PUZZLE_SOLUTION];
+float puzzle_value[MAX_PUZZLES]; //If -1, use puzzle_solution instead (which must start "!solve ").
 char puzzle_solution[MAX_PUZZLES][MAX_PUZZLE_SOLUTION];
 public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 {
@@ -769,7 +770,7 @@ public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 	//If >= puzzles, permit the defusal. Otherwise, show hint for puzzle N,
 	//and teleport the bomb away briefly.
 	//TODO: Show the time left, and maybe the puzzles left
-	if (puzzles_solved[client] < puzzles)
+	if (puzzles_solved[client] < num_puzzles)
 	{
 		PrintToChat(client, "It's time to solve puzzle %d", puzzles_solved[client] + 1);
 		PrintToChat(client, "%s", puzzle_clue[puzzles_solved[client]]);
@@ -860,6 +861,7 @@ public void OnGameFrame()
 				TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
 				//Come up with a clue and a solution
 				Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION, "Type this: !solve %d", i + 1);
+				puzzle_value[i] = -1.0;
 				Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %d", i + 1);
 			}
 		}
@@ -1170,11 +1172,48 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	//TODO some time: Break out all these handlers into functions, and build a
 	//hashtable of "!heal" ==> function. Split the message on the first space,
 	//look it up in the misnamed "trie", and then call the function.
-	if (puzzles_solved[self] < num_puzzles && !strcmp(msg, puzzle_solution[puzzles_solved[self]]))
+	if (num_puzzles && !strcmp(msg, "!solve"))
 	{
-		puzzles_solved[self]++;
-		PrintToChat(self, "You've solved puzzle %d! Go tap the bomb again!", puzzles_solved[self]);
+		PrintToChat(self, "Unsure how to solve the puzzle? Attempt to defuse the bomb for a clue!");
 		return;
+	}
+	if (puzzles_solved[self] < num_puzzles && !strncmp(msg, "!solve ", 7))
+	{
+		if (puzzle_value[puzzles_solved[self]] == -1.0)
+		{
+			//Keyword solution mode. The clue will give a small set of options, and
+			//one of them is right, the others will kill you.
+			if (!strcmp(msg, puzzle_solution[puzzles_solved[self]]))
+			{
+				//Will only happen if puzzle_solution[n] is a valid string (not "!solve"),
+				//and therefore that puzzle_value[n] is -1.
+				puzzles_solved[self]++;
+				PrintToChat(self, "You've solved puzzle %d! Go tap the bomb again!", puzzles_solved[self]);
+				return;
+			}
+			PrintToChatAll("BOOOOOOM!");
+			//TODO: Detonate the bomb if possible. Otherwise, just kill everyone.
+			//Note that these modules are finicky. Be EXACT.
+			return;
+		}
+		//It's a numeric challenge. Expect a value that's accurate to two decimal places.
+		//For the most part, the values given will either be integers (which will be
+		//completely accurate) or shown to two decimals eg armor penetration.
+		float attempt = StringToFloat(msg[7]);
+		if (!attempt)
+		{
+			//The solution will never be zero. Typing "!solve $3300" will trigger this.
+			PrintToChat(self, "Just type '!solve' and the number, no punctuation.");
+			return;
+		}
+		if (FloatAbs(attempt - puzzle_value[puzzles_solved[self]]) < 0.001)
+		{
+			puzzles_solved[self]++;
+			PrintToChat(self, "Correct! That was the next part of the code. Go tap the bomb again!");
+			return;
+		}
+		//PrintToChat(self, "You entered: %f", attempt);
+		return; //Silently ignore the attempt (and don't kill anyone).
 	}
 	if (!strcmp(msg, "!spawns"))
 	{
@@ -1886,9 +1925,9 @@ To generate clue items:
     - category, attribute
   - Big TODO on the wording.
   - Floating-point as above.
-  - With both of these, the puzzle_solution will be simply "!solve", which will always give
-    a constant message. With others, the numerical solution will be -1, signalling that there
-    is no numerical solution. (I really want puzzle_solution to be a string|float...)
+  - With both of these, the puzzle_solution will be ignored. With others, the numerical
+    solution will be -1, signalling that there is no numerical solution. (I really want
+    puzzle_solution to be a string|float...)
 * Clues for comparative category mode follow this structure:
   - "Which is more %s - my {most/least}-%s %s, or my {most/least}-%s %s?"
     - attribute, attribute, category 1, attribute, category 2

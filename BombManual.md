@@ -74,6 +74,9 @@ Some examples of comparison questions:
 
 Ties will not occur and must not be worn. There will always be a distinction.
 
+Be extremely careful with these puzzles. They are finicky and require absolute
+precision.
+
 General notes
 -------------
 
