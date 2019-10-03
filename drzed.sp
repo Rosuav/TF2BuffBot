@@ -1876,12 +1876,16 @@ To generate clue items:
 * Clues for unique item mode follow this structure:
   - "This is my %s. There are many like it, but this one is mine. What is its %s?"
     - category, attribute
-  - The solution will be a floating-point number (usually integral). If a chat message can be parsed
-    as a float, and is +/- 0.001 of the target, it is deemed successful.
+  - The solution will be a floating-point number (usually integral). You type "!solve N" or
+    "!solve N.NN", and if what you say is +/- 0.001 of the target, it is deemed successful.
 * Clues for summation category mode follow this structure:
   - "Find all my %ss. What is the total %s among them?"
     - category, attribute
   - Big TODO on the wording.
+  - Floating-point as above.
+  - With both of these, the puzzle_solution will be simply "!solve", which will always give
+    a constant message. With others, the numerical solution will be -1, signalling that there
+    is no numerical solution. (I really want puzzle_solution to be a string|float...)
 * Clues for comparative category mode follow this structure:
   - "Which is more %s - my {most/least}-%s %s, or my {most/least}-%s %s?"
     - attribute, attribute, category 1, attribute, category 2
