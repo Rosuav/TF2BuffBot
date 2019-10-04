@@ -853,9 +853,13 @@ public void OnGameFrame()
 			if (!numspawns) {puzzles = 0; spawnpoints[0] = -1;} //If there aren't any deathmatch spawn locations, we can't do puzzles.
 			#define MAX_CLUES_PER_CAT 10
 			int clues[sizeof(weapondata_categories)][MAX_CLUES_PER_CAT];
+			//unique_clue[cat] is -1 for "no weapons in category", -2 for
+			//"weapons but no unique", -3 for "weapons and multiple uniques",
+			//or the index into weapondata_* arrays.
 			int unique_clue[sizeof(weapondata_categories)];
+			for (int i=0; i<sizeof(unique_clue); ++i) unique_clue[i] = -1; //crude initializer :(
 			int nextspawn = 0;
-			for (int cat = 0; cat < 8; ++cat) //NOTE: This is the number of weapon type categories (as opposed to flags)
+			for (int cat = 0; cat < WEAPON_TYPE_CATEGORIES; ++cat)
 			{
 				int options[sizeof(weapondata_category)];
 				int nopt = 0;
@@ -898,9 +902,20 @@ public void OnGameFrame()
 						int clue = CreateEntityByName(weapondata_item_name[options[i]]);
 						DispatchSpawn(clue);
 						TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
-						//TODO: Assign this clue to its appropriate other categories
-						//and figure out if the cat has a unique
 					}
+					if (n > 1 && unique_clue[cat] == -1)
+						unique_clue[cat] = -2;
+					else if (n == 1)
+						unique_clue[cat] = (unique_clue[cat] == -1 || unique_clue[cat] == -2) ? options[i] : -3;
+					for (int c = WEAPON_TYPE_CATEGORIES; c < sizeof(weapondata_categories); ++c)
+						if (weapondata_category[i] & (1<<c))
+						{
+							//Assign this clue to its appropriate other categories
+							if (n > 1 && unique_clue[c] == -1)
+								unique_clue[c] = -2;
+							else if (n == 1)
+								unique_clue[c] = (unique_clue[c] == -1 || unique_clue[c] == -2) ? options[i] : -3;
+						}
 				}
 			}
 			for (int i = 0; i < puzzles; ++i)
