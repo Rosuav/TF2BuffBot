@@ -761,7 +761,7 @@ public Action buy_nades(Handle timer, any ignore) {jayne(0);}
 
 int puzzles_solved[65];
 #define MAX_PUZZLES 16
-#define MAX_PUZZLE_SOLUTION 64
+#define MAX_PUZZLE_SOLUTION 256
 int num_puzzles; //Normally equal to GetConVarInt(bomb_defusal_puzzles) as of round start
 char puzzle_clue[MAX_PUZZLES][MAX_PUZZLE_SOLUTION];
 float puzzle_value[MAX_PUZZLES]; //If -1, use puzzle_solution instead (which must start "!solve ").
@@ -812,6 +812,31 @@ public Action return_bomb(Handle timer, any bomb)
 }
 
 #include "cs_weapons.inc"
+char weapon_attribute_question[][] = {
+	"How many shots till I reload?",
+	"What does it cost to buy?",
+	"How well does it penetrate armor?",
+	"How fast can I move?",
+};
+char weapon_comparison_question[][] = {
+	"Which one lets me fire more bullets before reloading?",
+	"Which one is more expensive?",
+	"Which one takes less notice of armor?",
+	"Which one lets me move faster?",
+};
+float weapon_attribute(int idx, int attr)
+{
+	switch (attr)
+	{
+		case 0: return weapondata_primary_clip_size[idx];
+		case 1: return weapondata_in_game_price[idx];
+		case 2: return weapondata_armor_pen[idx];
+		case 3: return weapondata_max_player_speed[idx];
+		case -1: return weapondata_kill_award[idx]; //Not currently used
+		case -2: return weapondata_primary_reserve_ammo_max[idx]; //Not currently used
+		default: return 0.0;
+	}
+}
 public void OnGameFrame()
 {
 	int freeze = GameRules_GetProp("m_bFreezePeriod");
@@ -887,6 +912,19 @@ public void OnGameFrame()
 					int need = cl + n;
 					if (unique != -1 && unique > i) ++need;
 					if (need >= MAX_CLUES_PER_CAT) continue;
+					if (n > 1 && unique_clue[cat] == -1)
+						unique_clue[cat] = -2;
+					else if (n == 1)
+						unique_clue[cat] = (unique_clue[cat] == -1 || unique_clue[cat] == -2) ? options[i] : -3;
+					for (int c = WEAPON_TYPE_CATEGORIES; c < sizeof(weapondata_categories); ++c)
+						if (weapondata_category[options[i]] & (1<<c))
+						{
+							//Assign this clue to its appropriate other categories
+							if (n > 1 && unique_clue[c] == -1)
+								unique_clue[c] = -2;
+							else if (n == 1)
+								unique_clue[c] = (unique_clue[c] == -1 || unique_clue[c] == -2) ? options[i] : -3;
+						}
 					//And generate that many of this item
 					while (n--)
 					{
@@ -899,31 +937,35 @@ public void OnGameFrame()
 						DispatchSpawn(clue);
 						TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
 					}
-					if (n > 1 && unique_clue[cat] == -1)
-						unique_clue[cat] = -2;
-					else if (n == 1)
-						unique_clue[cat] = (unique_clue[cat] == -1 || unique_clue[cat] == -2) ? options[i] : -3;
-					for (int c = WEAPON_TYPE_CATEGORIES; c < sizeof(weapondata_categories); ++c)
-						if (weapondata_category[i] & (1<<c))
-						{
-							//Assign this clue to its appropriate other categories
-							if (n > 1 && unique_clue[c] == -1)
-								unique_clue[c] = -2;
-							else if (n == 1)
-								unique_clue[c] = (unique_clue[c] == -1 || unique_clue[c] == -2) ? options[i] : -3;
-						}
 				}
 			}
+			for (int i = 0; i < sizeof(weapondata_categories); ++i)
+				PrintToChatAll("In %s, unique is %d", weapondata_categories[i], unique_clue[i]);
 			for (int i = 0; i < puzzles; ++i)
 			{
-				//Pick a random puzzle
+				//Pick a random puzzle type
+				switch (randrange(1))
+				{
+					case 0: //"This is my X"
+					{
+						//Pick a random category. If it has no unique, reroll completely.
+						int cat = randrange(sizeof(weapondata_categories));
+						if (unique_clue[cat] < 0) {--i; continue;}
+						int attr = randrange(sizeof(weapon_attribute_question));
+						Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION,
+							"This is my %s. There are none quite like it. %s",
+							weapondata_categories[cat], weapon_attribute_question[attr]);
+						puzzle_value[i] = weapon_attribute(unique_clue[cat], attr);
+					}
+					default: PrintToChatAll("ASSERTION FAILED, puzzle type invalid");
+				}
 				//Come up with a clue and a solution
 				//Example: "This is my rifle. There are none quite like it. How many shots till I reload?"
 				//There could be three AKs, two M4A4s, and seven FAMASes, but there's only one
 				//Galil, so that's what you care about.
-				int n1 = randrange(10) + 1, n2 = randrange(10) + 1;
-				Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION, "What is %d + %d?", n1, n2);
-				puzzle_value[i] = n1 + n2 + 0.0;
+				//int n1 = randrange(10) + 1, n2 = randrange(10) + 1;
+				//Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION, "What is %d + %d?", n1, n2);
+				//puzzle_value[i] = n1 + n2 + 0.0;
 				//Or:
 				//puzzle_value[i] = -1.0; Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %d", i + 1);
 			}
