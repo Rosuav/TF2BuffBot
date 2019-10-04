@@ -898,6 +898,8 @@ public void OnGameFrame()
 						int clue = CreateEntityByName(weapondata_item_name[options[i]]);
 						DispatchSpawn(clue);
 						TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
+						//TODO: Assign this clue to its appropriate other categories
+						//and figure out if the cat has a unique
 					}
 				}
 			}
