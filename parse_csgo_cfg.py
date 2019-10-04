@@ -90,6 +90,8 @@ class Cat(Flag):
 	LMG = auto()
 	Grenade = auto() # Not currently being listed
 	Equipment = auto() # Not currently being listed
+	# ----- The first eight categories define the weapon type. Others are flags.
+	# Note that the number of categories above this line is hard-coded in drzed.sp.
 	Automatic = auto()
 	Scoped = auto()
 	Starter = auto()
@@ -132,8 +134,9 @@ with open(out, "w") as f:
 			print(f"char weapondata_{name}[][] = {{", file=f)
 			for val in arr:
 				print(f'\t"{val}",', file=f) # Don't have quotes in them. K?
-		else: # Float fields
-			print(f"float weapondata_{name}[] = {{", file=f)
+		else: # Numeric fields
+			t = {"category": "int"}.get(name, "float")
+			print(f"{t} weapondata_{name}[] = {{", file=f)
 			for val in arr:
 				print(f"\t{val},", file=f)
 		print("};", file=f)

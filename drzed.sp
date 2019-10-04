@@ -846,20 +846,64 @@ public void OnGameFrame()
 				spawnpoints[pos] = ent;
 				if (numspawns == MAX_CLUE_SPAWNS) break;
 			}
-			if (puzzles > numspawns) puzzles = numspawns; //If there aren't any deathmatch spawn locations, we can't do puzzles.
+			if (!numspawns) {puzzles = 0; spawnpoints[0] = -1;} //If there aren't any deathmatch spawn locations, we can't do puzzles.
+			#define MAX_CLUES_PER_CAT 10
+			int clues[sizeof(weapondata_categories)][MAX_CLUES_PER_CAT];
+			int unique_clue[sizeof(weapondata_categories)];
+			int nextspawn = 0;
+			for (int cat = 0; cat < 8; ++cat) //NOTE: This is the number of weapon type categories (as opposed to flags)
+			{
+				int options[sizeof(weapondata_category)];
+				int nopt = 0;
+				for (int i = 0; i < sizeof(weapondata_category); ++i)
+					if (weapondata_category[i] & (1<<cat))
+						options[nopt++] = i;
+				if (!nopt) continue; //No items in that category - probably unimplemented
+				PrintToChatAll("%d options in %ss", nopt, weapondata_categories[cat]);
+				int unique = -1;
+				if (GetURandomFloat() < 0.75)
+				{
+					//Pick one in the category to be the unique
+					unique = RoundToFloor(GetURandomFloat() * nopt);
+				}
+				int cl = 0;
+				for (int i = 0; i < nopt; ++i)
+				{
+					//50% chance of zero, 25% chance of 1, 12.5% chance of 2, etc
+					int n = RoundToFloor(-Logarithm(GetURandomFloat(), 2.0));
+					//Since the above formula has a slim chance of a VERY high number, cap it.
+					if (n > 4) n = 4;
+					//Enforce uniqueness (or the lack of it) if we're doing that
+					if (unique == i) n = 1;
+					else if (unique != -1 && n == 1) n = 2;
+					if (!n) continue;
+					//If we've run out of array space (ugh I hate that problem),
+					//reserve one for the unique (if necessary) and just stop
+					//generating.
+					int need = cl + n;
+					if (unique != -1 && unique > i) ++need;
+					if (need >= MAX_CLUES_PER_CAT) continue;
+					//And generate that many of this item
+					while (n--)
+					{
+						clues[cat][cl++] = options[i]; //Record the index for puzzle generation
+						float pos[3];
+						GetEntPropVector(spawnpoints[nextspawn++], Prop_Data, "m_vecOrigin", pos);
+						if (nextspawn == numspawns) nextspawn = 0;
+						PrintToChatAll("Found spawn at (%.2f,%.2f,%.2f) for %s", pos[0], pos[1], pos[2], weapondata_item_name[options[i]]);
+						int clue = CreateEntityByName(weapondata_item_name[options[i]]);
+						DispatchSpawn(clue);
+						TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
+					}
+				}
+			}
 			for (int i = 0; i < puzzles; ++i)
 			{
 				//Pick a random puzzle
-				float pos[3];
+				//Come up with a clue and a solution
 				//Example: "This is my rifle. There are none quite like it. How many shots till I reload?"
 				//There could be three AKs, two M4A4s, and seven FAMASes, but there's only one
 				//Galil, so that's what you care about.
-				GetEntPropVector(spawnpoints[--numspawns], Prop_Data, "m_vecOrigin", pos);
-				PrintToChatAll("Found spawn at (%.2f,%.2f,%.2f)", pos[0], pos[1], pos[2]);
-				int clue = CreateEntityByName(weapondata_item_name[i]);
-				DispatchSpawn(clue);
-				TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
-				//Come up with a clue and a solution
 				int n1 = RoundToFloor(GetURandomFloat() * 10) + 1;
 				int n2 = RoundToFloor(GetURandomFloat() * 10) + 1;
 				Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION, "What is %d + %d?", n1, n2);
