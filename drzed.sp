@@ -819,10 +819,16 @@ char weapon_attribute_question[][] = {
 	"How fast can I move?",
 };
 char weapon_comparison_question[][] = {
-	"Which one lets me fire more bullets before reloading?",
-	"Which one is more expensive?",
-	"Which one takes less notice of armor?",
-	"Which one lets me move faster?",
+	"Which lets me fire more bullets before reloading",
+	"Which is more expensive",
+	"Which takes less notice of armor",
+	"Which lets me move faster",
+};
+char weapon_attribute_superlative[][] = {
+	"smallest magazine", "largest magazine",
+	"cheapest", "most expensive",
+	"least penetrating", "most penetrating",
+	"heaviest", "lightest",
 };
 float weapon_attribute(int idx, int attr)
 {
@@ -957,17 +963,34 @@ public void OnGameFrame()
 							weapondata_categories[cat], weapon_attribute_question[attr]);
 						puzzle_value[i] = weapon_attribute(unique_clue[cat], attr);
 					}
+					case 1: //Comparisons
+					{
+						//Pick two random categories that have at least one weapon each
+						//(so unique_clue[cat] is not -1) and an attribute.
+						int cat1, cat2;
+						int attr;
+						//Find the min and max of that attr for each category
+						//NOTE: It's okay if there are duplicates, we just need the value.
+						int minmax1[2], minmax2[2]; //[min,max] for each
+						//Pick one from each pair - say, min1,max2
+						int bound1 = randrange(2), bound2 = randrange(2);
+						if (minmax1[bound1] > minmax2[bound2])
+							Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %s", weapondata_categories[cat1]);
+						else if (minmax2[bound2] > minmax1[bound1])
+							Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %s", weapondata_categories[cat2]);
+						else {--i; continue;} //It's a tie. Forbid that.
+						puzzle_value[i] = -1.0;
+						Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION,
+							"%s - my %s %s or my %s %s?",
+							weapon_comparison_question[attr],
+							weapon_attribute_superlative[attr * 2 + bound1],
+							weapondata_categories[cat1],
+							weapon_attribute_superlative[attr * 2 + bound2],
+							weapondata_categories[cat2]
+						);
+					}
 					default: PrintToChatAll("ASSERTION FAILED, puzzle type invalid");
 				}
-				//Come up with a clue and a solution
-				//Example: "This is my rifle. There are none quite like it. How many shots till I reload?"
-				//There could be three AKs, two M4A4s, and seven FAMASes, but there's only one
-				//Galil, so that's what you care about.
-				//int n1 = randrange(10) + 1, n2 = randrange(10) + 1;
-				//Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION, "What is %d + %d?", n1, n2);
-				//puzzle_value[i] = n1 + n2 + 0.0;
-				//Or:
-				//puzzle_value[i] = -1.0; Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %d", i + 1);
 			}
 		}
 		num_puzzles = puzzles; //Record the number of puzzles we actually got
@@ -1288,7 +1311,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		{
 			//Keyword solution mode. The clue will give a small set of options, and
 			//one of them is right, the others will kill you.
-			if (!strcmp(msg, puzzle_solution[puzzles_solved[self]]))
+			if (!strcmp(msg, puzzle_solution[puzzles_solved[self]], false))
 			{
 				//Will only happen if puzzle_solution[n] is a valid string (not "!solve"),
 				//and therefore that puzzle_value[n] is -1.
