@@ -852,7 +852,7 @@ public void OnGameFrame()
 			}
 			if (!numspawns) {puzzles = 0; spawnpoints[0] = -1;} //If there aren't any deathmatch spawn locations, we can't do puzzles.
 			#define MAX_CLUES_PER_CAT 10
-			int clues[sizeof(weapondata_categories)][MAX_CLUES_PER_CAT];
+			int clues[sizeof(weapondata_categories)][MAX_CLUE_SPAWNS]; //Larger array than the max-placed
 			//unique_clue[cat] is -1 for "no weapons in category", -2 for
 			//"weapons but no unique", -3 for "weapons and multiple uniques",
 			//or the index into weapondata_* arrays.
@@ -869,11 +869,7 @@ public void OnGameFrame()
 				if (!nopt) continue; //No items in that category - probably unimplemented
 				PrintToChatAll("%d options in %ss", nopt, weapondata_categories[cat]);
 				int unique = -1;
-				if (GetURandomFloat() < 0.75)
-				{
-					//Pick one in the category to be the unique
-					unique = randrange(nopt);
-				}
+				if (GetURandomFloat() < 0.75) unique = randrange(nopt); //Often pick one in the category to be the unique
 				int cl = 0;
 				for (int i = 0; i < nopt; ++i)
 				{
