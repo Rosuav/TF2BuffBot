@@ -222,6 +222,10 @@ public void OnPluginStart()
 	switch_weapon_call = EndPrepSDKCall();
 	delete gamedata;
 }
+
+//Not quite perfectly uniform. If there's a better way, it can be changed here.
+int randrange(int max) {return RoundToFloor(GetURandomFloat() * max);}
+
 int bomb_planter = -1;
 public void record_planter(Event event, const char[] name, bool dontBroadcast)
 {
@@ -712,7 +716,7 @@ void jayne(int team)
 		for (int i = 0; i < 7; ++i)
 		{
 			if (total_nades + bought >= max_nades) break;
-			switch (RoundToFloor(7*GetURandomFloat()))
+			switch (randrange(7))
 			{
 				//case 0: buy HE - handled by 'default' below
 				case 1: if (!have_flash && money >= 200)
@@ -841,7 +845,7 @@ public void OnGameFrame()
 			while ((ent = FindEntityByClassname(ent, "info_deathmatch_spawn")) != -1)
 			{
 				//TODO: Skip this one if there's a player there
-				int pos = RoundToFloor(GetURandomFloat() * ++numspawns);
+				int pos = randrange(++numspawns);
 				spawnpoints[numspawns - 1] = spawnpoints[pos];
 				spawnpoints[pos] = ent;
 				if (numspawns == MAX_CLUE_SPAWNS) break;
@@ -864,7 +868,7 @@ public void OnGameFrame()
 				if (GetURandomFloat() < 0.75)
 				{
 					//Pick one in the category to be the unique
-					unique = RoundToFloor(GetURandomFloat() * nopt);
+					unique = randrange(nopt);
 				}
 				int cl = 0;
 				for (int i = 0; i < nopt; ++i)
@@ -904,8 +908,7 @@ public void OnGameFrame()
 				//Example: "This is my rifle. There are none quite like it. How many shots till I reload?"
 				//There could be three AKs, two M4A4s, and seven FAMASes, but there's only one
 				//Galil, so that's what you care about.
-				int n1 = RoundToFloor(GetURandomFloat() * 10) + 1;
-				int n2 = RoundToFloor(GetURandomFloat() * 10) + 1;
+				int n1 = randrange(10) + 1, n2 = randrange(10) + 1;
 				Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION, "What is %d + %d?", n1, n2);
 				puzzle_value[i] = n1 + n2 + 0.0;
 				//Or:
