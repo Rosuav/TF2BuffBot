@@ -40,6 +40,7 @@ feature of it. These are the inherent attributes of a weapon, although not all
 weapons have all of these attributes:
 
 * Magazine (clip): the number of bullets that can be fired between reloads ("30")
+* Ammunition (reserve): the total number of bullets you carry ("90")
 * Armor penetration: the percentage of damage that ignores armor ("90")
 * Price: the cost in dollars to purchase the weapon ("3300")
 * Kill award: the number of dollars earned for one single kill ("300")
