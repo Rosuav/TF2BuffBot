@@ -113,12 +113,20 @@ for weapon, data in info["prefabs"].items():
 	for attr, dflt in {
 		"primary clip size": "-1",
 		"primary reserve ammo max": "-1",
-		"max player speed": "260",
 		"in game price": "-1",
 		"kill award": "300",
 	}.items():
 		arrays[attr.replace(" ", "_")].append(data["attributes"].get(attr, dflt))
 	arrays["armor_pen"].append(float(data["attributes"]["armor ratio"]) * 50)
+	# The data file has two speeds available. For scoped weapons, the main
+	# speed is unscoped and the alternate is scoped (SG556 has 210 / 150), but
+	# for the stupid Revolver, the alternate speed is your real speed, and
+	# the "base" speed is how fast you move while charging your shot. Since
+	# logically the shot-charging is the alternate, we just pick the higher
+	# speed in all cases, so we'll call the SG556 "210" and the R8 "220".
+	spd = data["attributes"].get("max player speed", "260")
+	spd2 = data["attributes"].get("max player speed alt", "260")
+	arrays["max_player_speed"].append(max(spd, spd2))
 	cat = Cat[data["visuals"]["weapon_type"]]
 	if int(data["attributes"].get("bullets", "1")) > 1: cat |= Cat.Shotgun # Probably don't actually need this
 	if int(data["attributes"].get("is full auto", "0")): cat |= Cat.Automatic
