@@ -132,6 +132,7 @@ for weapon, data in info["prefabs"].items():
 	if int(data["attributes"].get("is full auto", "0")): cat |= Cat.Automatic
 	if int(data["attributes"].get("zoom levels", "0")): cat |= Cat.Scoped
 	if data["item_class"] in {"weapon_hkp2000", "weapon_glock"}: cat |= Cat.Starter
+	# TODO: Suppressed weapons
 	arrays["category"].append(cat.value)
 # pprint(list(info["prefabs"]))
 
