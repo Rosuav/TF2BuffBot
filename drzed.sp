@@ -977,14 +977,14 @@ public void OnGameFrame()
 						minmax1[0] = minmax1[1] = weapon_attribute(clues[cat1][0], attr);
 						for (int cl=1; cl<nclues[cat1]; ++cl)
 						{
-							float a = weapon_attribute(clues[cat1][0], attr);
+							float a = weapon_attribute(clues[cat1][cl], attr);
 							if (a < minmax1[0]) minmax1[0] = a;
 							if (a > minmax1[1]) minmax1[1] = a;
 						}
 						minmax2[0] = minmax2[1] = weapon_attribute(clues[cat2][0], attr);
 						for (int cl=1; cl<nclues[cat2]; ++cl)
 						{
-							float a = weapon_attribute(clues[cat2][0], attr);
+							float a = weapon_attribute(clues[cat2][cl], attr);
 							if (a < minmax2[0]) minmax2[0] = a;
 							if (a > minmax2[1]) minmax2[1] = a;
 						}
