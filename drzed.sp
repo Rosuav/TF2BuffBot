@@ -102,6 +102,7 @@ public void OnPluginStart()
 	HookEvent("weapon_reload", weapon_reload);
 	HookEvent("player_jump", player_jump);
 	HookEvent("bomb_begindefuse", puzzle_defuse);
+	HookEvent("bomb_defused", show_defuse_time);
 	//HookEvent("player_hurt", player_hurt);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
@@ -803,6 +804,25 @@ public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 	CreateTimer(5.0, return_bomb, bomb, TIMER_FLAG_NO_MAPCHANGE);
 }
 
+public void show_defuse_time(Event event, const char[] name, bool dontBroadcast)
+{
+	int bomb = FindEntityByClassname(-1, "planted_c4");
+	if (bomb == -1) return;
+	float tm = GetEntPropFloat(bomb, Prop_Send, "m_flC4Blow") - GetGameTime();
+	if (tm < 1.0) PrintToChatAll("Bomb defused with %.3f seconds remaining!", tm);
+	else if (tm < 10.0) PrintToChatAll("Bomb defused with %.1f seconds remaining!", tm);
+	else if (tm < 60.0) PrintToChatAll("Bomb defused with %.0f seconds remaining.", tm);
+	else
+	{
+		//Won't happen in competitive modes, as the bomb timer starts at
+		//under a minute. But in puzzle mode, the bomb is ticking for the
+		//entire round, potentially several minutes.
+		int min = RoundToFloor(tm / 60);
+		int sec = RoundToCeil(tm - min * 60);
+		PrintToChatAll("Bomb defused with %02d:%02d on the clock.", min, sec);
+	}
+}
+
 public Action return_bomb(Handle timer, any bomb)
 {
 	ignore(timer);
@@ -1334,7 +1354,6 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			{
 				//Will only happen if puzzle_solution[n] is a valid string (not "!solve"),
 				//and therefore that puzzle_value[n] is -1.
-				//TODO: On victory, show the bomb timer ("defused with 0:37 on the clock")
 				if (++puzzles_solved[self] == num_puzzles)
 					PrintToChat(self, "That's it! All puzzles solved! Hurry, use your defuse kit!");
 				else
