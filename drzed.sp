@@ -1361,8 +1361,9 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 				return;
 			}
 			PrintToChatAll("BOOOOOOM!");
-			//TODO: Detonate the bomb if possible. Otherwise, just kill everyone.
-			//Note that these modules are finicky. Be EXACT.
+			int bomb = FindEntityByClassname(-1, "planted_c4");
+			if (bomb == -1) return;
+			SetEntPropFloat(bomb, Prop_Send, "m_flC4Blow", GetGameTime() + 4.0);
 			return;
 		}
 		//It's a numeric challenge. Expect a value that's accurate to two decimal places.
@@ -1384,7 +1385,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			return;
 		}
 		//PrintToChat(self, "You entered: %f", attempt);
-		return; //Silently ignore the attempt (and don't kill anyone).
+		//Open question: Should an error in a numerical challenge trigger the bomb?
+		return;
 	}
 	if (!strcmp(msg, "!spawns"))
 	{
