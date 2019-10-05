@@ -774,20 +774,23 @@ public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 	//If >= puzzles, permit the defusal. Otherwise, show hint for puzzle N,
 	//and teleport the bomb away briefly.
 	//TODO: Show the time left, and maybe the puzzles left
-	if (puzzles_solved[client] < num_puzzles)
+	if (puzzles_solved[client] >= num_puzzles)
 	{
-		PrintToChat(client, "It's time to solve puzzle %d", puzzles_solved[client] + 1);
-		PrintToChat(client, "%s", puzzle_clue[puzzles_solved[client]]);
-	}
-	else
-	{
-		PrintToChat(client, "The code has been entered! Stick the defuse!");
+		PrintToChat(client, "Go go go! Stick the defuse!");
 		return;
 	}
-	//Attempting to cancel the defusal seems to be really unreliable, but
-	//simply moving the bomb away appears to work every time.
 	int bomb = FindEntityByClassname(-1, "planted_c4");
 	if (bomb == -1) return;
+
+	float tm = GetEntPropFloat(bomb, Prop_Send, "m_flC4Blow") - GetGameTime();
+	int min = RoundToFloor(tm / 60);
+	int sec = RoundToCeil(tm - min * 60);
+	PrintToChat(client, "You have %02d:%02d on the clock and have solved %d/%d puzzles.",
+		min, sec, puzzles_solved[client], num_puzzles);
+	PrintToChat(client, "%s", puzzle_clue[puzzles_solved[client]]);
+
+	//Attempting to cancel the defusal seems to be really unreliable, but
+	//simply moving the bomb away appears to work every time.
 	float pos[3]; GetEntPropVector(bomb, Prop_Send, "m_vecOrigin", pos);
 	//For the most part, moving the bomb a long way away should break the
 	//defuse and force a reset. We move it a crazy long way because it's
@@ -1331,7 +1334,6 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			{
 				//Will only happen if puzzle_solution[n] is a valid string (not "!solve"),
 				//and therefore that puzzle_value[n] is -1.
-				//TODO: Show the bomb timer as you start a puzzle
 				//TODO: On victory, show the bomb timer ("defused with 0:37 on the clock")
 				if (++puzzles_solved[self] == num_puzzles)
 					PrintToChat(self, "That's it! All puzzles solved! Hurry, use your defuse kit!");
