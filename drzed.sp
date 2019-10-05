@@ -1326,16 +1326,17 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		if (puzzle_value[puzzles_solved[self]] == -1.0)
 		{
 			//Keyword solution mode. The clue will give a small set of options, and
-			//one of them is right, the others will kill you.
+			//exactly one of them is right; the others will kill you.
 			if (!strcmp(msg, puzzle_solution[puzzles_solved[self]], false))
 			{
 				//Will only happen if puzzle_solution[n] is a valid string (not "!solve"),
 				//and therefore that puzzle_value[n] is -1.
-				//TODO: If it's the last, tell the CT to stick the defuse.
 				//TODO: Show the bomb timer as you start a puzzle
 				//TODO: On victory, show the bomb timer ("defused with 0:37 on the clock")
-				puzzles_solved[self]++;
-				PrintToChat(self, "You've solved puzzle %d! Go tap the bomb again!", puzzles_solved[self]);
+				if (++puzzles_solved[self] == num_puzzles)
+					PrintToChat(self, "That's it! All puzzles solved! Hurry, use your defuse kit!");
+				else
+					PrintToChat(self, "You've solved puzzle %d! Go tap the bomb again!", puzzles_solved[self]);
 				return;
 			}
 			PrintToChatAll("BOOOOOOM!");
@@ -1355,8 +1356,10 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		}
 		if (FloatAbs(attempt - puzzle_value[puzzles_solved[self]]) < 0.001)
 		{
-			puzzles_solved[self]++;
-			PrintToChat(self, "Correct! That was the next part of the code. Go tap the bomb again!");
+			if (++puzzles_solved[self] == num_puzzles)
+				PrintToChat(self, "That's it! All puzzles solved! Hurry, use your defuse kit!");
+			else
+				PrintToChat(self, "Correct! That was the next part of the code. Go tap the bomb again!");
 			return;
 		}
 		//PrintToChat(self, "You entered: %f", attempt);
