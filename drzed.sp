@@ -884,6 +884,7 @@ public void OnGameFrame()
 			if (!numspawns) {puzzles = 0; spawnpoints[0] = -1;} //If there aren't any deathmatch spawn locations, we can't do puzzles.
 			#define MAX_CLUES_PER_CAT 10
 			int clues[sizeof(weapondata_categories)][MAX_CLUE_SPAWNS]; //Larger array than the max-placed
+			int nclues[sizeof(weapondata_categories)] = {0};
 			//unique_clue[cat] is -1 for "no weapons in category", -2 for
 			//"weapons but no unique", -3 for "weapons and multiple uniques",
 			//or the index into weapondata_* arrays.
@@ -898,7 +899,6 @@ public void OnGameFrame()
 					if (weapondata_category[i] & (1<<cat))
 						options[nopt++] = i;
 				if (!nopt) continue; //No items in that category - probably unimplemented
-				PrintToChatAll("%d options in %ss", nopt, weapondata_categories[cat]);
 				int unique = -1;
 				if (GetURandomFloat() < 0.75) unique = randrange(nopt); //Often pick one in the category to be the unique
 				int cl = 0;
@@ -918,10 +918,12 @@ public void OnGameFrame()
 					int need = cl + n;
 					if (unique != -1 && unique > i) ++need;
 					if (need >= MAX_CLUES_PER_CAT) continue;
+					cl += n;
 					if (n > 1 && unique_clue[cat] == -1)
 						unique_clue[cat] = -2;
 					else if (n == 1)
 						unique_clue[cat] = (unique_clue[cat] == -1 || unique_clue[cat] == -2) ? options[i] : -3;
+					for (int x=0; x<n; ++x) clues[cat][nclues[cat]++] = options[i];
 					for (int c = WEAPON_TYPE_CATEGORIES; c < sizeof(weapondata_categories); ++c)
 						if (weapondata_category[options[i]] & (1<<c))
 						{
@@ -930,27 +932,24 @@ public void OnGameFrame()
 								unique_clue[c] = -2;
 							else if (n == 1)
 								unique_clue[c] = (unique_clue[c] == -1 || unique_clue[c] == -2) ? options[i] : -3;
+							for (int x=0; x<n; ++x) clues[c][nclues[c]++] = options[i];
 						}
 					//And generate that many of this item
 					while (n--)
 					{
-						clues[cat][cl++] = options[i]; //Record the index for puzzle generation
 						float pos[3];
 						GetEntPropVector(spawnpoints[nextspawn++], Prop_Data, "m_vecOrigin", pos);
 						if (nextspawn == numspawns) nextspawn = 0;
-						PrintToChatAll("Found spawn at (%.2f,%.2f,%.2f) for %s", pos[0], pos[1], pos[2], weapondata_item_name[options[i]]);
 						int clue = CreateEntityByName(weapondata_item_name[options[i]]);
 						DispatchSpawn(clue);
 						TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
 					}
 				}
 			}
-			for (int i = 0; i < sizeof(weapondata_categories); ++i)
-				PrintToChatAll("In %s, unique is %d", weapondata_categories[i], unique_clue[i]);
 			for (int i = 0; i < puzzles; ++i)
 			{
 				//Pick a random puzzle type
-				switch (randrange(1))
+				switch (randrange(2))
 				{
 					case 0: //"This is my X"
 					{
@@ -967,11 +966,28 @@ public void OnGameFrame()
 					{
 						//Pick two random categories that have at least one weapon each
 						//(so unique_clue[cat] is not -1) and an attribute.
+						//Sigh. Can I deduplicate any of this at all?
+						int attr = randrange(sizeof(weapon_attribute_question));
 						int cat1, cat2;
-						int attr;
+						do {cat1 = randrange(sizeof(weapondata_categories));} while (!nclues[cat1]);
+						do {cat2 = randrange(sizeof(weapondata_categories));} while (!nclues[cat2]);
 						//Find the min and max of that attr for each category
 						//NOTE: It's okay if there are duplicates, we just need the value.
-						int minmax1[2], minmax2[2]; //[min,max] for each
+						float minmax1[2], minmax2[2]; //[min,max] for each
+						minmax1[0] = minmax1[1] = weapon_attribute(clues[cat1][0], attr);
+						for (int cl=1; cl<nclues[cat1]; ++cl)
+						{
+							float a = weapon_attribute(clues[cat1][0], attr);
+							if (a < minmax1[0]) minmax1[0] = a;
+							if (a > minmax1[1]) minmax1[1] = a;
+						}
+						minmax2[0] = minmax2[1] = weapon_attribute(clues[cat2][0], attr);
+						for (int cl=1; cl<nclues[cat2]; ++cl)
+						{
+							float a = weapon_attribute(clues[cat2][0], attr);
+							if (a < minmax2[0]) minmax2[0] = a;
+							if (a > minmax2[1]) minmax2[1] = a;
+						}
 						//Pick one from each pair - say, min1,max2
 						int bound1 = randrange(2), bound2 = randrange(2);
 						if (minmax1[bound1] > minmax2[bound2])
@@ -1315,6 +1331,9 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			{
 				//Will only happen if puzzle_solution[n] is a valid string (not "!solve"),
 				//and therefore that puzzle_value[n] is -1.
+				//TODO: If it's the last, tell the CT to stick the defuse.
+				//TODO: Show the bomb timer as you start a puzzle
+				//TODO: On victory, show the bomb timer ("defused with 0:37 on the clock")
 				puzzles_solved[self]++;
 				PrintToChat(self, "You've solved puzzle %d! Go tap the bomb again!", puzzles_solved[self]);
 				return;
