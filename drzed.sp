@@ -972,11 +972,14 @@ public void OnGameFrame()
 			for (int i = 0; i < puzzles; ++i)
 			{
 				//Pick a random puzzle type
-				switch (randrange(2))
+				switch (randrange(3))
 				{
 					case 0: //"This is my X"
 					{
 						//Pick a random category. If it has no unique, reroll completely.
+						//(It's entirely possible that there are NO categories with uniques,
+						//so don't risk getting stuck in an infinite loop spinning for one.
+						//We can always go for a different category.)
 						int cat = randrange(sizeof(weapondata_categories));
 						if (unique_clue[cat] < 0) {--i; continue;}
 						int attr = randrange(sizeof(weapon_attribute_question));
@@ -1027,6 +1030,24 @@ public void OnGameFrame()
 							weapon_attribute_superlative[attr * 2 + bound2],
 							weapondata_categories[cat2]
 						);
+					}
+					case 2: //Simple counting
+					{
+						bool distinct = GetURandomFloat() < 0.5;
+						int cat;
+						do {cat = randrange(sizeof(weapondata_categories));} while (!nclues[cat]);
+						int n = nclues[cat];
+						if (distinct)
+						{
+							//We can assume that duplicate clues are always placed as a
+							//block, because clue items are always generated uniquely.
+							for (int z = 1; z < nclues[cat]; ++i) if (clues[cat][z] == clues[cat][z-1]) --n;
+						}
+						puzzle_value[i] = n + 0.0;
+						Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION,
+							"How many%s %ss do I have here?",
+							distinct ? " distinct" : "",
+							weapondata_categories[cat]);
 					}
 					default: PrintToChatAll("ASSERTION FAILED, puzzle type invalid");
 				}
