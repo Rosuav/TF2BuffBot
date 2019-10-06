@@ -985,7 +985,7 @@ public void OnGameFrame()
 						int attr = randrange(sizeof(weapon_attribute_question));
 						Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION,
 							"This is my %s. There are none quite like it. %s",
-							weapondata_categories[cat], weapon_attribute_question[attr]);
+							weapondata_category_descr[cat], weapon_attribute_question[attr]);
 						puzzle_value[i] = weapon_attribute(unique_clue[cat], attr);
 					}
 					case 1: //Comparisons
@@ -1026,9 +1026,9 @@ public void OnGameFrame()
 							"%s - my %s %s or my %s %s?",
 							weapon_comparison_question[attr],
 							weapon_attribute_superlative[attr * 2 + bound1],
-							weapondata_categories[cat1],
+							weapondata_category_descr[cat1],
 							weapon_attribute_superlative[attr * 2 + bound2],
-							weapondata_categories[cat2]
+							weapondata_category_descr[cat2]
 						);
 					}
 					case 2: //Simple counting
@@ -1047,7 +1047,7 @@ public void OnGameFrame()
 						Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION,
 							"How many%s %ss do I have here?",
 							distinct ? " distinct" : "",
-							weapondata_categories[cat]);
+							weapondata_category_descr[cat]);
 					}
 					default: PrintToChatAll("ASSERTION FAILED, puzzle type invalid");
 				}
