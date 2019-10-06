@@ -1386,6 +1386,11 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		}
 		//PrintToChat(self, "You entered: %f", attempt);
 		//Open question: Should an error in a numerical challenge trigger the bomb?
+		//Currently "yes" but this decision can be reversed.
+		//Or should it cost you some seconds off the clock and let you keep going?
+		int bomb = FindEntityByClassname(-1, "planted_c4");
+		if (bomb == -1) return;
+		SetEntPropFloat(bomb, Prop_Send, "m_flC4Blow", GetGameTime() + 4.0);
 		return;
 	}
 	if (!strcmp(msg, "!spawns"))
