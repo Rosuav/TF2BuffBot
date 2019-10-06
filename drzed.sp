@@ -1317,12 +1317,18 @@ int plant_bomb()
 	DispatchSpawn(bomb);
 	float site[3];
 	//Pick a bomb site at random, assuming we have two
-	//NOTE: Inferno site B doesn't work - I think the bomb site center is
-	//inside the fountain somewhere?? Maybe need to go up a bit and THEN
-	//down, but then we'd have to find the target area brush.
+	//NOTE: Not all sites work on all maps. By moving up 100 HU before scanning
+	//down to find ground, we make a good few work that otherwise wouldn't (eg
+	//both sites on de_train), but it's also possible that this would break some
+	//sites that have a low ceiling. Have tested de_dust2, de_inferno, de_mirage,
+	//de_cache, all fine. On de_nuke, site A is inaccessible; on de_vertigo, both
+	//sites have some sort of strange problem; de_overpass site A requires a two
+	//man boost or a strafe jump. Any map with only a single bomb site won't work;
+	//any map with spawn locations that can't be reached from elsewhere won't work.
 	GetEntPropVector(FindEntityByClassname(-1, "cs_player_manager"), Prop_Send,
 		GetURandomFloat() < 0.5 ? "m_bombsiteCenterA" : "m_bombsiteCenterB", site);
 	float down[3] = {90.0, 0.0, 0.0}; //No, it's not (0,0,-1); this is actually a direction, not a delta-position.
+	site[2] += 100.0;
 	TR_TraceRay(site, down, MASK_SOLID, RayType_Infinite);
 	if (TR_DidHit(INVALID_HANDLE)) TR_GetEndPosition(site, INVALID_HANDLE);
 	TeleportEntity(bomb, site, NULL_VECTOR, NULL_VECTOR);
