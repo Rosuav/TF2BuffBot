@@ -993,7 +993,7 @@ public void OnGameFrame()
 						int attr = randrange(sizeof(weapon_attribute_question));
 						int cat1, cat2;
 						do {cat1 = randrange(sizeof(weapondata_categories));} while (!nclues[cat1]);
-						do {cat2 = randrange(sizeof(weapondata_categories));} while (!nclues[cat2]);
+						do {cat2 = randrange(sizeof(weapondata_categories));} while (!nclues[cat2] || cat2 == cat1);
 						//Find the min and max of that attr for each category
 						//NOTE: It's okay if there are duplicates, we just need the value.
 						float minmax1[2], minmax2[2]; //[min,max] for each
