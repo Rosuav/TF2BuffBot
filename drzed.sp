@@ -2092,11 +2092,11 @@ understand the next part of the code!
   message will be produced for every attempt.
   - "The code is the magazine size of my SMG", so you have to find a SMG somewhere on the map and call its clip size
   - Or for the demo...
-    - "How many hundred dollars does my pistol cost?" -- it's a Deagle (7) -- TODO
+    - "How many distinct fully Automatic guns do I have here?" -- count unique items (7)
     - "This is my AR. There are none quite like it. How many shots till I reload?" -- it's a Galil (35)
-    - "How many distinct Pistols do I have here?" -- count unique items (5)
+    - "How many total Shotguns do I have here?" -- just count 'em (5)
     - "This is my SMG. There are none quite like it. How well does it penetrate armor?" -- it's an MP9 (60)
-    - "How many total Shotguns do I have here?" -- just count 'em (8)
+    - "This is my Shotgun. There are none quite like it. How many shots till I reload?" -- it's a Nova (8)
   - Prevent items from being picked up. People don't need any items (not even knives).
 * Spawn the corresponding item at a random location.
   - Can I use the deathmatch spawns?
