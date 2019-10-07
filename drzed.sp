@@ -1041,7 +1041,7 @@ public void OnGameFrame()
 						{
 							//We can assume that duplicate clues are always placed as a
 							//block, because clue items are always generated uniquely.
-							for (int z = 1; z < nclues[cat]; ++i) if (clues[cat][z] == clues[cat][z-1]) --n;
+							for (int z = 1; z < nclues[cat]; ++z) if (clues[cat][z] == clues[cat][z-1]) --n;
 						}
 						puzzle_value[i] = n + 0.0;
 						Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION,
