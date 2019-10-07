@@ -1045,8 +1045,8 @@ public void OnGameFrame()
 						}
 						puzzle_value[puz] = n + 0.0;
 						Format(puzzle_clue[puz], MAX_PUZZLE_SOLUTION,
-							"How many%s %ss do I have here?",
-							distinct ? " distinct" : "",
+							"How many %s %ss do I have here?",
+							distinct ? "distinct" : "total",
 							weapondata_category_descr[cat]);
 					}
 					default: PrintToChatAll("ASSERTION FAILED, puzzle type invalid");
