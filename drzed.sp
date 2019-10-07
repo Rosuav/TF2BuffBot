@@ -969,7 +969,7 @@ public void OnGameFrame()
 					}
 				}
 			}
-			for (int i = 0; i < puzzles; ++i)
+			for (int puz = 0; puz < puzzles; ++puz)
 			{
 				//Pick a random puzzle type
 				switch (randrange(3))
@@ -981,12 +981,12 @@ public void OnGameFrame()
 						//so don't risk getting stuck in an infinite loop spinning for one.
 						//We can always go for a different category.)
 						int cat = randrange(sizeof(weapondata_categories));
-						if (unique_clue[cat] < 0) {--i; continue;}
+						if (unique_clue[cat] < 0) {--puz; continue;}
 						int attr = randrange(sizeof(weapon_attribute_question));
-						Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION,
+						Format(puzzle_clue[puz], MAX_PUZZLE_SOLUTION,
 							"This is my %s. There are none quite like it. %s",
 							weapondata_category_descr[cat], weapon_attribute_question[attr]);
-						puzzle_value[i] = weapon_attribute(unique_clue[cat], attr);
+						puzzle_value[puz] = weapon_attribute(unique_clue[cat], attr);
 					}
 					case 1: //Comparisons
 					{
@@ -1017,12 +1017,12 @@ public void OnGameFrame()
 						//Pick one from each pair - say, min1,max2
 						int bound1 = randrange(2), bound2 = randrange(2);
 						if (minmax1[bound1] > minmax2[bound2])
-							Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %s", weapondata_categories[cat1]);
+							Format(puzzle_solution[puz], MAX_PUZZLE_SOLUTION, "!solve %s", weapondata_categories[cat1]);
 						else if (minmax2[bound2] > minmax1[bound1])
-							Format(puzzle_solution[i], MAX_PUZZLE_SOLUTION, "!solve %s", weapondata_categories[cat2]);
-						else {--i; continue;} //It's a tie. Forbid that.
-						puzzle_value[i] = -1.0;
-						Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION,
+							Format(puzzle_solution[puz], MAX_PUZZLE_SOLUTION, "!solve %s", weapondata_categories[cat2]);
+						else {--puz; continue;} //It's a tie. Forbid that.
+						puzzle_value[puz] = -1.0;
+						Format(puzzle_clue[puz], MAX_PUZZLE_SOLUTION,
 							"%s - my %s %s or my %s %s?",
 							weapon_comparison_question[attr],
 							weapon_attribute_superlative[attr * 2 + bound1],
@@ -1043,8 +1043,8 @@ public void OnGameFrame()
 							//block, because clue items are always generated uniquely.
 							for (int z = 1; z < nclues[cat]; ++z) if (clues[cat][z] == clues[cat][z-1]) --n;
 						}
-						puzzle_value[i] = n + 0.0;
-						Format(puzzle_clue[i], MAX_PUZZLE_SOLUTION,
+						puzzle_value[puz] = n + 0.0;
+						Format(puzzle_clue[puz], MAX_PUZZLE_SOLUTION,
 							"How many%s %ss do I have here?",
 							distinct ? " distinct" : "",
 							weapondata_category_descr[cat]);
