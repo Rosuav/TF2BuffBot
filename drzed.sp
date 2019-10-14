@@ -883,6 +883,8 @@ public void OnGameFrame()
 		if (puzzles)
 		{
 			plant_bomb();
+			bool demo_mode = puzzles == 7355608;
+			if (demo_mode) puzzles = 1; //TODO: Get an array of puzzles from somewhere
 			if (puzzles > MAX_PUZZLES) puzzles = MAX_PUZZLES;
 			//Find some random spawn points
 			//Note that we're shuffling the list of entities, not the actual locations;
@@ -934,6 +936,15 @@ public void OnGameFrame()
 					//Enforce uniqueness (or the lack of it) if we're doing that
 					if (unique == i) n = 1;
 					else if (unique != -1 && n == 1) n = 2;
+					//And after all that work being random, if we're actually in demo mode, ignore it
+					//and just use the number we've been given.
+					if (demo_mode)
+					{
+						int qty = weapondata_demo_quantity[options[i]];
+						if (qty >= 0) n = qty; //Enforced quantity
+						else if (qty == -2 && n == 1) n = 2; //Anything non-unique
+						//Else it's okay to be anything.
+					}
 					if (!n) continue;
 					//If we've run out of array space (ugh I hate that problem),
 					//reserve one for the unique (if necessary) and just stop
@@ -972,6 +983,7 @@ public void OnGameFrame()
 			for (int puz = 0; puz < puzzles; ++puz)
 			{
 				//Pick a random puzzle type
+				//TODO: If demo_mode, force all the random rolls in order (wrapper around randrange)
 				switch (randrange(3))
 				{
 					case 0: //"This is my X"
@@ -2093,7 +2105,7 @@ understand the next part of the code!
   - "The code is the magazine size of my SMG", so you have to find a SMG somewhere on the map and call its clip size
   - Or for the demo...
     - "How many distinct fully Automatic guns do I have here?" -- count unique items (7)
-    - "This is my AR. There are none quite like it. How many shots till I reload?" -- it's a Galil (35)
+    - "Find my largest-magazine AR. How many shots till I reload?" -- it's a Galil (35)
     - "How many total Shotguns do I have here?" -- just count 'em (5)
     - "This is my SMG. There are none quite like it. How well does it penetrate armor?" -- it's an MP9 (60)
     - "This is my Shotgun. There are none quite like it. How many shots till I reload?" -- it's a Nova (8)
@@ -2108,6 +2120,10 @@ understand the next part of the code!
   start dropping smokes randomly. After one strike, there'll be a random smoke every 10 seconds; after
   two, three random smokes every 8 seconds. Use the same deathmatch spawn points that are used for the
   clues, so there's a high chance that a clue will be smoked over.
+* Additional difficulty option: Permit items to be pinged.
+  - Long ping time (har har) to allow you to mark things you've seen
+  - Chat command to unping everything
+  - Pings will naturally expire after, say, 2.5 minutes
 
 To generate clue items:
 * Pick a random category that has not yet been picked
@@ -2138,6 +2154,10 @@ To generate clue items:
     - attribute, attribute, category 1, attribute, category 2
   - Can only be used if there are two categories with data.
   - Will sometimes produce trivially easy challenges, like "most expensive sniper or least expensive pistol"
+* Clues for category min/max mode follow this structure:
+  - "Find my {superlative} {category}. What is its {attribute}?"
+  - It's okay if there are multiple sharing top spot, as long as they have the same asked-for attribute.
+  - It may be simplest to restrict this to matching the superlative to the asked attr.
 
 */
 

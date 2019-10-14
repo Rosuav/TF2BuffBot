@@ -102,6 +102,11 @@ class Cat(Flag):
 	SniperRifle = Sniper
 	Machinegun = LMG
 
+demo_items = dict(
+	galilar=1,
+	awp=6,
+)
+
 arrays = defaultdict(list)
 arrays["categories"] = [c.name for c in Cat]
 arrays["category_descr"] = [c.__annotations__.get(c.name, c.name) for c in Cat]
@@ -128,6 +133,7 @@ for weapon, data in info["prefabs"].items():
 	spd = data["attributes"].get("max player speed", "260")
 	spd2 = data["attributes"].get("max player speed alt", "260")
 	arrays["max_player_speed"].append(max(float(spd), float(spd2)))
+	arrays["demo_quantity"].append(demo_items.get(arrays["item_name"][-1].replace("weapon_", ""), -1))
 	cat = Cat[data["visuals"]["weapon_type"]]
 	if int(data["attributes"].get("bullets", "1")) > 1: cat |= Cat.Shotgun # Probably don't actually need this
 	if int(data["attributes"].get("is full auto", "0")): cat |= Cat.Automatic
@@ -146,7 +152,7 @@ with open(out, "w") as f:
 			for val in arr:
 				print(f'\t"{val}",', file=f) # Don't have quotes in them. K?
 		else: # Numeric fields
-			t = {"category": "int"}.get(name, "float")
+			t = {"category": "int", "demo_quantity": "int"}.get(name, "float")
 			print(f"{t} weapondata_{name}[] = {{", file=f)
 			for val in arr:
 				print(f"\t{val},", file=f)
