@@ -943,6 +943,7 @@ public void OnGameFrame()
 						int qty = weapondata_demo_quantity[options[i]];
 						if (qty >= 0) n = qty; //Enforced quantity
 						else if (qty == -2 && n == 1) n = 2; //Anything non-unique
+						else if (qty == -3 && n == 0) n = randrange(3)+1; //Anything non-zero
 						//Else it's okay to be anything.
 					}
 					if (!n) continue;
@@ -2104,8 +2105,8 @@ understand the next part of the code!
   message will be produced for every attempt.
   - "The code is the magazine size of my SMG", so you have to find a SMG somewhere on the map and call its clip size
   - Or for the demo...
-    - "How many distinct fully Automatic guns do I have here?" -- count unique items (7)
-    - "Find my largest-magazine AR. How many shots till I reload?" -- it's a Galil (35)
+    - "How many distinct Pistols do I have here?" -- count unique items (7)
+    - "Find my largest-magazine fully Automatic gun. How many shots till I reload?" -- it's a Galil (35)
     - "How many total Shotguns do I have here?" -- just count 'em (5)
     - "This is my SMG. There are none quite like it. How well does it penetrate armor?" -- it's an MP9 (60)
     - "This is my Shotgun. There are none quite like it. How many shots till I reload?" -- it's a Nova (8)
