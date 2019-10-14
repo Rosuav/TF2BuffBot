@@ -228,7 +228,17 @@ public void OnPluginStart()
 int randrange(int max) {return RoundToFloor(GetURandomFloat() * max);}
 
 int nonrandom_numbers[] = {
-	2, 3, 4,
+	4, //Number of puzzles minus one
+	2, //"How many total Shotguns do I have here?" -- just count 'em (7)
+	0, 1,
+	3, //"Find my largest magazine fully Automatic gun. How many shots till I reload?" -- it's a Galil (35)
+	0, 8, 1,
+	2, //"How many distinct Pistols do I have here?" -- count unique items (5)
+	1, 0,
+	0, //"This is my SMG. There are none quite like it. How well does it penetrate armor?" -- it's an MP9 (60)
+	2, 2,
+	0, //"This is my Shotgun. There are none quite like it. How many shots till I reload?" -- it's a Nova (8)
+	1, 0,
 };
 int next_nonrandom = -1;
 int randctrl(int max)
@@ -957,7 +967,7 @@ public void OnGameFrame()
 						int qty = weapondata_demo_quantity[options[i]];
 						if (qty >= 0) n = qty; //Enforced quantity
 						else if (qty == -2 && n == 1) n = 2; //Anything non-unique
-						else if (qty == -3 && n == 0) n = randrange(3)+1; //Anything non-zero
+						else if (qty == -3 && n == 0) n = 1; //Anything non-zero
 						//Else it's okay to be anything.
 					}
 					if (!n) continue;
@@ -1003,8 +1013,7 @@ public void OnGameFrame()
 			else next_nonrandom = -1;
 			for (int puz = 0; puz < puzzles; ++puz)
 			{
-				//Pick a random puzzle type
-				//TODO: If demo_mode, force all the random rolls in order (wrapper around randrange)
+				//Pick a random puzzle type (or a nonrandom one for demo)
 				switch (randctrl(4))
 				{
 					case 0: //"This is my X"
@@ -1066,7 +1075,7 @@ public void OnGameFrame()
 					}
 					case 2: //Simple counting
 					{
-						bool distinct = GetURandomFloat() < 0.5;
+						int distinct = randctrl(2);
 						int cat;
 						do {cat = randctrl(sizeof(weapondata_categories));} while (!nclues[cat]);
 						int n = nclues[cat];
@@ -1110,7 +1119,9 @@ public void OnGameFrame()
 					}
 					default: PrintToChatAll("ASSERTION FAILED, puzzle type invalid");
 				}
+				//if (demo_mode) {PrintToChatAll(puzzle_clue[puz]); PrintToChatAll("--> %.0f", puzzle_value[puz]);}
 			}
+			//if (demo_mode) PrintToChatAll("Next nonrandom: %d", next_nonrandom);
 		}
 		num_puzzles = puzzles; //Record the number of puzzles we actually got
 	}
@@ -2151,9 +2162,9 @@ understand the next part of the code!
   message will be produced for every attempt.
   - "The code is the magazine size of my SMG", so you have to find a SMG somewhere on the map and call its clip size
   - Or for the demo...
-    - "How many distinct Pistols do I have here?" -- count unique items (7)
+    - "How many total Shotguns do I have here?" -- just count 'em (7)
     - "Find my largest magazine fully Automatic gun. How many shots till I reload?" -- it's a Galil (35)
-    - "How many total Shotguns do I have here?" -- just count 'em (5)
+    - "How many distinct Pistols do I have here?" -- count unique items (5)
     - "This is my SMG. There are none quite like it. How well does it penetrate armor?" -- it's an MP9 (60)
     - "This is my Shotgun. There are none quite like it. How many shots till I reload?" -- it's a Nova (8)
   - Prevent items from being picked up. People don't need any items (not even knives).
