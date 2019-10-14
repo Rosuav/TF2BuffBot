@@ -227,6 +227,21 @@ public void OnPluginStart()
 //Not quite perfectly uniform. If there's a better way, it can be changed here.
 int randrange(int max) {return RoundToFloor(GetURandomFloat() * max);}
 
+int nonrandom_numbers[] = {
+	0, 1, 2, 3, 4,
+};
+int next_nonrandom = -1;
+int randctrl(int max)
+{
+	if (next_nonrandom != -1)
+	{
+		int ret = nonrandom_numbers[next_nonrandom++];
+		if (next_nonrandom >= sizeof(nonrandom_numbers)) next_nonrandom = -1;
+		if (ret < max) return ret; //If the forced one is out of bounds, ignore it.
+	}
+	return RoundToFloor(GetURandomFloat() * max);
+}
+
 int bomb_planter = -1;
 public void record_planter(Event event, const char[] name, bool dontBroadcast)
 {
@@ -884,7 +899,6 @@ public void OnGameFrame()
 		{
 			plant_bomb();
 			bool demo_mode = puzzles == 7355608;
-			if (demo_mode) puzzles = 1; //TODO: Get an array of puzzles from somewhere
 			if (puzzles > MAX_PUZZLES) puzzles = MAX_PUZZLES;
 			//Find some random spawn points
 			//Note that we're shuffling the list of entities, not the actual locations;
@@ -981,11 +995,16 @@ public void OnGameFrame()
 					}
 				}
 			}
+			if (demo_mode)
+			{
+				
+				puzzles = randrange(MAX_PUZZLES);
+			}
 			for (int puz = 0; puz < puzzles; ++puz)
 			{
 				//Pick a random puzzle type
 				//TODO: If demo_mode, force all the random rolls in order (wrapper around randrange)
-				switch (randrange(4))
+				switch (randctrl(4))
 				{
 					case 0: //"This is my X"
 					{
@@ -993,9 +1012,9 @@ public void OnGameFrame()
 						//(It's entirely possible that there are NO categories with uniques,
 						//so don't risk getting stuck in an infinite loop spinning for one.
 						//We can always go for a different puzzle type.)
-						int cat = randrange(sizeof(weapondata_categories));
+						int cat = randctrl(sizeof(weapondata_categories));
 						if (unique_clue[cat] < 0) {--puz; continue;}
-						int attr = randrange(sizeof(weapon_attribute_question));
+						int attr = randctrl(sizeof(weapon_attribute_question));
 						Format(puzzle_clue[puz], MAX_PUZZLE_SOLUTION,
 							"This is my %s. There are none quite like it. %s",
 							weapondata_category_descr[cat], weapon_attribute_question[attr]);
@@ -1006,10 +1025,10 @@ public void OnGameFrame()
 						//Pick two random categories that have at least one weapon each
 						//(so unique_clue[cat] is not -1) and an attribute.
 						//Sigh. Can I deduplicate any of this at all?
-						int attr = randrange(sizeof(weapon_attribute_question));
+						int attr = randctrl(sizeof(weapon_attribute_question));
 						int cat1, cat2;
-						do {cat1 = randrange(sizeof(weapondata_categories));} while (!nclues[cat1]);
-						do {cat2 = randrange(sizeof(weapondata_categories));} while (!nclues[cat2] || cat2 == cat1);
+						do {cat1 = randctrl(sizeof(weapondata_categories));} while (!nclues[cat1]);
+						do {cat2 = randctrl(sizeof(weapondata_categories));} while (!nclues[cat2] || cat2 == cat1);
 						//Find the min and max of that attr for each category
 						//NOTE: It's okay if there are duplicates, we just need the value.
 						float minmax1[2], minmax2[2]; //[min,max] for each
@@ -1028,7 +1047,7 @@ public void OnGameFrame()
 							if (a > minmax2[1]) minmax2[1] = a;
 						}
 						//Pick one from each pair - say, min1,max2
-						int bound1 = randrange(2), bound2 = randrange(2);
+						int bound1 = randctrl(2), bound2 = randctrl(2);
 						if (minmax1[bound1] > minmax2[bound2])
 							Format(puzzle_solution[puz], MAX_PUZZLE_SOLUTION, "!solve %s", weapondata_categories[cat1]);
 						else if (minmax2[bound2] > minmax1[bound1])
@@ -1048,7 +1067,7 @@ public void OnGameFrame()
 					{
 						bool distinct = GetURandomFloat() < 0.5;
 						int cat;
-						do {cat = randrange(sizeof(weapondata_categories));} while (!nclues[cat]);
+						do {cat = randctrl(sizeof(weapondata_categories));} while (!nclues[cat]);
 						int n = nclues[cat];
 						if (distinct)
 						{
@@ -1068,9 +1087,9 @@ public void OnGameFrame()
 						//If so, ensure that the value of the question attribute isn't ambiguous.
 						//(It's okay if multiple have the same min or max on the lookup, but
 						//only if they also have the same on the question too.)
-						int attr = randrange(sizeof(weapon_attribute_question));
+						int attr = randctrl(sizeof(weapon_attribute_question));
 						int cat;
-						do {cat = randrange(sizeof(weapondata_categories));} while (!nclues[cat]);
+						do {cat = randctrl(sizeof(weapondata_categories));} while (!nclues[cat]);
 						float minmax[2]; //Can this go into a function?
 						minmax[0] = minmax[1] = weapon_attribute(clues[cat][0], attr);
 						for (int cl=1; cl<nclues[cat]; ++cl)
@@ -1080,7 +1099,7 @@ public void OnGameFrame()
 							if (a > minmax[1]) minmax[1] = a;
 						}
 						if (minmax[0] == minmax[1]) {--puz; continue;} //Make sure it's not completely trivial.
-						int bound = randrange(2);
+						int bound = randctrl(2);
 						puzzle_value[puz] = minmax[bound];
 						Format(puzzle_clue[puz], MAX_PUZZLE_SOLUTION,
 							"Find my %s %s. %s",
