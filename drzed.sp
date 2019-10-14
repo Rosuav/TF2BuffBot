@@ -998,7 +998,7 @@ public void OnGameFrame()
 			if (demo_mode)
 			{
 				
-				puzzles = randrange(MAX_PUZZLES);
+				puzzles = randrange(MAX_PUZZLES - 1) + 1;
 			}
 			for (int puz = 0; puz < puzzles; ++puz)
 			{
