@@ -228,7 +228,7 @@ public void OnPluginStart()
 int randrange(int max) {return RoundToFloor(GetURandomFloat() * max);}
 
 int nonrandom_numbers[] = {
-	0, 1, 2, 3, 4,
+	2, 3, 4,
 };
 int next_nonrandom = -1;
 int randctrl(int max)
@@ -997,9 +997,10 @@ public void OnGameFrame()
 			}
 			if (demo_mode)
 			{
-				
-				puzzles = randrange(MAX_PUZZLES - 1) + 1;
+				next_nonrandom = 0;
+				puzzles = randctrl(MAX_PUZZLES - 1) + 1;
 			}
+			else next_nonrandom = -1;
 			for (int puz = 0; puz < puzzles; ++puz)
 			{
 				//Pick a random puzzle type
