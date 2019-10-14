@@ -108,7 +108,7 @@ demo_items = dict(
 	mag7=3,
 	sawedoff=3,
 	xm1014=0,
-	# - "Find my largest-magazine fully Automatic gun. How many shots till I reload?" -- it's a Galil (35)
+	# - "Find my largest magazine fully Automatic gun. How many shots till I reload?" -- it's a Galil (35)
 	galilar=1,
 	bizon=0,
 	p90=0,

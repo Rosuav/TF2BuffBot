@@ -985,7 +985,7 @@ public void OnGameFrame()
 			{
 				//Pick a random puzzle type
 				//TODO: If demo_mode, force all the random rolls in order (wrapper around randrange)
-				switch (randrange(3))
+				switch (randrange(4))
 				{
 					case 0: //"This is my X"
 					{
@@ -1061,6 +1061,32 @@ public void OnGameFrame()
 							"How many %s %ss do I have here?",
 							distinct ? "distinct" : "total",
 							weapondata_category_descr[cat]);
+					}
+					case 3: //Min/max
+					{
+						//Optionally pick a lookup attribute and question attribute separately
+						//If so, ensure that the value of the question attribute isn't ambiguous.
+						//(It's okay if multiple have the same min or max on the lookup, but
+						//only if they also have the same on the question too.)
+						int attr = randrange(sizeof(weapon_attribute_question));
+						int cat;
+						do {cat = randrange(sizeof(weapondata_categories));} while (!nclues[cat]);
+						float minmax[2]; //Can this go into a function?
+						minmax[0] = minmax[1] = weapon_attribute(clues[cat][0], attr);
+						for (int cl=1; cl<nclues[cat]; ++cl)
+						{
+							float a = weapon_attribute(clues[cat][cl], attr);
+							if (a < minmax[0]) minmax[0] = a;
+							if (a > minmax[1]) minmax[1] = a;
+						}
+						if (minmax[0] == minmax[1]) {--puz; continue;} //Make sure it's not completely trivial.
+						int bound = randrange(2);
+						puzzle_value[puz] = minmax[bound];
+						Format(puzzle_clue[puz], MAX_PUZZLE_SOLUTION,
+							"Find my %s %s. %s",
+							weapon_attribute_superlative[attr * 2 + bound],
+							weapondata_category_descr[cat],
+							weapon_attribute_question[attr]);
 					}
 					default: PrintToChatAll("ASSERTION FAILED, puzzle type invalid");
 				}
@@ -2106,7 +2132,7 @@ understand the next part of the code!
   - "The code is the magazine size of my SMG", so you have to find a SMG somewhere on the map and call its clip size
   - Or for the demo...
     - "How many distinct Pistols do I have here?" -- count unique items (7)
-    - "Find my largest-magazine fully Automatic gun. How many shots till I reload?" -- it's a Galil (35)
+    - "Find my largest magazine fully Automatic gun. How many shots till I reload?" -- it's a Galil (35)
     - "How many total Shotguns do I have here?" -- just count 'em (5)
     - "This is my SMG. There are none quite like it. How well does it penetrate armor?" -- it's an MP9 (60)
     - "This is my Shotgun. There are none quite like it. How many shots till I reload?" -- it's a Nova (8)
