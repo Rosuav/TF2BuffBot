@@ -21,12 +21,13 @@ These are the specific groups of weapons and which weapons count:
 * Snipers - Scout (SSG-08), AWP, G3SG1, SCAR-20
 * LMGs - M249, Negev
 * Grenades - HE, Smoke, Flash, Molotov (and Incendiary), Decoy
-* Equipment - Zeus (taser), Defusal Kit, Kevlar, Helmet (which may be together)
+* Equipment - Zeus (taser), Defusal Kit, Kevlar, Helmet (which may be together)m
+  Health Shot
 * Full-Auto - AK-47, AUG, FAMAS, Galil, M4A4, M4A1, SG553, M249, Negev, SCAR-20,
   G3SG1, CZ75a, Bizon, MP5, P90, MP7, MP9, UMP-45, Mac-10, XM1014
 * Scoped - Scout, G3SG1, SCAR-20, AWP, AUG, SG553
 * Starter - Glock, USP, P2000
-* Non-damaging - Flash, Smoke, Decoy, Defusal Kit, Kevlar, Helmet
+* Non-damaging - Flash, Smoke, Decoy, Defusal Kit, Kevlar, Helmet, Health Shot
 
 Take particular note of which items are NOT in certain categories. For instance,
 a G3SG1 does not count as an assault rifle, and an R8 does not count as
