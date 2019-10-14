@@ -383,14 +383,6 @@ Action add_anarchy(Handle timer, any client)
 	PrintCenterText(client, "You now have %d anarchy!", anarchy[client]);
 }
 
-public Action player_pinged(int client, const char[] command, int argc)
-{
-	//Put code here to be able to easily trigger it from the client
-	//By default, "player_ping" is bound to mouse3, and anyone who
-	//plays Danger Zone will have it accessible somewhere.
-	//PrintCenterText(client, "You pinged!");
-}
-
 public void SmokeLog(const char[] fmt, any ...)
 {
 	char buffer[4096];
@@ -1150,6 +1142,31 @@ public void OnGameFrame()
 		#if defined(POS_ONLY_WHEN_MONEY)
 		last_money[show_positions[i]] = money;
 		#endif
+	}
+}
+
+public Action player_pinged(int client, const char[] command, int argc)
+{
+	//Put code here to be able to easily trigger it from the client
+	//By default, "player_ping" is bound to mouse3, and anyone who
+	//plays Danger Zone will have it accessible somewhere.
+	//PrintCenterText(client, "You pinged!");
+	if (num_puzzles)
+	{
+		//In puzzle mode, allow people to ping weapons as they see them.
+		//Not currently working. Needs research.
+		float pos[3];
+		GetClientEyePosition(client, pos);
+		//TODO: Trace out and find a nearby weapon (not just a ray trace, be generous)
+		PrintToChatAll("Pinging at (%.2f,%.2f,%.2f)", pos[0], pos[1], pos[2]);
+		int ping = CreateEntityByName("info_player_ping");
+		DispatchSpawn(ping);
+		//SetEntPropEnt(ping, Prop_Send, "m_hOwnerEntity", client);
+		//SetEntProp(ping, Prop_Send, "m_hPlayer", client);
+		SetEntPropEnt(client, Prop_Send, "m_hPlayerPing", ping);
+		SetEntProp(ping, Prop_Send, "m_iTeamNum", 3);
+		//SetEntProp(ping, Prop_Send, "m_iType", 0);
+		TeleportEntity(ping, pos, NULL_VECTOR, NULL_VECTOR);
 	}
 }
 
