@@ -2199,6 +2199,9 @@ understand the next part of the code!
   - Long ping time (har har) to allow you to mark things you've seen
   - Chat command to unping everything
   - Pings will naturally expire after, say, 2.5 minutes
+
+TODO: Once *anyone* has solved the last puzzle (and been given the "stick it" message),
+allow everyone to stick the defuse. Also announce this globally when it happens.
 */
 
 /*
