@@ -939,6 +939,8 @@ char weapon_attribute_superlative[][] = {
 	"heaviest", "lightest",
 };
 #define MAX_CLUES_PER_CAT 10
+int puzzle_clues[MAX_CLUES_PER_CAT * WEAPON_TYPE_CATEGORIES];
+int num_puzzle_clues = 0;
 float weapon_attribute(int idx, int attr)
 {
 	switch (attr)
@@ -962,10 +964,12 @@ public void OnGameFrame()
 		//Note that they won't buy nades if we're out of freeze time, so you need at least
 		//one full second of freeze in order to do this reliably.
 		if (GetConVarInt(bot_autobuy_nades)) CreateTimer(0.5, buy_nades, 0, TIMER_FLAG_NO_MAPCHANGE);
+		num_puzzle_clues = 0; //TODO: Instead of doing it here, do it when those clue items get destroyed.
 	}
 	if (!freeze && last_freeze)
 	{
 		int puzzles = GameRules_GetProp("m_bWarmupPeriod") ? 0 : GetConVarInt(bomb_defusal_puzzles);
+		num_puzzle_clues = 0;
 		if (puzzles)
 		{
 			plant_bomb();
@@ -1062,6 +1066,7 @@ public void OnGameFrame()
 						int clue = CreateEntityByName(weapondata_item_name[options[i]]);
 						DispatchSpawn(clue);
 						TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
+						puzzle_clues[num_puzzle_clues++] = clue;
 					}
 				}
 			}
@@ -1577,6 +1582,12 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		int bomb = FindEntityByClassname(-1, "planted_c4");
 		if (bomb == -1) return;
 		SetEntPropFloat(bomb, Prop_Send, "m_flC4Blow", GetGameTime() + 4.0);
+		return;
+	}
+	if (!strcmp(msg, "!allclue"))
+	{
+		PrintToChatAll("Total clues: %d", num_puzzle_clues);
+		//for (int i = 0; i < num_puzzle_clues; ++i) puzzle_clues[i];
 		return;
 	}
 	if (!strcmp(msg, "!spawns"))
