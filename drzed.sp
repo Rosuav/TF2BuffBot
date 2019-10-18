@@ -103,6 +103,7 @@ public void OnPluginStart()
 	HookEvent("player_jump", player_jump);
 	HookEvent("bomb_begindefuse", puzzle_defuse);
 	HookEvent("bomb_defused", show_defuse_time);
+	HookEvent("player_use", player_use);
 	//HookEvent("player_hurt", player_hurt);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
@@ -882,6 +883,35 @@ public Action return_bomb(Handle timer, any bomb)
 	TeleportEntity(bomb, pos, NULL_VECTOR, NULL_VECTOR);
 }
 
+public void player_use(Event event, const char[] name, bool dontBroadcast)
+{
+	if (num_puzzles)
+	{
+		int client = GetClientOfUserId(event.GetInt("userid"));
+		int entity = event.GetInt("entity");
+		if (HasEntProp(entity, Prop_Send, "m_iPrimaryReserveAmmoCount"))
+		{
+			//Do this only for weapons. TODO: When grenades, kits, etc get
+			//added as sclues, have a way to recognize them too.
+			int r,g,b,a;
+			GetEntityRenderColor(entity, r, g, b, a);
+			bool highlight = a == 255;
+			char player[64]; GetClientName(client, player, sizeof player);
+			char weap[64]; describe_weapon(entity, weap, sizeof weap);
+			if (highlight)
+			{
+				SetEntityRenderColor(entity, 255, 0, 0, 128);
+				PrintToChatAll("%s marked a %s", player, weap);
+			}
+			else
+			{
+				SetEntityRenderColor(entity, 255, 255, 255, 255);
+				PrintToChatAll("%s unmarked a %s", player, weap);
+			}
+		}
+	}
+}
+
 #include "cs_weapons.inc"
 char weapon_attribute_question[][] = {
 	"How many shots till I reload?",
@@ -1025,9 +1055,6 @@ public void OnGameFrame()
 						int clue = CreateEntityByName(weapondata_item_name[options[i]]);
 						DispatchSpawn(clue);
 						TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
-						//To make 'em all look rusty:
-						//SetEntityRenderFx(clue, RENDERFX_GLOWSHELL);
-						//SetEntityRenderColor(clue, 255, 128, 0, 192);
 					}
 				}
 			}
