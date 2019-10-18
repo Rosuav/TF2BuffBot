@@ -1596,7 +1596,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		for (int i = 0; i < num_puzzle_clues; ++i) puzzle_highlight(puzzle_clues[i], 1);
 		return;
 	}
-	if (!strcmp(msg, "!gotoclue")) //TODO: Again, debug/admin/cheat flag
+	if (!strcmp(msg, "!gotoclue") && GetConVarInt(sm_drzed_allow_recall))
 	{
 		for (int i = 0; i < num_puzzle_clues; ++i) if (puzzle_is_highlighted(puzzle_clues[i]))
 		{
