@@ -883,18 +883,24 @@ public Action return_bomb(Handle timer, any bomb)
 	TeleportEntity(bomb, pos, NULL_VECTOR, NULL_VECTOR);
 }
 
+#include "cs_weapons.inc"
+#define MAX_CLUES_PER_CAT 10
+int puzzle_clues[MAX_CLUES_PER_CAT * WEAPON_TYPE_CATEGORIES];
+int num_puzzle_clues = 0;
+
+bool puzzle_is_highlighted(int entity)
+{
+	int r,g,b,a;
+	GetEntityRenderColor(entity, r, g, b, a);
+	return a < 255;
+}
 //Highlight or unhighlight a clue
 //state: 1 => highlight, 0 => unhighlight, -1 => toggle
 //Returns true if now highlighted, false if not
 bool puzzle_highlight(int entity, int state)
 {
-	if (state == -1)
-	{
-		int r,g,b,a;
-		GetEntityRenderColor(entity, r, g, b, a);
-		state = a == 255;
-	}
-	if (state) SetEntityRenderColor(entity, 255, 0, 0, 128);
+	if (state == -1) state = puzzle_is_highlighted(entity) ? 0 : 1;
+	if (state) SetEntityRenderColor(entity, 255, 128, 0, 128);
 	else SetEntityRenderColor(entity, 255, 255, 255, 255);
 	return state == 1;
 }
@@ -905,26 +911,18 @@ public void player_use(Event event, const char[] name, bool dontBroadcast)
 	{
 		int client = GetClientOfUserId(event.GetInt("userid"));
 		int entity = event.GetInt("entity");
-		if (HasEntProp(entity, Prop_Send, "m_iPrimaryReserveAmmoCount"))
+		//If this entity is a registered clue, highlight it.
+		for (int i = 0; i < num_puzzle_clues; ++i) if (puzzle_clues[i] == entity)
 		{
-			//Do this only for weapons. TODO: When grenades, kits, etc get
-			//added as clues, have a way to recognize them too.
-			//Bigger TODO: Have a chat command to unmark all items
-			//Resultant TODO: Retain the full list of clue entities, and
-			//use this for both the "is this a clue" check and the "unmark".
-			//Once that array exists, it'll also be possible to do a "mark-all"
-			//which would be a cheat option, and then maybe also a "go to
-			//first marked item", which would let you find all the spawns on
-			//a given map. Could be important with some maps.
 			bool state = puzzle_highlight(entity, -1);
 			char player[64]; GetClientName(client, player, sizeof player);
 			char weap[64]; describe_weapon(entity, weap, sizeof weap);
 			PrintToChatAll("%s %s a %s", player, state ? "marked" : "unmarked", weap);
+			break;
 		}
 	}
 }
 
-#include "cs_weapons.inc"
 char weapon_attribute_question[][] = {
 	"How many shots till I reload?",
 	"What does it cost to buy?",
@@ -943,9 +941,6 @@ char weapon_attribute_superlative[][] = {
 	"least penetrating", "most penetrating",
 	"heaviest", "lightest",
 };
-#define MAX_CLUES_PER_CAT 10
-int puzzle_clues[MAX_CLUES_PER_CAT * WEAPON_TYPE_CATEGORIES];
-int num_puzzle_clues = 0;
 float weapon_attribute(int idx, int attr)
 {
 	switch (attr)
@@ -1599,6 +1594,21 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	{
 		PrintToChatAll("Total clues: %d", num_puzzle_clues);
 		for (int i = 0; i < num_puzzle_clues; ++i) puzzle_highlight(puzzle_clues[i], 1);
+		return;
+	}
+	if (!strcmp(msg, "!gotoclue")) //TODO: Again, debug/admin/cheat flag
+	{
+		for (int i = 0; i < num_puzzle_clues; ++i) if (puzzle_is_highlighted(puzzle_clues[i]))
+		{
+			float pos[3];
+			GetEntPropVector(puzzle_clues[i], Prop_Data, "m_vecOrigin", pos);
+			char player[64]; GetClientName(self, player, sizeof player);
+			float lookdown[3] = {90.0, 0.0, 0.0};
+			TeleportEntity(self, pos, lookdown, NULL_VECTOR);
+			PrintToChatAll("Teleported %s to next highlighted clue.", player);
+			return;
+		}
+		PrintToChat(self, "No highlighted clues.");
 		return;
 	}
 	if (!strcmp(msg, "!spawns"))
