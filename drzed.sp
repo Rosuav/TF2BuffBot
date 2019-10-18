@@ -892,7 +892,7 @@ public void player_use(Event event, const char[] name, bool dontBroadcast)
 		if (HasEntProp(entity, Prop_Send, "m_iPrimaryReserveAmmoCount"))
 		{
 			//Do this only for weapons. TODO: When grenades, kits, etc get
-			//added as sclues, have a way to recognize them too.
+			//added as clues, have a way to recognize them too.
 			//Bigger TODO: Have a chat command to unmark all items
 			//Resultant TODO: Retain the full list of clue entities, and
 			//use this for both the "is this a clue" check and the "unmark".
