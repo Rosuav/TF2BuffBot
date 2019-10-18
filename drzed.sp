@@ -481,6 +481,7 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
+bool report_new_entities = false;
 public void OnEntityCreated(int entity, const char[] cls)
 {
 	if (GetConVarInt(learn_smoke) && !strcmp(cls, "smokegrenade_projectile"))
@@ -488,15 +489,45 @@ public void OnEntityCreated(int entity, const char[] cls)
 		//It's a newly-thrown smoke grenade. Mark it so we'll report its
 		//first bounce (if we're reporting grenade bounces).
 		smoke_not_bounced[entity] = true;
-		CreateTimer(0.01, report_grenade, entity, TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
+	}
+	//if (!strcmp(cls, "info_player_ping")) CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
+	if (report_new_entities)
+		PrintToChatAll("New: %s [%d]", cls, entity);
+}
+
+Action report_entity(Handle timer, any entity)
+{
+	ignore(timer);
+	if (!IsValidEntity(entity)) return;
+	char cls[64]; GetEdictClassname(entity, cls, sizeof(cls));
+	if (!strcmp(cls, "smokegrenade_projectile"))
+	{
+		int client = GetEntPropEnt(entity, Prop_Send, "m_hThrower");
+		if (client != -1) SmokeLog("[%d-C-%d] Spawn", client, entity);
+	}
+	else if (!strcmp(cls, "info_player_ping"))
+	{
+		PrintToStream("New ping: %d", entity);
+		int target = GetEntPropEnt(entity, Prop_Send, "m_hPingedEntity");
+		PrintToStream("Pinged %d Player %d Type %d",
+			target,
+			GetEntPropEnt(entity, Prop_Send, "m_hPlayer"),
+			GetEntProp(entity, Prop_Send, "m_iType")
+		);
+		PrintToStream("Ent %d render FX %d mode %d",
+			target,
+			GetEntProp(target, Prop_Send, "m_nRenderFX"),
+			GetEntProp(target, Prop_Send, "m_nRenderMode")
+		);
 	}
 }
 
-Action report_grenade(Handle timer, any entity)
+//Not really public, but not always used, so suppress the warning
+public Action unreport_new(Handle timer, any entity)
 {
 	ignore(timer);
-	int client = GetEntPropEnt(entity, Prop_Send, "m_hThrower");
-	if (client != -1) SmokeLog("[%d-C-%d] Spawn", client, entity);
+	report_new_entities = false;
 }
 
 //Tick number when you last jumped or last threw a smoke grenade
@@ -994,6 +1025,9 @@ public void OnGameFrame()
 						int clue = CreateEntityByName(weapondata_item_name[options[i]]);
 						DispatchSpawn(clue);
 						TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
+						//To make 'em all look rusty:
+						//SetEntityRenderFx(clue, RENDERFX_GLOWSHELL);
+						//SetEntityRenderColor(clue, 255, 128, 0, 192);
 					}
 				}
 			}
@@ -1151,7 +1185,11 @@ public Action player_pinged(int client, const char[] command, int argc)
 	//By default, "player_ping" is bound to mouse3, and anyone who
 	//plays Danger Zone will have it accessible somewhere.
 	//PrintCenterText(client, "You pinged!");
-	if (num_puzzles)
+	int entity = GetEntPropEnt(client, Prop_Send, "m_hPlayerPing");
+	//PrintToStream("Client %d pinged [ping = %d]", client, entity);
+	//if (entity != -1) CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
+	//report_new_entities = true; CreateTimer(1.0, unreport_new, 0, TIMER_FLAG_NO_MAPCHANGE);
+	if (num_puzzles && entity == -10) //Currently disabled
 	{
 		//In puzzle mode, allow people to ping weapons as they see them.
 		//Not currently working. Needs research.
