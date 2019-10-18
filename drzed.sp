@@ -938,6 +938,7 @@ char weapon_attribute_superlative[][] = {
 	"least penetrating", "most penetrating",
 	"heaviest", "lightest",
 };
+#define MAX_CLUES_PER_CAT 10
 float weapon_attribute(int idx, int attr)
 {
 	switch (attr)
@@ -991,7 +992,6 @@ public void OnGameFrame()
 				if (numspawns == MAX_CLUE_SPAWNS) break;
 			}
 			if (!numspawns) {puzzles = 0; spawnpoints[0] = -1;} //If there aren't any deathmatch spawn locations, we can't do puzzles.
-			#define MAX_CLUES_PER_CAT 10
 			int clues[sizeof(weapondata_categories)][MAX_CLUE_SPAWNS]; //Larger array than the max-placed
 			int nclues[sizeof(weapondata_categories)] = {0};
 			//unique_clue[cat] is -1 for "no weapons in category", -2 for
