@@ -896,6 +896,10 @@ public void player_use(Event event, const char[] name, bool dontBroadcast)
 			//Bigger TODO: Have a chat command to unmark all items
 			//Resultant TODO: Retain the full list of clue entities, and
 			//use this for both the "is this a clue" check and the "unmark".
+			//Once that array exists, it'll also be possible to do a "mark-all"
+			//which would be a cheat option, and then maybe also a "go to
+			//first marked item", which would let you find all the spawns on
+			//a given map. Could be important with some maps.
 			int r,g,b,a;
 			GetEntityRenderColor(entity, r, g, b, a);
 			bool highlight = a == 255;
