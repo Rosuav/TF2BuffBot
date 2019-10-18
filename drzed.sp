@@ -883,6 +883,22 @@ public Action return_bomb(Handle timer, any bomb)
 	TeleportEntity(bomb, pos, NULL_VECTOR, NULL_VECTOR);
 }
 
+//Highlight or unhighlight a clue
+//state: 1 => highlight, 0 => unhighlight, -1 => toggle
+//Returns true if now highlighted, false if not
+bool puzzle_highlight(int entity, int state)
+{
+	if (state == -1)
+	{
+		int r,g,b,a;
+		GetEntityRenderColor(entity, r, g, b, a);
+		state = a == 255;
+	}
+	if (state) SetEntityRenderColor(entity, 255, 0, 0, 128);
+	else SetEntityRenderColor(entity, 255, 255, 255, 255);
+	return state == 1;
+}
+
 public void player_use(Event event, const char[] name, bool dontBroadcast)
 {
 	if (num_puzzles)
@@ -900,21 +916,10 @@ public void player_use(Event event, const char[] name, bool dontBroadcast)
 			//which would be a cheat option, and then maybe also a "go to
 			//first marked item", which would let you find all the spawns on
 			//a given map. Could be important with some maps.
-			int r,g,b,a;
-			GetEntityRenderColor(entity, r, g, b, a);
-			bool highlight = a == 255;
+			bool state = puzzle_highlight(entity, -1);
 			char player[64]; GetClientName(client, player, sizeof player);
 			char weap[64]; describe_weapon(entity, weap, sizeof weap);
-			if (highlight)
-			{
-				SetEntityRenderColor(entity, 255, 0, 0, 128);
-				PrintToChatAll("%s marked a %s", player, weap);
-			}
-			else
-			{
-				SetEntityRenderColor(entity, 255, 255, 255, 255);
-				PrintToChatAll("%s unmarked a %s", player, weap);
-			}
+			PrintToChatAll("%s %s a %s", player, state ? "marked" : "unmarked", weap);
 		}
 	}
 }
