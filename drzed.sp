@@ -1589,10 +1589,16 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		SetEntPropFloat(bomb, Prop_Send, "m_flC4Blow", GetGameTime() + 4.0);
 		return;
 	}
-	if (!strcmp(msg, "!allclue"))
+	if (!strcmp(msg, "!noclue"))
+	{
+		for (int i = 0; i < num_puzzle_clues; ++i) puzzle_highlight(puzzle_clues[i], 0);
+		PrintToChatAll("All clues have been unhighlighted.");
+		return;
+	}
+	if (!strcmp(msg, "!allclue")) //TODO: Hide this one behind a debug/admin/cheat flag
 	{
 		PrintToChatAll("Total clues: %d", num_puzzle_clues);
-		//for (int i = 0; i < num_puzzle_clues; ++i) puzzle_clues[i];
+		for (int i = 0; i < num_puzzle_clues; ++i) puzzle_highlight(puzzle_clues[i], 1);
 		return;
 	}
 	if (!strcmp(msg, "!spawns"))
