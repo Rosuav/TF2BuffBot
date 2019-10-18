@@ -893,6 +893,9 @@ public void player_use(Event event, const char[] name, bool dontBroadcast)
 		{
 			//Do this only for weapons. TODO: When grenades, kits, etc get
 			//added as sclues, have a way to recognize them too.
+			//Bigger TODO: Have a chat command to unmark all items
+			//Resultant TODO: Retain the full list of clue entities, and
+			//use this for both the "is this a clue" check and the "unmark".
 			int r,g,b,a;
 			GetEntityRenderColor(entity, r, g, b, a);
 			bool highlight = a == 255;
