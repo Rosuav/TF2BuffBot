@@ -92,4 +92,9 @@ person solves two puzzles and then another person attempts the third, the second
 person must first enter the solutions to the first two puzzles. To see which
 puzzle you need to solve next, just attempt to defuse the bomb.
 
+In order to assist counter-terrorists in identifying which weapons are unique,
+how many there are of a type, etc, any weapon can be marked (with the "Use" key)
+to highlight it. Unmark it the same way (even if you were not the one to mark
+it). You can also unmark all weapons quickly by saying "!noclue" in chat.
+
 Have fun, and remember: a five minute bomb timer is not an invitation to relax...
