@@ -1590,7 +1590,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		PrintToChatAll("All clues have been unhighlighted.");
 		return;
 	}
-	if (!strcmp(msg, "!allclue")) //TODO: Hide this one behind a debug/admin/cheat flag
+	if (!strcmp(msg, "!allclue") && GetConVarInt(sm_drzed_allow_recall)) //Not really related to !recall, but it'll be used similarly.
 	{
 		PrintToChatAll("Total clues: %d", num_puzzle_clues);
 		for (int i = 0; i < num_puzzle_clues; ++i) puzzle_highlight(puzzle_clues[i], 1);
