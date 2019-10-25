@@ -2333,6 +2333,8 @@ understand the next part of the code!
   start dropping smokes randomly. After one strike, there'll be a random smoke every 10 seconds; after
   two, three random smokes every 8 seconds. Use the same deathmatch spawn points that are used for the
   clues, so there's a high chance that a clue will be smoked over.
+  - Start by AddTempEntHook("EffectDispatch", show_lots_of_info)
+  - Then TE_Start("EffectDispatch") and do the work to create a new one.
 */
 
 /*
