@@ -894,15 +894,29 @@ bool puzzle_is_highlighted(int entity)
 	GetEntityRenderColor(entity, r, g, b, a);
 	return a < 255;
 }
+Action stabilize_weapon(Handle timer, any entity)
+{
+	if (IsValidEntity(entity) && puzzle_is_highlighted(entity))
+		SetEntityRenderFx(entity, RENDERFX_HOLOGRAM);
+}
 //Highlight or unhighlight a clue
 //state: 1 => highlight, 0 => unhighlight, -1 => toggle
 //Returns true if now highlighted, false if not
+//The weapon flickers briefly, then stabilizes with semitransparency.
 bool puzzle_highlight(int entity, int state)
 {
-	if (state == -1) state = puzzle_is_highlighted(entity) ? 0 : 1;
-	if (state) SetEntityRenderColor(entity, 255, 128, 0, 128);
-	else SetEntityRenderColor(entity, 255, 255, 255, 255);
-	return state == 1;
+	if (state == -1) state = puzzle_is_highlighted(entity) ? 0 : randrange(2) + 1;
+	if (!state)
+	{
+		SetEntityRenderColor(entity, 255, 255, 255, 255);
+		SetEntityRenderFx(entity, RENDERFX_NONE);
+		return false;
+	}
+	if (state == 2) SetEntityRenderColor(entity, 128, 255, 255, 224); //Bubblegum
+	else SetEntityRenderColor(entity, 255, 192, 255, 224); //Blackcurrant
+	SetEntityRenderFx(entity, RENDERFX_EXPLODE);
+	CreateTimer(0.6, stabilize_weapon, entity, TIMER_FLAG_NO_MAPCHANGE);
+	return true;
 }
 
 public void player_use(Event event, const char[] name, bool dontBroadcast)
@@ -974,6 +988,7 @@ public void OnGameFrame()
 		{
 			plant_bomb();
 			bool demo_mode = puzzles == 7355608;
+			bool hack_mode = puzzles == 12345;
 			if (puzzles > MAX_PUZZLES) puzzles = MAX_PUZZLES;
 			//Find some random spawn points
 			//Note that we're shuffling the list of entities, not the actual locations;
@@ -996,6 +1011,21 @@ public void OnGameFrame()
 				if (numspawns == MAX_CLUE_SPAWNS) break;
 			}
 			if (!numspawns) {puzzles = 0; spawnpoints[0] = -1;} //If there aren't any deathmatch spawn locations, we can't do puzzles.
+			if (hack_mode)
+			{
+				for (int i = 0; i < numspawns; ++i)
+				{
+					float pos[3];
+					GetEntPropVector(spawnpoints[i], Prop_Data, "m_vecOrigin", pos);
+					int clue = CreateEntityByName(weapondata_item_name[i % sizeof(weapondata_item_name)]);
+					DispatchSpawn(clue);
+					TeleportEntity(clue, pos, NULL_VECTOR, NULL_VECTOR);
+					//puzzle_highlight(clue, i + 1);
+					puzzle_clues[num_puzzle_clues++] = clue;
+				}
+				PrintToChatAll("Created %d weapons.", numspawns);
+				puzzles = 0;
+			}
 			int clues[sizeof(weapondata_categories)][MAX_CLUE_SPAWNS]; //Larger array than the max-placed
 			int nclues[sizeof(weapondata_categories)] = {0};
 			//unique_clue[cat] is -1 for "no weapons in category", -2 for
@@ -1004,7 +1034,7 @@ public void OnGameFrame()
 			int unique_clue[sizeof(weapondata_categories)];
 			for (int i=0; i<sizeof(unique_clue); ++i) unique_clue[i] = -1; //crude initializer :(
 			int nextspawn = 0;
-			for (int cat = 0; cat < WEAPON_TYPE_CATEGORIES; ++cat)
+			if (puzzles) for (int cat = 0; cat < WEAPON_TYPE_CATEGORIES; ++cat)
 			{
 				int options[sizeof(weapondata_category)];
 				int nopt = 0;
@@ -1187,6 +1217,7 @@ public void OnGameFrame()
 				//if (demo_mode) {PrintToChatAll(puzzle_clue[puz]); PrintToChatAll("--> %.0f", puzzle_value[puz]);}
 			}
 			//if (demo_mode) PrintToChatAll("Next nonrandom: %d", next_nonrandom);
+			if (hack_mode) puzzles = 1;
 		}
 		num_puzzles = puzzles; //Record the number of puzzles we actually got
 	}
