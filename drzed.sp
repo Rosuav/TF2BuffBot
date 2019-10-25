@@ -2333,6 +2333,8 @@ understand the next part of the code!
 
 TODO: Once *anyone* has solved the last puzzle (and been given the "stick it" message),
 allow everyone to stick the defuse. Also announce this globally when it happens.
+
+TODO: If the bomb is in process of going off, don't do the bomb teleportation.
 */
 
 /*
