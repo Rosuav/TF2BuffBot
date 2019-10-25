@@ -2299,10 +2299,6 @@ understand the next part of the code!
   start dropping smokes randomly. After one strike, there'll be a random smoke every 10 seconds; after
   two, three random smokes every 8 seconds. Use the same deathmatch spawn points that are used for the
   clues, so there's a high chance that a clue will be smoked over.
-* Additional difficulty option: Permit items to be pinged.
-  - Long ping time (har har) to allow you to mark things you've seen
-  - Chat command to unping everything
-  - Pings will naturally expire after, say, 2.5 minutes
 
 TODO: Once *anyone* has solved the last puzzle (and been given the "stick it" message),
 allow everyone to stick the defuse. Also announce this globally when it happens.
