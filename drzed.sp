@@ -1563,7 +1563,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		PrintToChat(self, "Unsure how to solve the puzzle? Attempt to defuse the bomb for a clue!");
 		return;
 	}
-	if (puzzles_solved[self] < num_puzzles && !strncmp(msg, "!solve ", 7))
+	if (puzzles_solved[self] < num_puzzles && !strncmp(msg, "!solve ", 7) && !puzzle_endgame)
 	{
 		if (puzzle_value[puzzles_solved[self]] == -1.0)
 		{
