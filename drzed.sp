@@ -813,6 +813,7 @@ int puzzles_solved[65];
 #define MAX_PUZZLES 16
 #define MAX_PUZZLE_SOLUTION 256
 int num_puzzles; //Normally equal to GetConVarInt(bomb_defusal_puzzles) as of round start
+int puzzle_endgame = 0;
 char puzzle_clue[MAX_PUZZLES][MAX_PUZZLE_SOLUTION];
 float puzzle_value[MAX_PUZZLES]; //If -1, use puzzle_solution instead (which must start "!solve ").
 char puzzle_solution[MAX_PUZZLES][MAX_PUZZLE_SOLUTION];
@@ -820,15 +821,11 @@ public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 {
 	if (!num_puzzles) return;
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	//TODO: See how many puzzles the attempting defuser has solved
+	//See how many puzzles the attempting defuser has solved
 	//If >= puzzles, permit the defusal. Otherwise, show hint for puzzle N,
 	//and teleport the bomb away briefly.
-	//TODO: Show the time left, and maybe the puzzles left
-	if (puzzles_solved[client] >= num_puzzles)
-	{
-		PrintToChat(client, "Go go go! Stick the defuse!");
-		return;
-	}
+	if (puzzle_endgame == 2) PrintToChat(client, "Go go go! Stick the defuse!");
+	if (puzzle_endgame) return;
 	int bomb = FindEntityByClassname(-1, "planted_c4");
 	if (bomb == -1) return;
 
@@ -983,7 +980,7 @@ public void OnGameFrame()
 	if (!freeze && last_freeze)
 	{
 		int puzzles = GameRules_GetProp("m_bWarmupPeriod") ? 0 : GetConVarInt(bomb_defusal_puzzles);
-		num_puzzle_clues = 0;
+		num_puzzle_clues = puzzle_endgame = 0;
 		if (puzzles)
 		{
 			plant_bomb();
@@ -1577,14 +1574,17 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 				//Will only happen if puzzle_solution[n] is a valid string (not "!solve"),
 				//and therefore that puzzle_value[n] is -1.
 				if (++puzzles_solved[self] == num_puzzles)
-					PrintToChat(self, "That's it! All puzzles solved! Hurry, use your defuse kit!");
-				else
-					PrintToChat(self, "You've solved puzzle %d! Go tap the bomb again!", puzzles_solved[self]);
+				{
+					PrintToChatAll("That's it! All puzzles solved! Someone, hurry, use your defuse kit!");
+					puzzle_endgame = 2;
+				}
+				else PrintToChat(self, "You've solved puzzle %d! Go tap the bomb again!", puzzles_solved[self]);
 				return;
 			}
 			PrintToChatAll("BOOOOOOM!");
 			int bomb = FindEntityByClassname(-1, "planted_c4");
 			if (bomb == -1) return;
+			puzzle_endgame = 1;
 			SetEntPropFloat(bomb, Prop_Send, "m_flC4Blow", GetGameTime() + 4.0);
 			return;
 		}
@@ -1601,9 +1601,11 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		if (FloatAbs(attempt - puzzle_value[puzzles_solved[self]]) < 0.001)
 		{
 			if (++puzzles_solved[self] == num_puzzles)
-				PrintToChat(self, "That's it! All puzzles solved! Hurry, use your defuse kit!");
-			else
-				PrintToChat(self, "Correct! That was the next part of the code. Go tap the bomb again!");
+			{
+				PrintToChatAll("The code has been completed! Someone, hurry, use your defuse kit!");
+				puzzle_endgame = 2;
+			}
+			else PrintToChat(self, "Correct! That was the next part of the code. Go tap the bomb again!");
 			return;
 		}
 		//PrintToChat(self, "You entered: %f", attempt);
@@ -1612,6 +1614,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		//Or should it cost you some seconds off the clock and let you keep going?
 		int bomb = FindEntityByClassname(-1, "planted_c4");
 		if (bomb == -1) return;
+		puzzle_endgame = 1;
 		SetEntPropFloat(bomb, Prop_Send, "m_flC4Blow", GetGameTime() + 4.0);
 		return;
 	}
@@ -2330,11 +2333,6 @@ understand the next part of the code!
   start dropping smokes randomly. After one strike, there'll be a random smoke every 10 seconds; after
   two, three random smokes every 8 seconds. Use the same deathmatch spawn points that are used for the
   clues, so there's a high chance that a clue will be smoked over.
-
-TODO: Once *anyone* has solved the last puzzle (and been given the "stick it" message),
-allow everyone to stick the defuse. Also announce this globally when it happens.
-
-TODO: If the bomb is in process of going off, don't do the bomb teleportation.
 */
 
 /*
