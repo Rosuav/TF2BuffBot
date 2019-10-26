@@ -1285,6 +1285,11 @@ public Action player_pinged(int client, const char[] command, int argc)
 		//SetEntProp(ping, Prop_Send, "m_iType", 0);
 		TeleportEntity(ping, pos, NULL_VECTOR, NULL_VECTOR);
 	}
+	if (entity == -9) //Currently disabled
+	{
+		float pos[3]; GetClientAbsOrigin(client, pos);
+		for (int cl = 1; cl < MaxClients; ++cl) if (IsClientInGame(cl)) blow_smoke(cl, pos);
+	}
 }
 
 int last_attacker[MAXPLAYERS+1], last_inflictor[MAXPLAYERS+1], last_weapon[MAXPLAYERS+1], crippled_status[MAXPLAYERS+1];
