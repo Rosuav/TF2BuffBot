@@ -1246,6 +1246,18 @@ public void OnGameFrame()
 	}
 }
 
+//Create a cloud of smoke, visible to this client, at this pos
+void blow_smoke(int client, float pos[3])
+{
+	TE_Start("EffectDispatch");
+	TE_WriteNum("m_iEffectName", FindStringIndex(FindStringTable("EffectDispatch"), "ParticleEffect"));
+	TE_WriteNum("m_nHitBox", FindStringIndex(FindStringTable("ParticleEffectNames"), "explosion_smokegrenade"));
+	TE_WriteFloat("m_vOrigin.x", pos[0]);
+	TE_WriteFloat("m_vOrigin.y", pos[1]);
+	TE_WriteFloat("m_vOrigin.z", pos[2]);
+	TE_SendToClient(client);
+}
+
 public Action player_pinged(int client, const char[] command, int argc)
 {
 	//Put code here to be able to easily trigger it from the client
@@ -2345,4 +2357,5 @@ Messing with people
 - Where are the attributes that carry recoil and its corresponding recovery?
   - m_flRecoilIndex, m_fAccuracyPenalty, maybe m_fLastShotTime?
   - These are on the weapon, not the player, so there'd need to be a check on weapon switch.
+- float pos[3]; GetClientAbsOrigin(client, pos); blow_smoke(client, pos);
 */
