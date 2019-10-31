@@ -835,6 +835,7 @@ public void puzzle_defuse(Event event, const char[] name, bool dontBroadcast)
 	PrintToChat(client, "You have %02d:%02d on the clock and have solved %d/%d puzzles.",
 		min, sec, puzzles_solved[client], num_puzzles);
 	PrintToChat(client, "%s", puzzle_clue[puzzles_solved[client]]);
+	PrintCenterText(client, "%s", puzzle_clue[puzzles_solved[client]]);
 
 	//Attempting to cancel the defusal seems to be really unreliable, but
 	//simply moving the bomb away appears to work every time.
