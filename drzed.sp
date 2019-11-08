@@ -607,6 +607,7 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	else if (!strcmp(weapon, "weapon_smokegrenade")) ammo_offset = 16;
 	else if (!strcmp(weapon, "weapon_molotov") || !strcmp(weapon, "weapon_incgrenade")) ammo_offset = 17;
 	else if (!strcmp(weapon, "weapon_decoy")) ammo_offset = 18;
+	else if (!strcmp(weapon, "weapon_tagrenade")) ammo_offset = 22; //Mainly in co-op
 	else if (!strcmp(weapon, "weapon_snowball")) ammo_offset = 24; //Winter update 2018
 	else return; //Wasn't a grenade you just threw.
 
@@ -619,12 +620,10 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	if (GetPlayerWeaponSlot(client, 5) != -1) return; //Got the C4? All good.
 
 	//Do you have ammo of any other type of grenade?
-	for (int offset = 14; offset <= 18; ++offset)
+	for (int offset = 14; offset <= 24; ++offset)
 		if (offset != ammo_offset && GetEntProp(client, Prop_Data, "m_iAmmo", _, offset) > 0)
 			//You have some other 'nade. Default behaviour is fine.
 			return;
-	if (ammo_offset != 24 && GetEntProp(client, Prop_Data, "m_iAmmo", _, 24) > 0)
-		return; //You have a snowball. Ditto.
 
 	//You don't have anything else. Unselect the current weapon, allowing you
 	//to reselect your one and only grenade.
@@ -2273,6 +2272,7 @@ m_fOnTarget
 m_iAmmo[32] - what do they all mean?
 14-18 are grenades - HE/frag, flash, smoke, molly/inc, decoy/diversion
 21: Health Shot
+22: Tactical Awareness
 24: Snowball
 Bump mines, exojump, and parachute do not show up.
 
