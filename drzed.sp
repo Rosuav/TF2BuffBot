@@ -2378,3 +2378,11 @@ Messing with people
   - These are on the weapon, not the player, so there'd need to be a check on weapon switch.
 - float pos[3]; GetClientAbsOrigin(client, pos); blow_smoke(client, pos);
 */
+
+/*
+Research the TA Grenade with a view to using it in an alternate mode
+Can I get triggers from it and use it to highlight things in puzzle mode???
+The "buy tagrenade" command doesn't work, so there'll need to be some other way
+to distribute them. Possibly GivePlayerItem as soon as you spawn?
+Is there a way to switch to it?
+*/
