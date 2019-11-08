@@ -140,6 +140,8 @@ arrays = defaultdict(list)
 arrays["categories"] = [c.name for c in Cat]
 arrays["category_descr"] = [c.__annotations__.get(c.name, c.name) for c in Cat]
 for weapon, data in info["prefabs"].items():
+	if data.get("prefab") == "grenade":
+		print("Got a nade:", weapon)
 	if "item_class" not in data or "attributes" not in data: continue
 	# This is a sneaky way to restrict it to just "normal weapons", since
 	# you can't apply a sticker to your fists or your tablet :)
