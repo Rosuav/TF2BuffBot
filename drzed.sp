@@ -1290,6 +1290,19 @@ public Action player_pinged(int client, const char[] command, int argc)
 		float pos[3]; GetClientAbsOrigin(client, pos);
 		for (int cl = 1; cl < MaxClients; ++cl) if (IsClientInGame(cl)) blow_smoke(cl, pos);
 	}
+	if (entity == -8) //Currently disabled
+	{
+		char buf[128] = "Ammo:";
+		for (int off = 0; off < 32; ++off)
+			Format(buf, sizeof(buf), "%s %d", buf, GetEntProp(client, Prop_Data, "m_iAmmo", _, off));
+		PrintToChatAll(buf);
+	}
+	if (entity == -7) //Currently disabled
+	{
+		char name[64]; GetClientName(client, name, sizeof(name));
+		PrintToChatAll("%s just acquired a TA Grenade", name);
+		GivePlayerItem(client, "weapon_tagrenade");
+	}
 }
 
 int last_attacker[MAXPLAYERS+1], last_inflictor[MAXPLAYERS+1], last_weapon[MAXPLAYERS+1], crippled_status[MAXPLAYERS+1];
