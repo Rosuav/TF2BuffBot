@@ -1373,6 +1373,8 @@ void uncripple(int client)
 		break;
 	}
 }
+
+bool was_jumping[MAXPLAYERS + 1];
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3],
 	int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
@@ -1410,19 +1412,24 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		buttons & IN_GRENADE2 ? "IN_GRENADE2 " : "",
 		buttons & IN_ATTACK3 ? "IN_ATTACK3 " : ""
 	);*/
-	/*if (buttons & IN_JUMP)
+	if (buttons & IN_JUMP)
 	{
-		//Hack - show stuff every time you jump
-		PrintToStream("Addons: %X, %d, %d  Passives: %d/%d/%d/%d",
-			GetEntProp(client, Prop_Send, "m_iAddonBits"),
-			GetEntProp(client, Prop_Send, "m_iPrimaryAddon"),
-			GetEntProp(client, Prop_Send, "m_iSecondaryAddon"),
-			GetEntProp(client, Prop_Send, "m_passiveItems", _, 0),
-			GetEntProp(client, Prop_Send, "m_passiveItems", _, 1),
-			GetEntProp(client, Prop_Send, "m_passiveItems", _, 2),
-			GetEntProp(client, Prop_Send, "m_passiveItems", _, 3)
-		);
-	}*/
+		/* TODO: Govern this with a cvar to permit double jump
+
+		if (!was_jumping[client] && !(GetEntityFlags(client) & FL_ONGROUND))
+		{
+			//SetEntityGravity(client, -GetEntityGravity(client)); //For the lulz.
+			float velo[3];
+			GetEntPropVector(client, Prop_Data, "m_vecAbsVelocity", velo);
+			//Is it okay for the total vector magnitude to be higher than total speed?
+			if (velo[2] >= 0.0) velo[2] = 240.0;
+			else velo[2] += 240.0;
+			TeleportEntity(client, NULL_VECTOR, NULL_VECTOR, velo);
+		}
+		*/
+		was_jumping[client] = true;
+	}
+	else was_jumping[client] = false;
 	if (IsPlayerAlive(client) && is_crippled(client))
 	{
 		//While you're crippled, you can't do certain things. There may be more restrictions to add.
