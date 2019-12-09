@@ -2421,3 +2421,13 @@ The "buy tagrenade" command doesn't work, so there'll need to be some other way
 to distribute them. Possibly GivePlayerItem as soon as you spawn?
 Is there a way to switch to it?
 */
+
+/* Explore:
+m_iBlockingUseActionInProgress
+
+Does that mean "there's a blocking action in progress, disallow movement"? Could be useful.
+Or does it mean "block the Use action"?
+
+cl_showevents 1
+-- show some event dumps. Could reveal handy info.
+*/
