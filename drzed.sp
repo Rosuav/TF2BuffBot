@@ -43,6 +43,7 @@ ConVar damage_scale_humans = null; //(1.0) Scale all damage dealt by humans
 ConVar damage_scale_bots = null; //(1.0) Scale all damage dealt by bots
 ConVar learn_smoke = null; //(0) Set things up to learn a particular smoke (1 = Dust II Xbox)
 ConVar bomb_defusal_puzzles = null; //(0) Issue this many puzzles before allowing the bomb to be defused (can't be changed during a round)
+ConVar insta_respawn_damage_lag = null; //(0) Instantly respawn on death, with this many seconds of damage immunity and inability to fire
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
@@ -1412,6 +1413,14 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		buttons & IN_GRENADE2 ? "IN_GRENADE2 " : "",
 		buttons & IN_ATTACK3 ? "IN_ATTACK3 " : ""
 	);*/
+	if (GetConVarInt(insta_respawn_damage_lag)
+		&& (buttons & (IN_ATTACK | IN_ATTACK2 | IN_ATTACK3))
+		 && GetEntProp(client, Prop_Send, "m_bGunGameImmunity"))
+	{
+		PrintCenterText(client, "-- You are dead --");
+		buttons &= ~(IN_ATTACK | IN_ATTACK2 | IN_ATTACK3);
+		return Plugin_Changed;
+	}
 	if (buttons & IN_JUMP)
 	{
 		/* TODO: Govern this with a cvar to permit double jump
@@ -2187,13 +2196,32 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		}
 	}
 	//
-	int gate = GetConVarInt(sm_drzed_gate_health_left);
-	if (!gate) return ret; //Health gate not active
 	int full = GetConVarInt(sm_drzed_max_hitpoints); if (!full) full = default_health;
 	full += GetConVarInt(sm_drzed_crippled_health);
 	int health = GetClientHealth(victim);
-	if (health < full) return ret; //Below the health gate
 	int dmg = RoundToFloor(damage);
+	//
+	int respawn_lag = GetConVarInt(insta_respawn_damage_lag);
+	if (respawn_lag && dmg >= health)
+	{
+		//This is a form of instant respawn. You stay in the same place, you keep
+		//all your gear, and you just reset and try again.
+		char name[64]; GetClientName(victim, name, sizeof(name));
+		PrintToChatAll("%s would have died (%d dmg on %d hp).", name, dmg, health);
+		SetEntityHealth(victim, full);
+		//Give back armor if you still have any. Assumes 100 max armor.
+		if (GetEntProp(victim, Prop_Send, "m_ArmorValue") > 0)
+			SetEntProp(victim, Prop_Send, "m_ArmorValue", 100);
+		//NOTE: For some bizarre reason, immunity time is capped at one second
+		//during warmup. I have been unable to find a reason for this, nor any
+		//way to control it. Weird weird.
+		SetEntProp(victim, Prop_Send, "m_bGunGameImmunity", 1);
+		SetEntPropFloat(victim, Prop_Send, "m_fImmuneToGunGameDamageTime", GetGameTime() + respawn_lag);
+	}
+	//
+	int gate = GetConVarInt(sm_drzed_gate_health_left);
+	if (!gate) return ret; //Health gate not active
+	if (health < full) return ret; //Below the health gate
 	if (dmg < health) return ret; //Wouldn't kill you
 	char cls[64]; describe_weapon(weapon, cls, sizeof(cls));
 	if (!strcmp(cls, "Knife")) return ret; //No health-gating knife backstabs
