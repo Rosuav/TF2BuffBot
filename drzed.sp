@@ -1414,11 +1414,12 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		buttons & IN_ATTACK3 ? "IN_ATTACK3 " : ""
 	);*/
 	if (GetConVarInt(insta_respawn_damage_lag)
-		&& (buttons & (IN_ATTACK | IN_ATTACK2 | IN_ATTACK3))
-		 && GetEntProp(client, Prop_Send, "m_bGunGameImmunity"))
+		&& (buttons & (IN_ATTACK | IN_ATTACK2 | IN_ATTACK3 | IN_USE))
+		&& GetEntProp(client, Prop_Send, "m_bGunGameImmunity")
+		&& GetEntPropFloat(client, Prop_Send, "m_fImmuneToGunGameDamageTime") > GetGameTime())
 	{
 		PrintCenterText(client, "-- You are dead --");
-		buttons &= ~(IN_ATTACK | IN_ATTACK2 | IN_ATTACK3);
+		buttons &= ~(IN_ATTACK | IN_ATTACK2 | IN_ATTACK3 | IN_USE);
 		return Plugin_Changed;
 	}
 	if (buttons & IN_JUMP)
