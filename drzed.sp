@@ -2218,6 +2218,13 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		//way to control it. Weird weird.
 		SetEntProp(victim, Prop_Send, "m_bGunGameImmunity", 1);
 		SetEntPropFloat(victim, Prop_Send, "m_fImmuneToGunGameDamageTime", GetGameTime() + respawn_lag);
+		//Update the scoreboard. TODO: Register assists. That might require
+		//manually tracking all damage, which would be stupid, since the game
+		//already tracks it. But I can't find that info anywhere.
+		//TODO: Figure out when and why these stats get reset.
+		if (attacker && attacker < MAXPLAYERS)
+			SetEntProp(attacker, Prop_Data, "m_iFrags", GetClientFrags(attacker) + 1);
+		SetEntProp(victim, Prop_Data, "m_iDeaths", GetClientDeaths(victim) + 1);
 	}
 	//
 	int gate = GetConVarInt(sm_drzed_gate_health_left);
