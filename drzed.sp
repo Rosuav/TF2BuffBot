@@ -1692,18 +1692,32 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		PrintToChat(self, "No highlighted clues.");
 		return;
 	}
-	if (!strcmp(msg, "!spawns"))
+	if (!strcmp(msg, "!entities"))
 	{
+		File fp = OpenFile("entities.log", "w");
 		int ent = -1;
-		int spawns = 0;
-		while ((ent = FindEntityByClassname(ent, "info_deathmatch_spawn")) != -1)
+		char entnames[][] = {"trigger_survival_playarea", "point_dz_weaponspawn", "func_hostage_rescue"};
+		char mapname[64]; GetCurrentMap(mapname, sizeof(mapname));
+		WriteFileLine(fp, "Searching %s for interesting entities...", mapname);
+		for (int i = 0; i < sizeof(entnames); ++i)
 		{
-			float pos[3];
-			GetEntPropVector(ent, Prop_Data, "m_vecOrigin", pos);
-			PrintToChat(self, "Found spawn #%d at (%.2f,%.2f,%.2f): %x %s", ++spawns,
-				pos[0], pos[1], pos[2],
-				ent, IsEntNetworkable(ent) ? "(networkable)" : "(not edict)");
+			int entcount = 0;
+			while ((ent = FindEntityByClassname(ent, entnames[i])) != -1)
+			{
+				float pos[3]; GetEntPropVector(ent, Prop_Data, "m_vecOrigin", pos);
+				float min[3]; GetEntPropVector(ent, Prop_Data, "m_vecMins", min);
+				float max[3]; GetEntPropVector(ent, Prop_Data, "m_vecMaxs", max);
+				WriteFileLine(fp, "%s: %.2f,%.2f,%.2f [%.2f,%.2f,%.2f - %.2f,%.2f,%.2f]", entnames[i],
+					pos[0], pos[1], pos[2],
+					min[0], min[1], min[2],
+					max[0], max[1], max[2]
+				);
+				++entcount;
+			}
+			WriteFileLine(fp, "== %d entities of class %s.", entcount, entnames[i]);
+			PrintToChatAll("Found %d entities of class %s.", entcount, entnames[i]);
 		}
+		CloseHandle(fp);
 		return;
 	}
 	if (0 && !strcmp(msg, "!bomb"))
