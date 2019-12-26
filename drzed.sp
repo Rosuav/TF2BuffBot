@@ -1696,7 +1696,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	{
 		File fp = OpenFile("entities.log", "w");
 		int ent = -1;
-		char entnames[][] = {"trigger_survival_playarea", "point_dz_weaponspawn", "func_hostage_rescue"};
+		char entnames[][] = {"trigger_survival_playarea", "info_map_region", "point_dz_weaponspawn", "func_hostage_rescue"};
 		char mapname[64]; GetCurrentMap(mapname, sizeof(mapname));
 		WriteFileLine(fp, "Searching %s for interesting entities...", mapname);
 		for (int i = 0; i < sizeof(entnames); ++i)
@@ -1707,10 +1707,14 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 				float pos[3]; GetEntPropVector(ent, Prop_Data, "m_vecOrigin", pos);
 				float min[3]; GetEntPropVector(ent, Prop_Data, "m_vecMins", min);
 				float max[3]; GetEntPropVector(ent, Prop_Data, "m_vecMaxs", max);
-				WriteFileLine(fp, "%s: %.2f,%.2f,%.2f [%.2f,%.2f,%.2f - %.2f,%.2f,%.2f]", entnames[i],
+				//Hack! Only info_map_region has a location token.
+				char location[64] = "";
+				if (i == 1) GetEntPropString(ent, Prop_Send, "m_szLocToken", location, sizeof(location));
+				WriteFileLine(fp, "%s: %.2f,%.2f,%.2f [%.2f,%.2f,%.2f - %.2f,%.2f,%.2f] %s", entnames[i],
 					pos[0], pos[1], pos[2],
 					min[0], min[1], min[2],
-					max[0], max[1], max[2]
+					max[0], max[1], max[2],
+					location
 				);
 				++entcount;
 			}
