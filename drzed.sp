@@ -1724,6 +1724,19 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		CloseHandle(fp);
 		return;
 	}
+	if (!strcmp(msg, "!moarentities"))
+	{
+		//23 named locations, want 200ish more spawns. So add 10 per location.
+		//From each location, go up a few hundred HU, and out a random distance
+		//with drop-off. Roll d20, and on a nat 20, reroll and add 20. Multiply
+		//the result by 25 HU, pick a random angle 0-360, and plot that. Scan
+		//down from that point until you hit ground. If you hit ground instantly
+		//or you fail to hit ground after 1000 HU, abort and rerandomize. If you
+		//hit water, find shore? Or put it there anyway? Or abort?
+		//For first try, just place a money there. For the real thing, create a
+		//new point_dz_weaponspawn.
+		return;
+	}
 	if (0 && !strcmp(msg, "!bomb"))
 	{
 		int bomb = plant_bomb();
