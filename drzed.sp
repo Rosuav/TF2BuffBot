@@ -1724,17 +1724,52 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		CloseHandle(fp);
 		return;
 	}
-	if (!strcmp(msg, "!moarentities"))
+	if (0 && !strcmp(msg, "!moarentities"))
 	{
 		//23 named locations, want 200ish more spawns. So add 10 per location.
 		//From each location, go up a few hundred HU, and out a random distance
 		//with drop-off. Roll d20, and on a nat 20, reroll and add 20. Multiply
-		//the result by 25 HU, pick a random angle 0-360, and plot that. Scan
+		//the result by 100 HU, pick a random angle 0-360, and plot that. Scan
 		//down from that point until you hit ground. If you hit ground instantly
 		//or you fail to hit ground after 1000 HU, abort and rerandomize. If you
 		//hit water, find shore? Or put it there anyway? Or abort?
 		//For first try, just place a money there. For the real thing, create a
 		//new point_dz_weaponspawn.
+		//Alas, creating more entities doesn't make the game use them - even if
+		//they're created on map start :( Maybe they need to be activated in some
+		//way? Or maybe there's just an array of them, stored internally, and
+		//that's what the game ACTUALLY uses.
+		int ent = -1;
+		while ((ent = FindEntityByClassname(ent, "info_map_region")) != -1)
+		{
+			char location[64] = ""; GetEntPropString(ent, Prop_Send, "m_szLocToken", location, sizeof(location));
+			float pos[3]; GetEntPropVector(ent, Prop_Data, "m_vecOrigin", pos);
+			PrintToStream("%s: %.2f,%.2f,%.2f", location, pos[0], pos[1], pos[2]);
+			int placed = 0;
+			for (int tries = 0; tries < 100 && placed < 10; ++tries)
+			{
+				int d = 0, dist = 0;
+				while ((d = randrange(20) + 1) == 20) dist += 20;
+				dist += d;
+				float ang[3] = {0.0, 0.0, 0.0}; ang[1] = randrange(360) + 0.0;
+				float dir[3]; GetAngleVectors(ang, dir, NULL_VECTOR, NULL_VECTOR);
+				ScaleVector(dir, dist * 100.0);
+				float loc[3]; AddVectors(pos, dir, loc);
+				loc[2] += 400; //Give us a bit of altitude to make sure we don't run into terrain
+				//Trace down till we hit terrain.
+				float down[3] = {90.0, 0.0, 0.0}; //No, it's not (0,0,-1); this is actually a direction, not a delta-position.
+				TR_TraceRay(loc, down, MASK_SOLID, RayType_Infinite);
+				if (!TR_DidHit(INVALID_HANDLE)) continue;
+				float ground[3]; TR_GetEndPosition(ground, INVALID_HANDLE);
+				float fell = loc[2] - ground[2];
+				if (fell < 20.0 || fell > 1000.0) continue;
+				ground[2] += 20.0; //Lift us a bit above the ground for safety.
+				int spawn = CreateEntityByName("point_dz_weaponspawn");
+				DispatchSpawn(spawn);
+				TeleportEntity(spawn, ground, NULL_VECTOR, NULL_VECTOR);
+				++placed;
+			}
+		}
 		return;
 	}
 	if (0 && !strcmp(msg, "!bomb"))
