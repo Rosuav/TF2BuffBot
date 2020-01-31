@@ -401,6 +401,19 @@ float smoke_targets[1][2][3] = { //Unfortunately the size has to be specified :(
 	//Add others as needed - {{x1,y1,z1},{x2,y2,z2}} where the
 	//second coords are all greater than the firsts.
 };
+/*
+* Blue box: From the passageway from backyard into tuns, standing throw between the rafters (middle of opening).
+  - Precise position depends how far left/right you stand; optimal is about 75% right.
+* Site: From the same passageway, hug the left wall (somewhere near the tuft of grass), and throw through the same hole.
+* Car: Same passageway, hug left wall, come all the way to the arch (but not the freestanding pillar). Same hole, aim parallel to the top corrugated iron.
+* Alt site: From the ambush nook just in tuns proper, aim into the biggest opening, on the right edge of it.
+* Doors: Jump past the AWPer at blue box, get all the way to the corner. Aim into the rectangular gap, in the middle of the long side (left).
+* Window: No standing throw found but I suspect that a moving/jumping throw will be possible.
+  - Best partial success so far comes from standing squarely in front of blue box, right in the corner, and aiming near the tip of the stonework.
+* Flagstones: Stand btwn white angled box and pillar, aim into opening below stonework (left of ctr for safety)
+  - This partly smokes off Window
+* Alternate car: Stand ON the white box, up against the pillar, on top of the wood slat. Aim through the hole, about two thirds down, a tad to the right.
+*/
 float smoke_first_bounce[1][2][3] = {
 	//1: Dust II Xbox
 	//NOTE: If the bounce is extremely close to the wall (-265 to -257), the
