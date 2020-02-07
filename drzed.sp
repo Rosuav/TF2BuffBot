@@ -1758,7 +1758,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		//down from that point until you hit ground. If you hit ground instantly
 		//or you fail to hit ground after 1000 HU, abort and rerandomize. If you
 		//hit water, find shore? Or put it there anyway? Or abort?
-		//For first try, just place a money there. For the real thing, create a
+		//For first try, just place item_cash there. For the real thing, create a
 		//new point_dz_weaponspawn.
 		//Alas, creating more entities doesn't make the game use them - even if
 		//they're created on map start :( Maybe they need to be activated in some
