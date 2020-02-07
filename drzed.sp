@@ -36,6 +36,7 @@ ConVar sm_drzed_anarchy_kept_on_death = null; //(0) Percentage of anarchy stacks
 ConVar sm_drzed_anarchy_per_kill = null; //(0) Whether you gain anarchy for getting a kill
 ConVar sm_drzed_hack = null; //(0) Activate some coded hack - actual meaning may change. Used for rapid development.
 ConVar sm_drzed_allow_recall = null; //(0) Set to 1 to enable !recall and !recall2.
+ConVar sm_drzed_admin_chat_name = null; //("") Name of admin for chat purposes
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 ConVar bots_get_empty_weapon = null; //("") Give bots an ammo-less weapon on startup (eg weapon_glock). Use only if they wouldn't get a weapon in that slot.
 ConVar bot_purchase_delay = null; //(0.0) Delay bot primary weapon purchases by this many seconds
@@ -93,6 +94,7 @@ int last_money[MAXPLAYERS + 1];
 public void OnPluginStart()
 {
 	RegAdminCmd("zed_money", give_all_money, ADMFLAG_SLAY);
+	RegAdminCmd("chat", admin_chat, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("weapon_fire", Event_weapon_fire);
 	HookEvent("round_end", uncripple_all);
@@ -224,6 +226,15 @@ public void OnPluginStart()
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	switch_weapon_call = EndPrepSDKCall();
 	delete gamedata;
+}
+
+public Action admin_chat(int client, int args)
+{
+	char text[512]; GetCmdArgString(text, sizeof(text));
+	char admin[32]; GetConVarString(sm_drzed_admin_chat_name, admin, sizeof(admin));
+	ReplyToCommand(client, "%s: %s", admin, text);
+	PrintToChatAll(" \x04%s : \x01%s", admin, text); //Chat is in green, distinct from both team colours
+	return Plugin_Handled;
 }
 
 //Not quite perfectly uniform. If there's a better way, it can be changed here.
