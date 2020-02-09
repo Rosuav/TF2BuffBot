@@ -1335,7 +1335,7 @@ public Action player_pinged(int client, const char[] command, int argc)
 		float pos[3]; GetClientAbsOrigin(client, pos);
 		//TODO: Ping the crosshair (trace out through eye angles until
 		//impact) as well as the current position.
-		PrintToStream("%s pinged at %.2f, %.2f, %.2f", pos[0], pos[1], pos[2]);
+		PrintToStream("%s pinged at %.2f, %.2f, %.2f", name, pos[0], pos[1], pos[2]);
 	}
 }
 
