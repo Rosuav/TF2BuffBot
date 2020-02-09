@@ -1329,6 +1329,14 @@ public Action player_pinged(int client, const char[] command, int argc)
 		PrintToChatAll("%s just acquired a TA Grenade", name);
 		GivePlayerItem(client, "weapon_tagrenade");
 	}
+	if (entity != -6) //Currently ENABLED
+	{
+		char name[64]; GetClientName(client, name, sizeof(name));
+		float pos[3]; GetClientAbsOrigin(client, pos);
+		//TODO: Ping the crosshair (trace out through eye angles until
+		//impact) as well as the current position.
+		PrintToStream("%s pinged at %.2f, %.2f, %.2f", pos[0], pos[1], pos[2]);
+	}
 }
 
 int last_attacker[MAXPLAYERS+1], last_inflictor[MAXPLAYERS+1], last_weapon[MAXPLAYERS+1], crippled_status[MAXPLAYERS+1];
