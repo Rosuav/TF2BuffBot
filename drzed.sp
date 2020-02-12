@@ -2538,3 +2538,14 @@ Or does it mean "block the Use action"?
 cl_showevents 1
 -- show some event dumps. Could reveal handy info.
 */
+
+/*
+Territory control team deathmatch.
+
+Claimable territory is defined by deathmatch spawn points.
+If you can see a spawn location, you increase your team's control of it.
+Control fades over time, and builds fairly quickly but not instantly.
+Non-spectators can only see their own team's control, as a heat map. Interpret lack of control as
+enemy. You can't see if something's contested.
+Team scores increase according to the number of points that they have better than 66% control of.
+*/
