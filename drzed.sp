@@ -787,7 +787,7 @@ void jayne(int team)
 		money -= 1000; //Ensure that the bots don't spend below $1000 this way (just in case).
 		int bought = 0;
 		int which = -1;
-		char nade_desc[][] = {"HE", "Flash", "Smoke", "Molly"};
+		char nade_desc[][] = {"an HE", "a Flash", "a Smoke", "a Molly"};
 		for (int i = 0; i < 7; ++i)
 		{
 			if (total_nades + bought >= max_nades) break;
