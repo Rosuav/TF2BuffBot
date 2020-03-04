@@ -1818,6 +1818,9 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	{
 		GetClientAbsOrigin(self, marked_pos);
 		GetClientEyeAngles(self, marked_angle);
+		//Locate an instance of some class and mark that position instead
+		//int ent = FindEntityByClassname(-1, "weapon_zone_repulsor");
+		//if (ent != -1) GetEntPropVector(ent, Prop_Send, "m_vecOrigin", marked_pos);
 		PrintToChat(self, "Marked position: %f, %f, %f", marked_pos[0], marked_pos[1], marked_pos[2]);
 		return;
 	}
