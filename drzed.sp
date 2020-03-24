@@ -1329,7 +1329,7 @@ public Action player_pinged(int client, const char[] command, int argc)
 		PrintToChatAll("%s just acquired a TA Grenade", name);
 		GivePlayerItem(client, "weapon_tagrenade");
 	}
-	if (entity != -6) //Currently ENABLED
+	if (entity == -6) //Currently disabled
 	{
 		char name[64]; GetClientName(client, name, sizeof(name));
 		float pos[3]; GetClientAbsOrigin(client, pos);
