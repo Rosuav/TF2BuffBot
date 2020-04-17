@@ -1638,6 +1638,15 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	//TODO some time: Break out all these handlers into functions, and build a
 	//hashtable of "!heal" ==> function. Split the message on the first space,
 	//look it up in the misnamed "trie", and then call the function.
+	if (0 && !strcmp(msg, "!hack"))
+	{
+		int ent = CreateEntityByName("game_player_equip");
+		DispatchKeyValue(ent, "spawnflags", "5"); //or 3 to strip ALL weapons away - even the knife (unless explicitly granted)
+		DispatchKeyValue(ent, "weapon_mac10", "0");
+		DispatchKeyValue(ent, "item_kevlar", "0");
+		AcceptEntityInput(ent, "Use", self, -1, 0);
+		PrintToChatAll("Equipment delivered.");
+	}
 	if (num_puzzles && !strcmp(msg, "!solve"))
 	{
 		PrintToChat(self, "Unsure how to solve the puzzle? Attempt to defuse the bomb for a clue!");
