@@ -2522,6 +2522,8 @@ understand the next part of the code!
   clues, so there's a high chance that a clue will be smoked over.
   - Start by AddTempEntHook("EffectDispatch", show_lots_of_info)
   - Then TE_Start("EffectDispatch") and do the work to create a new one.
+* Possibly grant people weapon_fists rather than knives?
+* Can TA grenades be granted (awarded maybe?) and made able to reveal nearby weapons?
 */
 
 /*
