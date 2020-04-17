@@ -1642,8 +1642,10 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	{
 		int ent = CreateEntityByName("game_player_equip");
 		DispatchKeyValue(ent, "spawnflags", "5"); //or 3 to strip ALL weapons away - even the knife (unless explicitly granted)
-		DispatchKeyValue(ent, "weapon_mac10", "0");
-		DispatchKeyValue(ent, "item_kevlar", "0");
+		DispatchKeyValue(ent, "weapon_mac10", "0"); //You'll get skinned weapons (only) if they're equipped for the team you're on
+		DispatchKeyValue(ent, "weapon_tagrenade", "0"); //Grenades can be given too
+		DispatchKeyValue(ent, "item_kevlar", "0"); //Armor w/o helmet
+		//DispatchKeyValue(ent, "weapon_fists", "0"); //Doesn't seem to work though. Oh well.
 		AcceptEntityInput(ent, "Use", self, -1, 0);
 		PrintToChatAll("Equipment delivered.");
 	}
