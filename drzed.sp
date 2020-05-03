@@ -626,6 +626,27 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		Format(buf, sizeof(buf), "%s %d", buf, GetEntProp(client, Prop_Data, "m_iAmmo", _, off));
 	PrintToStream(buf);
 	#endif
+	#if 0
+	int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	PrintToStream("Accuracy: pen %.5f last %.2f idx %.2f",
+		GetEntPropFloat(weap, Prop_Send, "m_fAccuracyPenalty"),
+		GetEntPropFloat(weap, Prop_Send, "m_fLastShotTime"),
+		GetEntPropFloat(weap, Prop_Send, "m_flRecoilIndex")
+	);
+	//Creating a "reverse recoil pattern" doesn't work. I think what happens is that
+	//the recoil for the current index is added onto the weapon's recoil angles and
+	//stuff, which means that you can't actually subtract that out.
+	//SetEntPropFloat(weap, Prop_Send, "m_flRecoilIndex", GetEntProp(weap, Prop_Send, "m_iClip1") + 0.0);
+
+	//This does work, but doesn't do what you might think. It doesn't keep the weapon
+	//at its initial dot, and it also doesn't keep it going straight up; it actually
+	//seems to have most weapons go straight out sideways like the Krieg - either
+	//left or right, but always the same way for any particular weapon. I think it's
+	//normally going to go a little to the left, then a little to the right, etc,
+	//so in normal usage, it feels like it goes straight up; but constantly resetting
+	//to zero means it goes the same way every time.
+	SetEntPropFloat(weap, Prop_Send, "m_flRecoilIndex", 0.0);
+	#endif
 	if (GetPlayerWeaponSlot(client, 2) != -1) return; //Normally you'll have a knife, and things are fine.
 	int ammo_offset = 0;
 	if (!strcmp(weapon, "weapon_hegrenade")) ammo_offset = 14;
