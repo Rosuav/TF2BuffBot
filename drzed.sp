@@ -2186,7 +2186,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	//If the attacking weapon is one you're currently wielding (ie not a grenade etc)
 	//in one of your first two slots (no knife etc), flag the user (or maybe gun) as
 	//being anarchy-ready. TODO: De-flag if the gun is changed?
-	if (attacker && attacker < MAXPLAYERS && weapon == GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon"))
+	if (attacker >= 0 && attacker < MAXPLAYERS && weapon == GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon"))
 	{
 		if (weapon == GetPlayerWeaponSlot(attacker, 0)) anarchy_available[attacker] |= 1; //Primary weapon
 		else if (weapon == GetPlayerWeaponSlot(attacker, 1)) anarchy_available[attacker] |= 2; //Secondary weapon
