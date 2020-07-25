@@ -2205,7 +2205,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	int score = RoundToFloor(damage);
 	if (score >= cap) score = cap + 100; //100 bonus points for the kill, but the actual damage caps out at the health taken.
 	int teamdmg = 0;
-	if (attacker && attacker < MAXPLAYERS)
+	if (attacker >= 0 && attacker < MAXPLAYERS)
 	{
 		teamdmg = GetClientTeam(victim) == GetClientTeam(attacker);
 		if (is_crippled(attacker) && !teamdmg)
