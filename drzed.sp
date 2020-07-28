@@ -2254,7 +2254,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 
 	//Scale damage according to who's dealing with it (non-hackily)
 	Action ret = Plugin_Continue;
-	if (attacker && attacker < MAXPLAYERS)
+	if (attacker >= 0 && attacker < MAXPLAYERS)
 	{
 		float proportion;
 		if (IsFakeClient(attacker)) proportion = GetConVarFloat(damage_scale_bots);
@@ -2263,7 +2263,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	}
 
 	int hack = GetConVarInt(sm_drzed_hack);
-	if (hack && attacker && attacker < MAXPLAYERS)
+	if (hack && attacker >= 0 && attacker < MAXPLAYERS)
 	{
 		//Mess with damage based on who's dealing it. This is a total hack, and
 		//can change at any time while I play around with testing stuff.
@@ -2301,7 +2301,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		return Plugin_Changed;
 	}
 
-	if (attacker && attacker < MAXPLAYERS)
+	if (attacker >= 0 && attacker < MAXPLAYERS)
 	{
 		int anarchy_bonus = GetConVarInt(sm_drzed_anarchy_bonus) * anarchy[attacker];
 		float newdmg = damage * (100 + anarchy_bonus) / 100.0;
@@ -2359,7 +2359,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		//manually tracking all damage, which would be stupid, since the game
 		//already tracks it. But I can't find that info anywhere.
 		//TODO: Figure out when and why these stats get reset.
-		if (attacker && attacker < MAXPLAYERS)
+		if (attacker >= 0 && attacker < MAXPLAYERS)
 			SetEntProp(attacker, Prop_Data, "m_iFrags", GetClientFrags(attacker) + 1);
 		SetEntProp(victim, Prop_Data, "m_iDeaths", GetClientDeaths(victim) + 1);
 	}
