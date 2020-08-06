@@ -63,7 +63,7 @@ public void PrintToStream(const char[] fmt, any ...)
 StringMap weapon_names;
 StringMap weapon_is_primary;
 ConVar default_weapons[4];
-ConVar ammo_grenade_limit_total;
+ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
 Handle switch_weapon_call = null;
 
 //For anything that needs default health, we'll use this. Any time a character spawns,
@@ -109,6 +109,8 @@ public void OnPluginStart()
 	HookEvent("bomb_begindefuse", puzzle_defuse);
 	HookEvent("bomb_defused", show_defuse_time);
 	HookEvent("player_use", player_use);
+	HookEvent("player_death", player_death);
+
 	//HookEvent("player_hurt", player_hurt);
 	//HookEvent("cs_intermission", reset_stats); //Seems to fire at the end of a match??
 	//HookEvent("announce_phase_end", reset_stats); //Seems to fire at halftime team swap
@@ -220,6 +222,8 @@ public void OnPluginStart()
 	default_weapons[2] = FindConVar("mp_ct_default_secondary");
 	default_weapons[3] = FindConVar("mp_t_default_secondary");
 	ammo_grenade_limit_total = FindConVar("ammo_grenade_limit_total");
+	mp_guardian_special_weapon_needed = FindConVar("mp_guardian_special_weapon_needed");
+	mp_guardian_special_kills_needed = FindConVar("mp_guardian_special_kills_needed");
 
 	Handle gamedata = LoadGameConfigFile("sdkhooks.games");
 	StartPrepSDKCall(SDKCall_Player);
@@ -965,6 +969,26 @@ bool puzzle_highlight(int entity, int state)
 	return true;
 }
 
+float last_guardian_buy_time = 0.0;
+Action check_wave_end(Handle timer, any entity)
+{
+	float buytime = GameRules_GetPropFloat("m_flGuardianBuyUntilTime");
+	if (buytime != last_guardian_buy_time)
+	{
+		last_guardian_buy_time = buytime;
+		//See if any bots are currently alive. If there aren't, it's a new wave!
+		for (int client = 1; client < MAXPLAYERS; ++client)
+			if (IsClientInGame(client) && IsPlayerAlive(client) && IsFakeClient(client))
+				return; //There's a living bot. Don't redo rules.
+		devise_underdome_rules();
+	}
+}
+public void player_death(Event event, const char[] name, bool dontBroadcast)
+{
+	if (GetConVarInt(guardian_underdome_waves))
+		CreateTimer(0.0, check_wave_end, 0, TIMER_FLAG_NO_MAPCHANGE);
+}
+
 public void player_use(Event event, const char[] name, bool dontBroadcast)
 {
 	if (num_puzzles)
@@ -1317,6 +1341,12 @@ public Action player_pinged(int client, const char[] command, int argc)
 	//PrintToStream("Client %d pinged [ping = %d]", client, entity);
 	//if (entity != -1) CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
 	//report_new_entities = true; CreateTimer(1.0, unreport_new, 0, TIMER_FLAG_NO_MAPCHANGE);
+	if (entity == -11) //Currently disabled
+	{
+		int next = GameRules_GetProp("m_nGuardianModeSpecialWeaponNeeded") + 1;
+		GameRules_SetProp("m_nGuardianModeSpecialWeaponNeeded", next);
+		PrintToChatAll("Setting special weapon code to %d", next);
+	}
 	if (num_puzzles && entity == -10) //Currently disabled
 	{
 		//In puzzle mode, allow people to ping weapons as they see them.
@@ -1529,6 +1559,40 @@ public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
+void devise_underdome_rules()
+{
+	if (GameRules_GetProp("m_nGuardianModeSpecialKillsRemaining") == GetConVarInt(mp_guardian_special_kills_needed))
+	{
+		//It's probably the first wave. Or you're doing really REALLY badly.
+		//This doesn't seem to work properly. Not sure why. Empty string ought
+		//to work; it doesn't, and nor does "1".
+		//TODO: Test this. Why doesn't it work? (Or does it now work, since the change to the death check below?)
+		SetConVarString(mp_guardian_special_weapon_needed, "1");
+		PrintToChatAll("Warmup wave! Any kill's a kill!");
+		return;
+	}
+	//GameRules_SetProp("m_nGuardianModeSpecialWeaponNeeded", ???); //Change the gun displayed on the middle left of the screen
+	switch (randrange(3))
+	{
+		case 0:
+		{
+			SetConVarString(mp_guardian_special_weapon_needed, "%weapon_aug%");
+			PrintToChatAll("GOAL: Bullpup");
+		}
+		case 1:
+		{
+			SetConVarString(mp_guardian_special_weapon_needed, "%cond_player_zoomed%");
+			PrintToChatAll("GOAL: Snipers. Zoomed kills only.");
+		}
+		case 2:
+		{
+			SetConVarString(mp_guardian_special_weapon_needed, "%weapon_m4a1% || %weapon_m4a1_silencer%");
+			PrintToChatAll("GOAL: M4");
+		}
+		default: PrintToChatAll("Buggy random - check randrange against switch");
+	}
+}
+
 float armory_positions[][3] = {
 	{-242.552642, -841.306030, 266.671295},
 	{-340.010864, -1103.308471, 88.031250},
@@ -1542,8 +1606,7 @@ char armory_weapons[][] = {
 };
 public void round_started(Event event, const char[] name, bool dontBroadcast)
 {
-	int underdome = GetConVarInt(guardian_underdome_waves);
-	if (underdome)
+	if (GetConVarInt(guardian_underdome_waves) && !GameRules_GetProp("m_bWarmupPeriod"))
 	{
 		for (int i = 0; i < 2; ++i)
 		{
@@ -1556,6 +1619,7 @@ public void round_started(Event event, const char[] name, bool dontBroadcast)
 				TeleportEntity(weap, armory_positions[a], NULL_VECTOR, NULL_VECTOR);
 			}
 		}
+		devise_underdome_rules();
 	}
 }
 
@@ -2693,4 +2757,46 @@ cond_victim_rescuing
 cond_victim_terrorist
 cond_victim_ct
 cond_victim_reloading
+weapon_deagle
+weapon_revolver
+weapon_elite
+weapon_fiveseven
+weapon_cz75a`
+weapon_p228
+weapon_usp
+weapon_ak47
+weapon_aug
+weapon_awp
+weapon_famas
+weapon_g3sg1
+weapon_galil
+weapon_galilar
+weapon_m249
+weapon_m3
+weapon_m4a1
+weapon_m4a1_silencer
+weapon_mac10
+weapon_mp5navy
+weapon_p90
+weapon_scout
+weapon_sg550
+weapon_sg552
+weapon_tmp
+weapon_ump45
+weapon_xm1014
+weapon_bizon
+weapon_mag7
+weapon_negev
+weapon_sawedoff
+weapon_tec9
+weapon_cz75a
+weapon_taser
+weapon_mp7
+weapon_mp9
+weapon_nova
+weapon_p250
+weapon_scar17
+weapon_scar20
+weapon_sg556
+weapon_ssg08
 */
