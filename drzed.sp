@@ -45,6 +45,7 @@ ConVar damage_scale_bots = null; //(1.0) Scale all damage dealt by bots
 ConVar learn_smoke = null; //(0) Set things up to learn a particular smoke (1 = Dust II Xbox)
 ConVar bomb_defusal_puzzles = null; //(0) Issue this many puzzles before allowing the bomb to be defused (can't be changed during a round)
 ConVar insta_respawn_damage_lag = null; //(0) Instantly respawn on death, with this many seconds of damage immunity and inability to fire
+ConVar guardian_underdome_waves = null; //(0) Utilize Underdome rules
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
@@ -97,6 +98,7 @@ public void OnPluginStart()
 	RegAdminCmd("chat", admin_chat, ADMFLAG_SLAY);
 	HookEvent("player_say", Event_PlayerChat);
 	HookEvent("weapon_fire", Event_weapon_fire);
+	HookEvent("round_start", round_started);
 	HookEvent("round_end", uncripple_all);
 	HookEvent("bomb_planted", record_planter);
 	HookEvent("smokegrenade_detonate", smoke_popped);
@@ -1527,6 +1529,36 @@ public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
+float armory_positions[][3] = {
+	{-242.552642, -841.306030, 266.671295},
+	{-340.010864, -1103.308471, 88.031250},
+	{-1302.787597, -888.107421, 92.031250},
+	{-427.399749, -286.893615, 72.031250},
+	{-1478.015991, -82.491691, 37.631965},
+};
+char armory_weapons[][] = {
+	"weapon_usp_silencer",
+	"weapon_mp5sd",
+};
+public void round_started(Event event, const char[] name, bool dontBroadcast)
+{
+	int underdome = GetConVarInt(guardian_underdome_waves);
+	if (underdome)
+	{
+		for (int i = 0; i < 2; ++i)
+		{
+			//Spawn weapons in a little cache at one of several randomly-selected locations.
+			int a = randrange(5);
+			for (int w = 0; w < sizeof(armory_weapons); ++w)
+			{
+				int weap = CreateEntityByName(armory_weapons[w]);
+				DispatchSpawn(weap);
+				TeleportEntity(weap, armory_positions[a], NULL_VECTOR, NULL_VECTOR);
+			}
+		}
+	}
+}
+
 /* So, uhh.... this is one of those cases where I have NO idea what's wrong.
 Apparently, the healthbonus_for_warmup flag is getting reset unexpectedly.
 Having a few shims appears to prevent this. Cannot find any bug in my code,
@@ -2588,4 +2620,77 @@ Control fades over time, and builds fairly quickly but not instantly.
 Non-spectators can only see their own team's control, as a heat map. Interpret lack of control as
 enemy. You can't see if something's contested.
 Team scores increase according to the number of points that they have better than 66% control of.
+*/
+
+
+/*
+TODO: CS:GO Guardian with every wave having a different attribute, from Moxxi's Underdome
+* Can we get an event on wave end? Worst case, try to use death status and see if any fake clients are alive
+* Change the mp_guardian_special_weapon_needed cvar on the fly
+* Would be awesome to actually lift Moxxi's voice lines, but that's beyond me
+* Disable bomb planting. Yes, this theoretically means players can cheese it by hiding until the bots suicide. Just don't do that.
+* Maybe provide an armory as well. Provide a small number of cheap weapons eg USP-S and MP5. These would be available for people who don't have them equipped.
+  - Possibly have 4-5 locations, and randomly select 1-2 of them to have the weapons spawn.
+* First round is a warmup - any weapon, any kill, bots maybe only get pistols. Then pick one from this list, and after X rounds, pick two:
+  - Headshot kills only. If the death blow wasn't a HS, it doesn't tick up the counter.
+  - No headshots. If you shoot someone in the head, it does same as a chest shot.
+  - Shotguns only; SMGs only; Snipers and LMGs only. Counter only increments if the right weapon class used.
+    - Other weapons DO still deal damage. It just won't count to the goal unless the killing blow is correct.
+  - Pocket AWP. Your sidearm deals double damage.
+  - Low gravity??
+  - Low accuracy??
+  - Enemies get 150 HP (or in a later round, 200 HP)
+  - Players have no armor ("naked")
+  - Enemies and players all move faster??
+  - Enemies and players all move slower??
+  - Horde wave! Spawn 2-3 times as many bots but they only have knives.
+  - Vampiric weapons
+  - Suppressed weapons
+* Can we permit bomb plants and defuses? If the bots plant, then the objective is disabled until it's defused (upon which the bots spawn a new bomb).
+  - Spawn infinite enemies while the bomb is lit. Defuse under pressure!
+
+
+act_kill_human
+act_kill_chicken
+act_win_match
+act_flashbang_enemy
+act_pick_up_hostage
+act_rescue_hostage
+act_defuse_bomb
+act_plant_bomb
+act_damage
+act_win_round
+act_dm_bonus_points
+act_income
+act_cash
+act_spend
+cond_damage_headshot
+cond_damage_burn
+cond_match_unique_weapon
+cond_roundstate_pistolround
+cond_roundstate_finalround
+cond_roundstate_matchpoint
+cond_roundstate_bomb_planted
+cond_item_own
+cond_item_borrowed
+cond_item_borrowed_enemy
+cond_item_borrowed_teammate
+cond_item_borrowed_victim
+cond_item_nondefault
+cond_bullet_since_spawn
+cond_player_rescuing
+cond_player_zoomed
+cond_player_blind
+cond_player_terrorist
+cond_player_ct
+cond_life_killstreak_human
+cond_life_killstreak_chicken
+cond_match_rounds_won
+cond_match_rounds_played
+cond_victim_blind
+cond_victim_zoomed
+cond_victim_rescuing
+cond_victim_terrorist
+cond_victim_ct
+cond_victim_reloading
 */
