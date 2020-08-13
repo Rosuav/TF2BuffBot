@@ -1582,10 +1582,9 @@ void devise_underdome_rules()
 	if (killsneeded == GetConVarInt(mp_guardian_special_kills_needed))
 	{
 		//It's probably the first wave. Or you're doing really REALLY badly.
-		//This doesn't seem to work properly. Not sure why. Empty string ought
-		//to work; it doesn't, and nor does "1".
-		//TODO: Test this. Why doesn't it work? (Or does it now work, since the change to the death check below?)
-		SetConVarString(mp_guardian_special_weapon_needed, "1");
+		//The obvious thing doesn't seem to work properly. Not sure why. Empty string
+		//ought to work; it doesn't, and nor does "1", so instead we use a tautology.
+		SetConVarString(mp_guardian_special_weapon_needed, "%cond_player_zoomed% || !%cond_player_zoomed%");
 		PrintToChatAll("Warmup wave! Any kill's a kill!");
 		underdome_mode = 0;
 		return;
