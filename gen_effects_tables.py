@@ -147,7 +147,7 @@ with open("randeffects.inc", "w") as f:
 
 with open("underdome.inc", "w") as f:
 	for flag in UF:
-		print("#define %s %d\n" % (str(flag).replace(".", "_"), int(flag)), file=f)
+		print("#define %s %d" % (str(flag).replace(".", "_"), int(flag)), file=f)
 	for block, example in underdome_modes[0].items():
 		# For each key in the dict, create a dedicated data block
 		if isinstance(example, int):
