@@ -126,9 +126,16 @@ underdome_modes = [
 		"killok": "M4 kill",
 		"killbad": "",
 	},
+	{
+		"intro": "GOAL: Baroness",
+		"needed": "%weapon_deagle% || %weapon_p90% || %weapon_xm1014% || %weapon_scar20% || %weapon_g3sg1% || %weapon_m249% || %weapon_knife%",
+		"flags": 0,
+		"killok": "",
+		"killbad": "Weapon too cheap, doesn't count!",
+	},
+	# TODO: Assisted kills only. Team up!
 ]
-# Baroness mode (Aurelia): only the most expensive thing in any category
-# Deagle, P90, XM1014, M249, either Dak (and knife kills b/c kaching)
+
 with open("randeffects.inc", "w") as f:
 	for name, options in effects.items():
 		print("TFCond %s[] = {" % name, file=f)
