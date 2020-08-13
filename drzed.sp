@@ -969,9 +969,24 @@ bool puzzle_highlight(int entity, int state)
 	return true;
 }
 
+//TODO: Give money back
+#include "underdome.inc"
+int underdome_mode = 0;
+int killsneeded;
 float last_guardian_buy_time = 0.0;
 Action check_wave_end(Handle timer, any entity)
 {
+	int killsnowneeded = GameRules_GetProp("m_nGuardianModeSpecialKillsRemaining");
+	if (underdome_mode)
+	{
+		if (killsneeded != killsnowneeded)
+			//Good kill. TODO: Don't print at all if empty string (or does it already do that??)
+			PrintToChatAll(underdome_killok[underdome_mode - 1]);
+		else
+			//Bad kill - or player kill. TODO: See if the victim was a fake client.
+			PrintToChatAll(underdome_killbad[underdome_mode - 1]);
+	}
+	killsneeded = killsnowneeded;
 	float buytime = GameRules_GetPropFloat("m_flGuardianBuyUntilTime");
 	if (buytime != last_guardian_buy_time)
 	{
@@ -987,6 +1002,7 @@ public void player_death(Event event, const char[] name, bool dontBroadcast)
 {
 	if (GetConVarInt(guardian_underdome_waves))
 		CreateTimer(0.0, check_wave_end, 0, TIMER_FLAG_NO_MAPCHANGE);
+	else underdome_mode = 0;
 }
 
 public void player_use(Event event, const char[] name, bool dontBroadcast)
@@ -1559,9 +1575,11 @@ public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
+Action show_underdome_mode(Handle timer, any entity) {PrintCenterTextAll(underdome_intro[underdome_mode - 1]);}
 void devise_underdome_rules()
 {
-	if (GameRules_GetProp("m_nGuardianModeSpecialKillsRemaining") == GetConVarInt(mp_guardian_special_kills_needed))
+	killsneeded = GameRules_GetProp("m_nGuardianModeSpecialKillsRemaining");
+	if (killsneeded == GetConVarInt(mp_guardian_special_kills_needed))
 	{
 		//It's probably the first wave. Or you're doing really REALLY badly.
 		//This doesn't seem to work properly. Not sure why. Empty string ought
@@ -1569,28 +1587,14 @@ void devise_underdome_rules()
 		//TODO: Test this. Why doesn't it work? (Or does it now work, since the change to the death check below?)
 		SetConVarString(mp_guardian_special_weapon_needed, "1");
 		PrintToChatAll("Warmup wave! Any kill's a kill!");
+		underdome_mode = 0;
 		return;
 	}
 	//GameRules_SetProp("m_nGuardianModeSpecialWeaponNeeded", ???); //Change the gun displayed on the middle left of the screen
-	switch (randrange(3))
-	{
-		case 0:
-		{
-			SetConVarString(mp_guardian_special_weapon_needed, "%weapon_aug%");
-			PrintToChatAll("GOAL: Bullpup");
-		}
-		case 1:
-		{
-			SetConVarString(mp_guardian_special_weapon_needed, "%cond_player_zoomed%");
-			PrintToChatAll("GOAL: Snipers. Zoomed kills only.");
-		}
-		case 2:
-		{
-			SetConVarString(mp_guardian_special_weapon_needed, "%weapon_m4a1% || %weapon_m4a1_silencer%");
-			PrintToChatAll("GOAL: M4");
-		}
-		default: PrintToChatAll("Buggy random - check randrange against switch");
-	}
+	int m = randrange(sizeof(underdome_flags)); underdome_mode = m + 1;
+	PrintToChatAll(underdome_intro[m]);
+	CreateTimer(0.25, show_underdome_mode, 0, TIMER_FLAG_NO_MAPCHANGE);
+	SetConVarString(mp_guardian_special_weapon_needed, underdome_needed[m]);
 }
 
 float armory_positions[][3] = {
@@ -1621,6 +1625,7 @@ public void round_started(Event event, const char[] name, bool dontBroadcast)
 		}
 		devise_underdome_rules();
 	}
+	else underdome_mode = 0;
 }
 
 /* So, uhh.... this is one of those cases where I have NO idea what's wrong.

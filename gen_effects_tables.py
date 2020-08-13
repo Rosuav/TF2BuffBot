@@ -2,6 +2,7 @@
 # Generate the randeffects.inc file for inclusion into carnage.sp
 import json # Quickest way to get C-like string encoding
 import re
+from enum import IntFlag, auto
 
 # These tables define the effects possible from the !roulette command.
 # The "benefits" table is also used by the !gift command. The intention
@@ -99,6 +100,35 @@ notable_kills = {
 # TF_CUSTOM_PENETRATE_HEADSHOT, TF_CUSTOM_FLYINGBURN, TF_CUSTOM_AEGIS_ROUND,
 # TF_CUSTOM_PRACTICE_STICKY, TF_CUSTOM_THROWABLE, TF_CUSTOM_THROWABLE_KILL
 
+class UF(IntFlag):
+	NO_HEADSHOTS = auto()
+	HEADSHOTS_ONLY = auto()
+
+underdome_modes = [
+	{
+		"intro": "GOAL: Bullpup",
+		"needed": "%weapon_aug%",
+		"flags": 0,
+		"killok": "Aug kill",
+		"killbad": "Non-aug kill, doesn't count",
+	},
+	{
+		"intro": "GOAL: Snipers. Zoomed kills only.",
+		"needed": "%cond_player_zoomed%",
+		"flags": 0,
+		"killok": "",
+		"killbad": "Kills only count if you're scoped in!",
+	},
+	{
+		"intro": "GOAL: M4",
+		"needed": "%weapon_m4a1% || %weapon_m4a1_silencer%",
+		"flags": 0,
+		"killok": "M4 kill",
+		"killbad": "",
+	},
+]
+# Baroness mode (Aurelia): only the most expensive thing in any category
+# Deagle, P90, XM1014, M249, either Dak (and knife kills b/c kaching)
 with open("randeffects.inc", "w") as f:
 	for name, options in effects.items():
 		print("TFCond %s[] = {" % name, file=f)
@@ -114,6 +144,20 @@ with open("randeffects.inc", "w") as f:
 			if not desc.startswith('"%s'): desc = r'"\x079ACDFF\x01' + desc[1:]
 			print("\t%s," % desc, file=f)
 		print("};\n", file=f)
+
+with open("underdome.inc", "w") as f:
+	for flag in UF:
+		print("#define %s %d\n" % (str(flag).replace(".", "_"), int(flag)), file=f)
+	for block, example in underdome_modes[0].items():
+		# For each key in the dict, create a dedicated data block
+		if isinstance(example, int):
+			# Print it all out on one line for simplicity
+			print("int underdome_%s[] = {%s};" % (block, ",".join(str(mode[block]) for mode in underdome_modes)), file=f)
+			continue
+		print("char underdome_%s[][] = {" % block, file=f)
+		for mode in underdome_modes:
+			print("\t%s," % json.dumps(mode[block]), file=f)
+		print("};", file=f);
 
 def parse_convars(fn, **mappings):
 	"""Parse out cvar definitions and create an include file
