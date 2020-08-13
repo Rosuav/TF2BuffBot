@@ -2765,7 +2765,7 @@ weapon_deagle
 weapon_revolver
 weapon_elite
 weapon_fiveseven
-weapon_cz75a`
+weapon_cz75a
 weapon_p228
 weapon_usp
 weapon_ak47

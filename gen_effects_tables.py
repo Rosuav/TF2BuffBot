@@ -101,8 +101,12 @@ notable_kills = {
 # TF_CUSTOM_PRACTICE_STICKY, TF_CUSTOM_THROWABLE, TF_CUSTOM_THROWABLE_KILL
 
 class UF(IntFlag):
+	# Headshots deal 1.0 damage instead of 4.0
 	NO_HEADSHOTS = auto()
+	# Non-headshots deal 0.0 damage. Can technically be combined with NO_HEADSHOTS but it'd be annoying.
 	HEADSHOTS_ONLY = auto()
+	# Note that cond_damage_headshot can be used (directly or inverted) to permit all damage but only
+	# count the kill if it was/wasn't a headshot.
 
 underdome_modes = [
 	{
@@ -134,6 +138,9 @@ underdome_modes = [
 		"killbad": "Weapon too cheap, doesn't count!",
 	},
 	# TODO: Assisted kills only. Team up!
+	# TODO: cond_item_borrowed_teammate - "trade weapons with your buddy"
+	# TODO: cond_item_nondefault - what does that mean? USP-S but not P2000?
+	# TODO: cond_victim_blind - flash 'em and smash 'em
 ]
 
 with open("randeffects.inc", "w") as f:
