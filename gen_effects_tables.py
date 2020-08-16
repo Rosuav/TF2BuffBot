@@ -137,10 +137,11 @@ underdome_modes = [
 		"killok": "",
 		"killbad": "Weapon too cheap, doesn't count!",
 	},
-	# TODO: Assisted kills only. Team up!
+	# TODO: Assisted kills only. Team up! (Not sure I can make this one work. Would be nice though.)
 	# TODO: cond_item_borrowed_teammate - "trade weapons with your buddy"
 	# TODO: cond_item_nondefault - what does that mean? USP-S but not P2000?
-	# TODO: cond_victim_blind - flash 'em and smash 'em
+	# TODO: cond_victim_blind - flash 'em and smash 'em. Would need a flag that gives a free flashbang every few seconds.
+	# TODO: cond_damage_burn - burn, baby, burn! "I'm sending you some of my old bottles of wine. Use them." (Give T-side mollies.)
 ]
 
 with open("randeffects.inc", "w") as f:
