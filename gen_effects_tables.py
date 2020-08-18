@@ -142,6 +142,7 @@ underdome_modes = [
 	# TODO: cond_item_nondefault - what does that mean? USP-S but not P2000?
 	# TODO: cond_victim_blind - flash 'em and smash 'em. Would need a flag that gives a free flashbang every few seconds.
 	# TODO: cond_damage_burn - burn, baby, burn! "I'm sending you some of my old bottles of wine. Use them." (Give T-side mollies.)
+	# TODO: Low gravity, high gravity, low movement speed, high movement speed - separate flags for Ts and CTs
 ]
 
 with open("randeffects.inc", "w") as f:
