@@ -984,12 +984,14 @@ void reset_underdome_config()
 		KillTimer(underdome_ticker);
 		underdome_ticker = INVALID_HANDLE;
 	}
+	underdome_mode = 0;
+	adjust_underdome_gravity();
 }
 
 Action check_wave_end(Handle timer, int victim)
 {
 	int killsnowneeded = GameRules_GetProp("m_nGuardianModeSpecialKillsRemaining");
-	if (underdome_mode && GetClientTeam(victim) == 2) //No messages when a CT dies
+	if (underdome_mode && IsClientInGame(victim) && GetClientTeam(victim) == 2) //No messages when a CT dies or someone disconnects
 	{
 		if (killsneeded != killsnowneeded)
 			//Good kill. TODO: Don't print at all if empty string (or does it already do that??)
