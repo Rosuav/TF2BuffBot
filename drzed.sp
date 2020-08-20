@@ -985,10 +985,10 @@ void reset_underdome_config()
 	}
 }
 
-Action check_wave_end(Handle timer, any entity)
+Action check_wave_end(Handle timer, int victim)
 {
 	int killsnowneeded = GameRules_GetProp("m_nGuardianModeSpecialKillsRemaining");
-	if (underdome_mode)
+	if (underdome_mode && GetClientTeam(victim) == 2) //No messages when a CT dies
 	{
 		if (killsneeded != killsnowneeded)
 			//Good kill. TODO: Don't print at all if empty string (or does it already do that??)
@@ -1012,7 +1012,7 @@ Action check_wave_end(Handle timer, any entity)
 public void player_death(Event event, const char[] name, bool dontBroadcast)
 {
 	if (GetConVarInt(guardian_underdome_waves))
-		CreateTimer(0.0, check_wave_end, 0, TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.0, check_wave_end, GetClientOfUserId(event.GetInt("userid")), TIMER_FLAG_NO_MAPCHANGE);
 	else reset_underdome_config();
 }
 
