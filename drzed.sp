@@ -969,11 +969,22 @@ bool puzzle_highlight(int entity, int state)
 	return true;
 }
 
-//TODO: Give money back
 #include "underdome.inc"
 int underdome_mode = 0;
 int killsneeded;
 float last_guardian_buy_time = 0.0;
+Handle underdome_ticker = INVALID_HANDLE;
+void reset_underdome_config()
+{
+	//Clear out anything that's set up specifically for Underdome mode
+	//Must be idempotent - can be called when we've never had any Underdoming.
+	if (underdome_ticker != INVALID_HANDLE)
+	{
+		KillTimer(underdome_ticker);
+		underdome_ticker = INVALID_HANDLE;
+	}
+}
+
 Action check_wave_end(Handle timer, any entity)
 {
 	int killsnowneeded = GameRules_GetProp("m_nGuardianModeSpecialKillsRemaining");
@@ -1002,7 +1013,7 @@ public void player_death(Event event, const char[] name, bool dontBroadcast)
 {
 	if (GetConVarInt(guardian_underdome_waves))
 		CreateTimer(0.0, check_wave_end, 0, TIMER_FLAG_NO_MAPCHANGE);
-	else underdome_mode = 0;
+	else reset_underdome_config();
 }
 
 public void player_use(Event event, const char[] name, bool dontBroadcast)
@@ -1624,7 +1635,7 @@ public void round_started(Event event, const char[] name, bool dontBroadcast)
 		}
 		devise_underdome_rules();
 	}
-	else underdome_mode = 0;
+	else reset_underdome_config();
 }
 
 /* So, uhh.... this is one of those cases where I have NO idea what's wrong.
