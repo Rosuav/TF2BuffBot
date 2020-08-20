@@ -107,6 +107,14 @@ class UF(IntFlag):
 	HEADSHOTS_ONLY = auto()
 	# Note that cond_damage_headshot can be used (directly or inverted) to permit all damage but only
 	# count the kill if it was/wasn't a headshot.
+	FREE_HEGRENADE = auto()
+	FREE_FLASHBANG = auto()
+	FREE_MOLLY = auto()
+	FREE_TAGRENADE = auto()
+	# These flags give free items to all CTs and are handled with a single block of code.
+	FREEBIES = FREE_HEGRENADE | FREE_FLASHBANG | FREE_MOLLY | FREE_TAGRENADE
+	# These flags require the ticking timer. As soon as one is seen, the timer will be started.
+	NEED_TIMER = FREEBIES | 256 # hack - has to be different from FREEBIES. Once something else uses the timer, remove the arbitrary 256.
 
 underdome_modes = [
 	{
@@ -137,10 +145,16 @@ underdome_modes = [
 		"killok": "",
 		"killbad": "Weapon too cheap, doesn't count!",
 	},
+	{
+		"intro": "GOAL: Flash 'em and Smash 'em!",
+		"needed": "%cond_victim_blind%",
+		"flags": UF.FREE_FLASHBANG,
+		"killok": "",
+		"killbad": "No good, he saw that coming!",
+	},
 	# TODO: Assisted kills only. Team up! (Not sure I can make this one work. Would be nice though.)
 	# TODO: cond_item_borrowed_teammate - "trade weapons with your buddy"
 	# TODO: cond_item_nondefault - what does that mean? USP-S but not P2000?
-	# TODO: cond_victim_blind - flash 'em and smash 'em. Would need a flag that gives a free flashbang every few seconds.
 	# TODO: cond_damage_burn - burn, baby, burn! "I'm sending you some of my old bottles of wine. Use them." (Give T-side mollies.)
 	# TODO: Low gravity, high gravity, low movement speed, high movement speed - separate flags for Ts and CTs
 ]
@@ -168,7 +182,7 @@ with open("underdome.inc", "w") as f:
 		# For each key in the dict, create a dedicated data block
 		if isinstance(example, int):
 			# Print it all out on one line for simplicity
-			print("int underdome_%s[] = {%s};" % (block, ",".join(str(mode[block]) for mode in underdome_modes)), file=f)
+			print("int underdome_%s[] = {%s};" % (block, ",".join(str(int(mode[block])) for mode in underdome_modes)), file=f)
 			continue
 		print("char underdome_%s[][] = {" % block, file=f)
 		for mode in underdome_modes:

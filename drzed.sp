@@ -1587,6 +1587,31 @@ public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
 }
 
 Action show_underdome_mode(Handle timer, any entity) {PrintCenterTextAll(underdome_intro[underdome_mode - 1]);}
+
+Action underdome_tick(Handle timer, any data)
+{
+	if (!underdome_mode) {underdome_ticker = INVALID_HANDLE; return Plugin_Stop;}
+	int flg = underdome_flags[underdome_mode - 1];
+	PrintToChatAll("Current underdome flags: %d", flg);
+	if (flg & UF_FREEBIES)
+	{
+		for (int client = 1; client < MaxClients; ++client)
+		{
+			if (!IsClientInGame(client) || !IsPlayerAlive(client) || IsFakeClient(client)) continue;
+			//TODO: Check the max grenades too
+			if ((flg & UF_FREE_HEGRENADE) && !GetEntProp(client, Prop_Data, "m_iAmmo", _, 14))
+				GivePlayerItem(client, "weapon_hegrenade");
+			if ((flg & UF_FREE_FLASHBANG) && !GetEntProp(client, Prop_Data, "m_iAmmo", _, 15))
+				GivePlayerItem(client, "weapon_flashbang");
+			if ((flg & UF_FREE_MOLLY) && !GetEntProp(client, Prop_Data, "m_iAmmo", _, 17))
+				GivePlayerItem(client, "weapon_molotov");
+			if ((flg & UF_FREE_TAGRENADE) && !GetEntProp(client, Prop_Data, "m_iAmmo", _, 22))
+				GivePlayerItem(client, "weapon_tagrenade");
+		}
+	}
+	return Plugin_Continue;
+}
+
 void devise_underdome_rules()
 {
 	killsneeded = GameRules_GetProp("m_nGuardianModeSpecialKillsRemaining");
@@ -1604,6 +1629,8 @@ void devise_underdome_rules()
 	int m = randrange(sizeof(underdome_flags)); underdome_mode = m + 1;
 	PrintToChatAll(underdome_intro[m]);
 	CreateTimer(0.25, show_underdome_mode, 0, TIMER_FLAG_NO_MAPCHANGE);
+	if (underdome_flags[m] & UF_NEED_TIMER)
+		underdome_ticker = CreateTimer(7.0, underdome_tick, 0, TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
 	SetConVarString(mp_guardian_special_weapon_needed, underdome_needed[m]);
 }
 
