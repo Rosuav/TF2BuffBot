@@ -176,6 +176,8 @@ underdome_modes = [
 	# TODO: Assisted kills only. Team up! (Not sure I can make this one work. Would be nice though.)
 	# TODO: cond_item_nondefault - what does that mean? USP-S but not P2000?
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
+	# TODO: Weapon category challenges
+	# TODO: Headshot / no-headshot challenges
 ]
 
 with open("randeffects.inc", "w") as f:
