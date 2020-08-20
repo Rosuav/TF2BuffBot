@@ -1616,14 +1616,21 @@ Action underdome_tick(Handle timer, any data)
 		for (int client = 1; client < MaxClients; ++client)
 		{
 			if (!IsClientInGame(client) || !IsPlayerAlive(client) || IsFakeClient(client)) continue;
-			//TODO: Check the max grenades too
-			if ((flg & UF_FREE_HEGRENADE) && !GetEntProp(client, Prop_Data, "m_iAmmo", _, 14))
+			int have_he = GetEntProp(client, Prop_Data, "m_iAmmo", _, 14);
+			int have_flash = GetEntProp(client, Prop_Data, "m_iAmmo", _, 15);
+			int have_smoke = GetEntProp(client, Prop_Data, "m_iAmmo", _, 16);
+			int have_molly = GetEntProp(client, Prop_Data, "m_iAmmo", _, 17);
+			int have_decoy = GetEntProp(client, Prop_Data, "m_iAmmo", _, 18);
+			int have_ta = GetEntProp(client, Prop_Data, "m_iAmmo", _, 22);
+			int total_nades = have_he + have_flash + have_smoke + have_molly + have_decoy + have_ta;
+			//TODO: Check the max grenades instead of assuming four
+			if ((flg & UF_FREE_HEGRENADE) && !have_he && total_nades < 4)
 				GivePlayerItem(client, "weapon_hegrenade");
-			if ((flg & UF_FREE_FLASHBANG) && !GetEntProp(client, Prop_Data, "m_iAmmo", _, 15))
+			if ((flg & UF_FREE_FLASHBANG) && !have_flash && total_nades < 4)
 				GivePlayerItem(client, "weapon_flashbang");
-			if ((flg & UF_FREE_MOLLY) && !GetEntProp(client, Prop_Data, "m_iAmmo", _, 17))
+			if ((flg & UF_FREE_MOLLY) && !have_molly && total_nades < 4)
 				GivePlayerItem(client, "weapon_molotov");
-			if ((flg & UF_FREE_TAGRENADE) && !GetEntProp(client, Prop_Data, "m_iAmmo", _, 22))
+			if ((flg & UF_FREE_TAGRENADE) && !have_ta && total_nades < 4)
 				GivePlayerItem(client, "weapon_tagrenade");
 		}
 	}
