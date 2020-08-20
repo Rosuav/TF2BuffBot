@@ -807,7 +807,8 @@ void jayne(int team)
 		int have_smoke = GetEntProp(client, Prop_Data, "m_iAmmo", _, 16);
 		int have_molly = GetEntProp(client, Prop_Data, "m_iAmmo", _, 17);
 		int have_decoy = GetEntProp(client, Prop_Data, "m_iAmmo", _, 18);
-		int total_nades = have_he + have_flash + have_smoke + have_molly + have_decoy;
+		int have_ta = GetEntProp(client, Prop_Data, "m_iAmmo", _, 22);
+		int total_nades = have_he + have_flash + have_smoke + have_molly + have_decoy + have_ta;
 		int max_nades = GetConVarInt(ammo_grenade_limit_total);
 		//TODO: Respect per-type maximums that might be higher than 1
 		int molly_price = team == 2 ? 400 : 600; //Incendiary grenades are overpriced for CTs
