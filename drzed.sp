@@ -1629,7 +1629,7 @@ void devise_underdome_rules()
 	int m = randrange(sizeof(underdome_flags)); underdome_mode = m + 1;
 	PrintToChatAll(underdome_intro[m]);
 	CreateTimer(0.25, show_underdome_mode, 0, TIMER_FLAG_NO_MAPCHANGE);
-	if (underdome_flags[m] & UF_NEED_TIMER)
+	if ((underdome_flags[m] & UF_NEED_TIMER) && underdome_ticker == INVALID_HANDLE)
 		underdome_ticker = CreateTimer(7.0, underdome_tick, 0, TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
 	SetConVarString(mp_guardian_special_weapon_needed, underdome_needed[m]);
 }
