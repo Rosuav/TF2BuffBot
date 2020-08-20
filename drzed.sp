@@ -975,6 +975,21 @@ int underdome_mode = 0;
 int killsneeded;
 float last_guardian_buy_time = 0.0;
 Handle underdome_ticker = INVALID_HANDLE;
+
+void adjust_underdome_gravity()
+{
+	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
+	for (int client = 1; client < MaxClients; ++client)
+	{
+		if (!IsClientInGame(client) || !IsPlayerAlive(client)) continue;
+		float grav = 1.0;
+		int ct = GetClientTeam(client) == 3;
+		if (flg & (ct ? UF_CT_LOW_GRAVITY : UF_T_LOW_GRAVITY)) grav = 0.5;
+		if (flg & (ct ? UF_CT_HIGH_GRAVITY : UF_T_HIGH_GRAVITY)) grav = 1.75;
+		SetEntityGravity(client, grav);
+	}
+}
+
 void reset_underdome_config()
 {
 	//Clear out anything that's set up specifically for Underdome mode
@@ -1612,6 +1627,7 @@ Action underdome_tick(Handle timer, any data)
 				GivePlayerItem(client, "weapon_tagrenade");
 		}
 	}
+	adjust_underdome_gravity(); //Just in case
 	return Plugin_Continue;
 }
 
@@ -1626,6 +1642,7 @@ void devise_underdome_rules()
 		SetConVarString(mp_guardian_special_weapon_needed, "%cond_player_zoomed% || !%cond_player_zoomed%");
 		PrintToChatAll("Warmup wave! Any kill's a kill!");
 		underdome_mode = 0;
+		adjust_underdome_gravity();
 		return;
 	}
 	//GameRules_SetProp("m_nGuardianModeSpecialWeaponNeeded", ???); //Change the gun displayed on the middle left of the screen
@@ -1635,6 +1652,7 @@ void devise_underdome_rules()
 	if ((underdome_flags[m] & UF_NEED_TIMER) && underdome_ticker == INVALID_HANDLE)
 		underdome_ticker = CreateTimer(7.0, underdome_tick, 0, TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
 	SetConVarString(mp_guardian_special_weapon_needed, underdome_needed[m]);
+	adjust_underdome_gravity();
 }
 
 float armory_positions[][3] = {

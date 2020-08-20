@@ -111,6 +111,13 @@ class UF(IntFlag):
 	FREE_FLASHBANG = auto()
 	FREE_MOLLY = auto()
 	FREE_TAGRENADE = auto()
+	# Gravity manipulation
+	T_LOW_GRAVITY = auto()
+	CT_LOW_GRAVITY = auto()
+	T_HIGH_GRAVITY = auto() # High gravity isn't very interesting tbh
+	CT_HIGH_GRAVITY = auto()
+	# Unimplemented
+	FLYING = auto() # Damage only has effect if you are in the air
 	# These flags give free items to all CTs and are handled with a single block of code.
 	FREEBIES = FREE_HEGRENADE | FREE_FLASHBANG | FREE_MOLLY | FREE_TAGRENADE
 	# These flags require the ticking timer. As soon as one is seen, the timer will be started.
@@ -152,10 +159,16 @@ underdome_modes = [
 		"killok": "",
 		"killbad": "No good, he saw that coming!",
 	},
+	{
+		"intro": "GOAL: Burn, baby, burn!", # "I'm sending you some of my old bottles of wine. Bomb those bandits from the air!"
+		"needed": "%cond_damage_burn%",
+		"flags": UF.FREE_MOLLY | UF.CT_LOW_GRAVITY | UF.T_LOW_GRAVITY | UF.FLYING,
+		"killok": "Sick burn, bro...",
+		"killbad": "",
+	},
 	# TODO: Assisted kills only. Team up! (Not sure I can make this one work. Would be nice though.)
 	# TODO: cond_item_borrowed_teammate - "trade weapons with your buddy"
 	# TODO: cond_item_nondefault - what does that mean? USP-S but not P2000?
-	# TODO: cond_damage_burn - burn, baby, burn! "I'm sending you some of my old bottles of wine. Use them." (Give T-side mollies.)
 	# TODO: Low gravity, high gravity, low movement speed, high movement speed - separate flags for Ts and CTs
 ]
 
