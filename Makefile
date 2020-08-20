@@ -9,7 +9,7 @@ carnage.smx: carnage.sp gen_effects_tables.py
 botcontrol.smx: botcontrol.sp
 	~/tf2server/steamcmd_linux/tf2/tf/addons/sourcemod/scripting/spcomp botcontrol.sp
 
-drzed.smx: drzed.sp cs_weapons.inc
+drzed.smx: drzed.sp cs_weapons.inc underdome.inc
 	python3 gen_effects_tables.py
 	~/tf2server/steamcmd_linux/tf2/tf/addons/sourcemod/scripting/spcomp drzed.sp
 
