@@ -121,7 +121,7 @@ class UF(IntFlag):
 	# These flags give free items to all CTs and are handled with a single block of code.
 	FREEBIES = FREE_HEGRENADE | FREE_FLASHBANG | FREE_MOLLY | FREE_TAGRENADE
 	# These flags require the ticking timer. As soon as one is seen, the timer will be started.
-	NEED_TIMER = FREEBIES | 256 # hack - has to be different from FREEBIES. Once something else uses the timer, remove the arbitrary 256.
+	NEED_TIMER = FREEBIES | 1048576 # hack - has to be different from FREEBIES. Once something else uses the timer, remove the arbitrary 1M.
 
 underdome_modes = [
 	{
