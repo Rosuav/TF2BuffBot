@@ -1008,11 +1008,9 @@ Action check_wave_end(Handle timer, int victim)
 	int killsnowneeded = GameRules_GetProp("m_nGuardianModeSpecialKillsRemaining");
 	if (underdome_mode && IsClientInGame(victim) && GetClientTeam(victim) == 2) //No messages when a CT dies or someone disconnects
 	{
-		if (killsneeded != killsnowneeded)
-			//Good kill. TODO: Don't print at all if empty string (or does it already do that??)
+		if (killsneeded != killsnowneeded) //Good kill, counted on the score
 			PrintToChatAll(underdome_killok[underdome_mode - 1]);
-		else
-			//Bad kill - or player kill. TODO: See if the victim was a fake client.
+		else //Didn't count to the score. Optionally give a message explaining why.
 			PrintToChatAll(underdome_killbad[underdome_mode - 1]);
 	}
 	killsneeded = killsnowneeded;
