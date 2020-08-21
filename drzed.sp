@@ -1045,7 +1045,7 @@ public void player_death(Event event, const char[] name, bool dontBroadcast)
 			if ((flg & UF_NO_NONFLASH_ASSISTS) && !event.GetInt("assistedflash")) deny = true;
 			if ((flg & UF_PENETRATION_ONLY) && !event.GetInt("penetrated")) deny = true;
 			if (deny)
-				//Use the exact counterpart of the tautology used for "always true" in devise_underdome_rules
+				//Use the exact counterpart of the tautology used for "always true" in gen_effects_tables
 				SetConVarString(mp_guardian_special_weapon_needed, "%cond_player_zoomed% && !%cond_player_zoomed%");
 			else
 				SetConVarString(mp_guardian_special_weapon_needed, underdome_needed[underdome_mode - 1]);
@@ -1660,20 +1660,23 @@ Action underdome_tick(Handle timer, any data)
 
 void devise_underdome_rules()
 {
+	int m = randrange(sizeof(underdome_flags) - 1) + 1;
 	killsneeded = GameRules_GetProp("m_nGuardianModeSpecialKillsRemaining");
-	if (killsneeded == GetConVarInt(mp_guardian_special_kills_needed))
+	//First wave? Force it to the warmup settings.
+	if (killsneeded == GetConVarInt(mp_guardian_special_kills_needed)) m = 0;
+	int cfg = GetConVarInt(guardian_underdome_waves);
+	if (cfg > sizeof(underdome_flags))
 	{
-		//It's probably the first wave. Or you're doing really REALLY badly.
-		//The obvious thing doesn't seem to work properly. Not sure why. Empty string
-		//ought to work; it doesn't, and nor does "1", so instead we use a tautology.
-		SetConVarString(mp_guardian_special_weapon_needed, "%cond_player_zoomed% || !%cond_player_zoomed%");
-		PrintToChatAll("Warmup wave! Any kill's a kill!");
-		underdome_mode = 0;
-		adjust_underdome_gravity();
-		return;
+		//Tried to set it to an invalid value. Dump a list of values to the console.
+		PrintToServer("guardian_underdome_waves too high, use either 1 or 2..%d", sizeof(underdome_flags));
+		for (int i = 1; i < sizeof(underdome_flags); ++i)
+			PrintToServer("guardian_underdome_waves %d // %s", i + 1, underdome_intro[i]);
+		SetConVarInt(guardian_underdome_waves, 1);
+		//And don't change m (ie it'll stay randomized)
 	}
+	else if (cfg > 1) m = cfg - 1;
 	//GameRules_SetProp("m_nGuardianModeSpecialWeaponNeeded", ???); //Change the gun displayed on the middle left of the screen
-	int m = randrange(sizeof(underdome_flags)); underdome_mode = m + 1;
+	underdome_mode = m + 1;
 	PrintToChatAll(underdome_intro[m]);
 	CreateTimer(0.25, show_underdome_mode, 0, TIMER_FLAG_NO_MAPCHANGE);
 	if ((underdome_flags[m] & UF_NEED_TIMER) && underdome_ticker == INVALID_HANDLE)

@@ -129,7 +129,19 @@ class UF(IntFlag):
 	# These flags require the ticking timer. As soon as one is seen, the timer will be started.
 	NEED_TIMER = FREEBIES | 1048576 # hack - has to be different from FREEBIES. Once something else uses the timer, remove the arbitrary 1M.
 
+# Tautology for "always true" because other methods failed. Used for warmup, and for
+# any wave where the actual conditions are defined by flags.
+ANYTHING = "%cond_player_zoomed% || !%cond_player_zoomed%"
+
 underdome_modes = [
+	# Warmup wave - always the first entry. If you start a wave with 0 kills, it'll use this rather than randomizing.
+	{
+		"intro": "Warmup wave! Any kill's a kill!",
+		"needed": ANYTHING,
+		"flags": 0,
+		"killok": "",
+		"killbad": "",
+	},
 	{
 		"intro": "GOAL: Snipers. Zoomed kills only.",
 		"needed": "%cond_player_zoomed%",
@@ -167,7 +179,7 @@ underdome_modes = [
 	},
 	{
 		"intro": "GOAL: Team up! Get assists with your teammate!",
-		"needed": "%cond_player_zoomed% || !%cond_player_zoomed%",
+		"needed": ANYTHING,
 		"flags": UF.ASSISTED_ONLY | UF.NO_TEAM_ASSISTS,
 		"killok": "",
 		"killbad": "You can't do this as a lone wolf - buddy up!",
@@ -188,7 +200,7 @@ underdome_modes = [
 	},
 	{
 		"intro": "GOAL: I'm totally not walling",
-		"needed": "%cond_player_zoomed% || !%cond_player_zoomed%",
+		"needed": ANYTHING,
 		"flags": UF.FREE_TAGRENADE | UF.PENETRATION_ONLY,
 		"killok": "",
 		"killbad": "Go on, shoot 'em through the wall already",
