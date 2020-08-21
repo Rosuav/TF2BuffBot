@@ -2369,6 +2369,7 @@ void spawncheck(int entity)
 	}
 }
 
+//For some reason, attacker is -1 at all times (at least when playing Guardian - TODO: check compet). Why? Did something change?
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
 	int &weapon, float damageForce[3], float damagePosition[3])
 {
@@ -2386,13 +2387,9 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 			PrintCenterText(attacker, "You now have %d anarchy!", anarchy[attacker]);
 		}
 	}
-	//Log all damage to a file that gets processed by a Python script
 	int vicweap = GetEntPropEnt(victim, Prop_Send, "m_hActiveWeapon");
 	char atkcls[64]; describe_weapon(weapon > 0 ? weapon : inflictor, atkcls, sizeof(atkcls));
 	char viccls[64]; describe_weapon(vicweap, viccls, sizeof(viccls));
-	int cap = GetClientHealth(victim);
-	int score = RoundToFloor(damage);
-	if (score >= cap) score = cap + 100; //100 bonus points for the kill, but the actual damage caps out at the health taken.
 	int teamdmg = 0;
 	if (attacker >= 0 && attacker < MAXPLAYERS)
 	{
@@ -2411,11 +2408,17 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 			last_attacker[victim] = attacker; last_inflictor[victim] = inflictor; last_weapon[victim] = weapon;
 		}
 	}
+	/*
+	//Log all damage to a file that gets processed by a Python script
+	int cap = GetClientHealth(victim);
+	int score = RoundToFloor(damage);
+	if (score >= cap) score = cap + 100; //100 bonus points for the kill, but the actual damage caps out at the health taken.
 	File fp = OpenFile("weapon_scores.log", "a");
 	WriteFileLine(fp, "%s %sdamaged %s for %d (%.0fhp)",
 		atkcls, victim == attacker ? "self" : teamdmg ? "team" : "",
 		viccls, score, damage);
 	CloseHandle(fp);
+	*/
 
 	int cripplepoint = GetConVarInt(sm_drzed_crippled_health);
 	//For one second after being crippled, you get damage immunity.
@@ -2448,6 +2451,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 		float proportion;
 		if (IsFakeClient(attacker)) proportion = GetConVarFloat(damage_scale_bots);
 		else proportion = GetConVarFloat(damage_scale_humans);
+		PrintToServer("Damage proportion: %.2f", proportion);
 		if (proportion != 1.0) {ret = Plugin_Changed; damage *= proportion;}
 	}
 
