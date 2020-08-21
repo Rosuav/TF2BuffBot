@@ -1043,6 +1043,7 @@ public void player_death(Event event, const char[] name, bool dontBroadcast)
 			) deny = true;
 			if ((flg & UF_NO_FLASH_ASSISTS) && event.GetInt("assistedflash")) deny = true;
 			if ((flg & UF_NO_NONFLASH_ASSISTS) && !event.GetInt("assistedflash")) deny = true;
+			if ((flg & UF_PENETRATION_ONLY) && !event.GetInt("penetrated")) deny = true;
 			if (deny)
 				//Use the exact counterpart of the tautology used for "always true" in devise_underdome_rules
 				SetConVarString(mp_guardian_special_weapon_needed, "%cond_player_zoomed% && !%cond_player_zoomed%");
@@ -1630,7 +1631,6 @@ Action underdome_tick(Handle timer, any data)
 {
 	if (!underdome_mode) {underdome_ticker = INVALID_HANDLE; return Plugin_Stop;}
 	int flg = underdome_flags[underdome_mode - 1];
-	PrintToChatAll("Current underdome flags: %d", flg);
 	if (flg & UF_FREEBIES)
 	{
 		for (int client = 1; client < MaxClients; ++client)

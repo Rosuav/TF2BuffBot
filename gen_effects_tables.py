@@ -121,6 +121,7 @@ class UF(IntFlag):
 	NO_TEAM_ASSISTS = auto() # ... assister is on same team as victim
 	NO_FLASH_ASSISTS = auto() # ... it was a flash assist
 	NO_NONFLASH_ASSISTS = auto() # ... it was not a flash assist
+	PENETRATION_ONLY = auto() # ... it wasn't a penetration shot
 	# Unimplemented
 	FLYING = auto() # Damage only has effect if you are in the air
 	# These flags give free items to all CTs and are handled with a single block of code.
@@ -185,9 +186,18 @@ underdome_modes = [
 		"killok": "",
 		"killbad": "The true world revealed - noises are now known to me - time to silence your gun.",
 	},
+	{
+		"intro": "GOAL: I'm totally not walling",
+		"needed": "%cond_player_zoomed% || !%cond_player_zoomed%",
+		"flags": UF.FREE_TAGRENADE | UF.PENETRATION_ONLY,
+		"killok": "",
+		"killbad": "Go on, shoot 'em through the wall already",
+	},
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
 	# TODO: Weapon category challenges
 	# TODO: Headshot / no-headshot challenges
+	# TODO: "I punch it!" -- knife attacks deal 200 damage, but gun damage is reduced
+	# TODO: Vladof mode - increase fire rates of all guns???
 ]
 
 with open("randeffects.inc", "w") as f:
