@@ -47,3 +47,24 @@ Certain attacks are able to bypass the health gate, including the knife;
 anything that deals massive overkill damage can punch right past it.
 
 Example config file: [drzed.cfg](https://github.com/Rosuav/tf2server/blob/master/steamcmd_linux/csgo/csgo/cfg/drzed.cfg)
+
+## Mad Moxxi's Crash Site Underdome
+
+Base game mode: Guardian (type 4 mode 0)
+
+Designed for gd_crashsite, but can work on other maps (would need some
+tweaking of armory locations, that's all). Grindy Guardian mission - needs
+fifty kills to win - but every wave has different rules. You get to buy any
+weapons you like, but your money is finite, so don't throw away your old
+ones! Some waves will have easy requirements, some hard. Some will mess with
+you in ways you won't expect. Stay on your toes and keep that site safe!
+
+Tips for difficult waves:
+* Worst case, just kill all the terrorists and let it change to a new wave. You
+  might not get any progress towards the goal, but you'll be past that wave.
+* There are two weapon caches - or occasionally, one cache with twice as many
+  weapons in it. They're somewhere on the CT side of the map.
+* Don't forget that taking weapons from your enemy is an option too.
+* Sniper rifles count as rifles. LMGs count as heavy weapons.
+
+Example config file: [underdome.cfg](https://github.com/Rosuav/tf2server/blob/master/steamcmd_linux/csgo/csgo/cfg/underdome.cfg)
