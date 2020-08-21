@@ -205,6 +205,13 @@ underdome_modes = [
 		"killok": "",
 		"killbad": "Go on, shoot 'em through the wall already",
 	},
+	{
+		"intro": "GOAL: Shotgun challenge. Go for center of mass.",
+		"needed": "%weapon_nova% || %weapon_sawedoff% || %weapon_mag7% || %weapon_xm1014%",
+		"flags": UF.NO_HEADSHOTS,
+		"killok": "",
+		"killbad": "",
+	},
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
 	# TODO: Weapon category challenges
 	# TODO: Headshot / no-headshot challenges
