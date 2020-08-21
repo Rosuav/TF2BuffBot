@@ -130,25 +130,11 @@ class UF(IntFlag):
 
 underdome_modes = [
 	{
-		"intro": "GOAL: Bullpup",
-		"needed": "%weapon_aug%",
-		"flags": 0,
-		"killok": "Aug kill",
-		"killbad": "Non-aug kill, doesn't count",
-	},
-	{
 		"intro": "GOAL: Snipers. Zoomed kills only.",
 		"needed": "%cond_player_zoomed%",
 		"flags": 0,
 		"killok": "",
 		"killbad": "Kills only count if you're scoped in!",
-	},
-	{
-		"intro": "GOAL: M4",
-		"needed": "%weapon_m4a1% || %weapon_m4a1_silencer%",
-		"flags": 0,
-		"killok": "M4 kill",
-		"killbad": "",
 	},
 	{
 		"intro": "GOAL: Baroness",
@@ -191,6 +177,13 @@ underdome_modes = [
 		"flags": 0,
 		"killok": "",
 		"killbad": "Try an unskinned weapon or your starting pistol",
+	},
+	{
+		"intro": "GOAL: Keep the n0ise down", # :)
+		"needed": "%weapon_usp_silencer% || %weapon_m4a1_silencer% || %weapon_mp5sd%",
+		"flags": 0,
+		"killok": "",
+		"killbad": "The true world revealed - noises are now known to me - time to silence your gun.",
 	},
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
 	# TODO: Weapon category challenges
