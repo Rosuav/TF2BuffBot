@@ -1031,20 +1031,22 @@ public void player_death(Event event, const char[] name, bool dontBroadcast)
 {
 	//What happens if I change mp_guardian_special_weapon_needed in here?
 	//Can I set it to a self-contradiction (aka "never") or back to its default?
-	/*
-	if (randrange(2))
-	{
-		PrintToChatAll("Denying kill");
-		SetConVarString(mp_guardian_special_weapon_needed, "%cond_player_zoomed% && !%cond_player_zoomed%");
-	}
-	else
-	{
-		PrintToChatAll("Permitting kill");
-		SetConVarString(mp_guardian_special_weapon_needed, underdome_needed[underdome_mode - 1]);
-	}
-	*/
 	if (GetConVarInt(guardian_underdome_waves))
+	{
+		if (underdome_mode) //This can never happen during the warmup wave - ALL kills count.
+		{
+			int flg = underdome_flags[underdome_mode - 1];
+			bool deny = false;
+			//TODO: Put code here to set deny to true based on various conditions
+			if ((flg & 1048576) && event.GetInt("megakill") < 5) deny = true;
+			if (deny)
+				//Use the exact counterpart of the tautology used for "always true" in devise_underdome_rules
+				SetConVarString(mp_guardian_special_weapon_needed, "%cond_player_zoomed% && !%cond_player_zoomed%");
+			else
+				SetConVarString(mp_guardian_special_weapon_needed, underdome_needed[underdome_mode - 1]);
+		}
 		CreateTimer(0.0, check_wave_end, GetClientOfUserId(event.GetInt("userid")), TIMER_FLAG_NO_MAPCHANGE);
+	}
 	else reset_underdome_config();
 }
 
