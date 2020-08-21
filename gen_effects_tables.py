@@ -185,7 +185,13 @@ underdome_modes = [
 		"killok": "",
 		"killbad": "You can't do this as a lone wolf - buddy up!",
 	},
-	# TODO: cond_item_nondefault - what does that mean? USP-S but not P2000?
+	{
+		"intro": "GOAL: Go Vanilla!",
+		"needed": "%weapon_hkp2000% || %weapon_usp_silencer% || %weapon_glock% || !%cond_item_nondefault%",
+		"flags": 0,
+		"killok": "",
+		"killbad": "Try an unskinned weapon or your starting pistol",
+	},
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
 	# TODO: Weapon category challenges
 	# TODO: Headshot / no-headshot challenges
