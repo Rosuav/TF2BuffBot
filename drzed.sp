@@ -2369,7 +2369,8 @@ void spawncheck(int entity)
 	}
 }
 
-//For some reason, attacker is -1 at all times (at least when playing Guardian - TODO: check compet). Why? Did something change?
+//For some reason, attacker is -1 at all times (at least when playing Guardian - TODO: check compet).
+//Why? Did something change? Can I use inflictor instead??
 public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
 	int &weapon, float damageForce[3], float damagePosition[3])
 {
