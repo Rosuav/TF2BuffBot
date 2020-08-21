@@ -215,7 +215,7 @@ underdome_modes = [
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
 	# TODO: Weapon category challenges
 	# TODO: Headshot / no-headshot challenges
-	# TODO: "I punch it!" -- knife attacks deal 200 damage, but gun damage is reduced
+	# TODO: "I punch it!" -- knife attacks deal 200 damage, but gun damage is reduced (both directions)
 	# TODO: Vladof mode - increase fire rates of all guns???
 ]
 
