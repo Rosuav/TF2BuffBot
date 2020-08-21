@@ -1035,8 +1035,14 @@ public void player_death(Event event, const char[] name, bool dontBroadcast)
 		{
 			int flg = underdome_flags[underdome_mode - 1];
 			bool deny = false;
-			//TODO: Put code here to set deny to true based on various conditions
-			if ((flg & 1048576) && event.GetInt("megakill") < 5) deny = true;
+			int assister = event.GetInt("assister");
+			if ((flg & UF_ASSISTED_ONLY) && !assister) deny = true;
+			if ((flg & UF_NO_TEAM_ASSISTS) && assister &&
+				//Ahem. *cough* *cough*
+				GetClientTeam(GetClientOfUserId(event.GetInt("userid"))) == GetClientTeam(GetClientOfUserId(assister))
+			) deny = true;
+			if ((flg & UF_NO_FLASH_ASSISTS) && event.GetInt("assistedflash")) deny = true;
+			if ((flg & UF_NO_NONFLASH_ASSISTS) && !event.GetInt("assistedflash")) deny = true;
 			if (deny)
 				//Use the exact counterpart of the tautology used for "always true" in devise_underdome_rules
 				SetConVarString(mp_guardian_special_weapon_needed, "%cond_player_zoomed% && !%cond_player_zoomed%");

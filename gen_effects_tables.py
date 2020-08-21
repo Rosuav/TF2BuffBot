@@ -116,6 +116,11 @@ class UF(IntFlag):
 	CT_LOW_GRAVITY = auto()
 	T_HIGH_GRAVITY = auto() # High gravity isn't very interesting tbh
 	CT_HIGH_GRAVITY = auto()
+	# Extra conditions: Kill doesn't count if...
+	ASSISTED_ONLY = auto() # ... there's no assister; combine with the below to narrow it down
+	NO_TEAM_ASSISTS = auto() # ... assister is on same team as victim
+	NO_FLASH_ASSISTS = auto() # ... it was a flash assist
+	NO_NONFLASH_ASSISTS = auto() # ... it was not a flash assist
 	# Unimplemented
 	FLYING = auto() # Damage only has effect if you are in the air
 	# These flags give free items to all CTs and are handled with a single block of code.
@@ -167,13 +172,19 @@ underdome_modes = [
 		"killbad": "",
 	},
 	{
-		"intro": "GOAL: Swap weapons with your buddy",
+		"intro": "GOAL: Team up! Swap weapons with your buddy!",
 		"needed": "%cond_item_borrowed_teammate%",
 		"flags": 0,
 		"killok": "",
 		"killbad": "",
 	},
-	# TODO: Assisted kills only. Team up! (Not sure I can make this one work. Would be nice though.)
+	{
+		"intro": "GOAL: Team up! Get assists with your teammate!",
+		"needed": "%cond_player_zoomed% || !%cond_player_zoomed%",
+		"flags": UF.ASSISTED_ONLY | UF.NO_TEAM_ASSISTS,
+		"killok": "",
+		"killbad": "You can't do this as a lone wolf - buddy up!",
+	},
 	# TODO: cond_item_nondefault - what does that mean? USP-S but not P2000?
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
 	# TODO: Weapon category challenges
