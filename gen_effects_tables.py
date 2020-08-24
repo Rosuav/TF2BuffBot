@@ -131,7 +131,9 @@ class UF(IntFlag):
 	VLADOF = auto() # The longer you keep firing, the more your fire rate increases.
 	BETTER_ARMOR = auto() # All weapons have their armor penetration (armor ratio) reduced
 	DISABLE_AUTOMATIC_FIRE = auto() # After you fire a bullet, your gun will stop firing.
-	PHASEPING = auto() # Ping, wait half a second, and then you will teleport to that location.
+	PHASEPING = auto() # Ping, wait 1.5 seconds, and then you will teleport to that location. (Borrow code from Vanellope mode in TF2 mod.) Immune to damage while phasewalking and for 0.5s after.
+	KNIFE_FOCUS = auto() # Knife slashes deal 200 damage but guns deal half damage
+	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
 	# These flags give free items to all CTs and are handled with a single block of code.
 	FREEBIES = FREE_HEGRENADE | FREE_FLASHBANG | FREE_MOLLY | FREE_TAGRENADE
 	# These flags require the ticking timer. As soon as one is seen, the timer will be started.
@@ -262,8 +264,13 @@ underdome_modes = [
 		"killok": "",
 		"killbad": "",
 	},
-	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
-	# TODO: "I punch it!" -- knife attacks deal 200 damage, but gun damage is reduced (both directions)
+	{
+		"intro": "GOAL: Brick, have fun",
+		"needed": "%weapon_knife%",
+		"flags": UF.KNIFE_FOCUS | UF.FREE_HEGRENADE,
+		"killok": "",
+		"killbad": "",
+	},
 ]
 
 with open("randeffects.inc", "w") as f:
