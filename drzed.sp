@@ -63,7 +63,7 @@ public void PrintToStream(const char[] fmt, any ...)
 StringMap weapon_names;
 StringMap weapon_is_primary;
 ConVar default_weapons[4];
-ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
+ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed, weapon_recoil_scale;
 Handle switch_weapon_call = null;
 
 //For anything that needs default health, we'll use this. Any time a character spawns,
@@ -224,6 +224,7 @@ public void OnPluginStart()
 	ammo_grenade_limit_total = FindConVar("ammo_grenade_limit_total");
 	mp_guardian_special_weapon_needed = FindConVar("mp_guardian_special_weapon_needed");
 	mp_guardian_special_kills_needed = FindConVar("mp_guardian_special_kills_needed");
+	weapon_recoil_scale = FindConVar("weapon_recoil_scale");
 
 	Handle gamedata = LoadGameConfigFile("sdkhooks.games");
 	StartPrepSDKCall(SDKCall_Player);
@@ -999,6 +1000,7 @@ void reset_underdome_config()
 		KillTimer(underdome_ticker);
 		underdome_ticker = INVALID_HANDLE;
 	}
+	SetConVarFloat(weapon_recoil_scale, 2.0);
 	underdome_mode = 0;
 	adjust_underdome_gravity();
 }
@@ -1694,11 +1696,15 @@ void devise_underdome_rules()
 	else if (cfg > 1) m = cfg - 1;
 	//GameRules_SetProp("m_nGuardianModeSpecialWeaponNeeded", ???); //Change the gun displayed on the middle left of the screen
 	underdome_mode = m + 1;
+	int flg = underdome_flags[m];
 	PrintToChatAll(underdome_intro[m]);
 	CreateTimer(0.25, show_underdome_mode, 0, TIMER_FLAG_NO_MAPCHANGE);
 	if ((underdome_flags[m] & UF_NEED_TIMER) && underdome_ticker == INVALID_HANDLE)
 		underdome_ticker = CreateTimer(7.0, underdome_tick, 0, TIMER_REPEAT);
 	SetConVarString(mp_guardian_special_weapon_needed, underdome_needed[m]);
+	if (flg & UF_LOW_ACCURACY) SetConVarFloat(weapon_recoil_scale, 3.0);
+	else if (flg & UF_HIGH_ACCURACY) SetConVarFloat(weapon_recoil_scale, 0.5); //Maybe "weapon_accuracy_nospread 1" as well?
+	else SetConVarFloat(weapon_recoil_scale, 2.0);
 	adjust_underdome_gravity();
 }
 
@@ -2872,46 +2878,4 @@ cond_victim_rescuing
 cond_victim_terrorist
 cond_victim_ct
 cond_victim_reloading
-weapon_deagle
-weapon_revolver
-weapon_elite
-weapon_fiveseven
-weapon_cz75a
-weapon_p228
-weapon_usp
-weapon_ak47
-weapon_aug
-weapon_awp
-weapon_famas
-weapon_g3sg1
-weapon_galil
-weapon_galilar
-weapon_m249
-weapon_m3
-weapon_m4a1
-weapon_m4a1_silencer
-weapon_mac10
-weapon_mp5navy
-weapon_p90
-weapon_scout
-weapon_sg550
-weapon_sg552
-weapon_tmp
-weapon_ump45
-weapon_xm1014
-weapon_bizon
-weapon_mag7
-weapon_negev
-weapon_sawedoff
-weapon_tec9
-weapon_cz75a
-weapon_taser
-weapon_mp7
-weapon_mp9
-weapon_nova
-weapon_p250
-weapon_scar17
-weapon_scar20
-weapon_sg556
-weapon_ssg08
 */

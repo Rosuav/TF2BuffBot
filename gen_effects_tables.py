@@ -111,11 +111,13 @@ class UF(IntFlag):
 	FREE_FLASHBANG = auto()
 	FREE_MOLLY = auto()
 	FREE_TAGRENADE = auto()
-	# Gravity manipulation
+	# World manipulation
 	T_LOW_GRAVITY = auto()
 	CT_LOW_GRAVITY = auto()
 	T_HIGH_GRAVITY = auto() # High gravity isn't very interesting tbh
 	CT_HIGH_GRAVITY = auto()
+	LOW_ACCURACY = auto() # Reduce all accuracy
+	HIGH_ACCURACY = auto() # Improve all accuracy
 	# Extra conditions: Kill doesn't count if...
 	ASSISTED_ONLY = auto() # ... there's no assister; combine with the below to narrow it down
 	NO_TEAM_ASSISTS = auto() # ... assister is on same team as victim
@@ -126,8 +128,6 @@ class UF(IntFlag):
 	DISABLE_SCOPING = auto() # If anyone scopes in, automatically unscope them. Will confuse the bots, probably!
 	# Unimplemented
 	FLYING = auto() # Damage only has effect if you are in the air
-	LOW_ACCURACY = auto() # Reduce all accuracy
-	HIGH_ACCURACY = auto() # Improve all accuracy - remove the penalties for movement and jumping?
 	MORE_RANGE_PENALTY = auto() # Increase damage at close range but drastically increase the range penalty
 	VLADOF = auto() # The longer you keep firing, the more your fire rate increases.
 	BETTER_ARMOR = auto() # All weapons have their armor penetration (armor ratio) reduced
