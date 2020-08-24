@@ -122,12 +122,13 @@ class UF(IntFlag):
 	NO_FLASH_ASSISTS = auto() # ... it was a flash assist
 	NO_NONFLASH_ASSISTS = auto() # ... it was not a flash assist
 	PENETRATION_ONLY = auto() # ... it wasn't a penetration shot
+	# Player restrictions
+	DISABLE_SCOPING = auto() # If anyone scopes in, automatically unscope them. Will confuse the bots, probably!
 	# Unimplemented
 	FLYING = auto() # Damage only has effect if you are in the air
 	LOW_ACCURACY = auto() # Reduce all accuracy
 	HIGH_ACCURACY = auto() # Improve all accuracy - remove the penalties for movement and jumping?
 	MORE_RANGE_PENALTY = auto() # Increase damage at close range but drastically increase the range penalty
-	DISABLE_SCOPING = auto() # If anyone scopes in, automatically unscope them. Will confuse the bots, probably!
 	VLADOF = auto() # The longer you keep firing, the more your fire rate increases.
 	BETTER_ARMOR = auto() # All weapons have their armor penetration (armor ratio) reduced
 	DISABLE_AUTOMATIC_FIRE = auto() # After you fire a bullet, your gun will stop firing.

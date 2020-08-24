@@ -1534,7 +1534,8 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	//IN_ALT1 comes from the commands "+alt1" in client, and appears to have no effect
 	//IN_ZOOM appears to have the same effect as ATTACK2 on weapons with scopes, and also
 	//on the knife. Yes, "+zoom" will backstab with a knife. But it won't light a molly.
-	//IN_LEFT/IN_RIGHT rotate you, like a 90s video game. Still active but nobody uses.
+	//IN_LEFT/IN_RIGHT rotate you, like a 90s video game. Still active but nobody uses
+	//(other than the old "+right and go AFK" trick).
 	//Holding Shift will activate IN_SPEED, not IN_WALK or IN_RUN.
 	//IN_GRENADE1/2 correspond to "+grenade1/2" but have no visible effect.
 	/*PrintCenterText(client, "Buttons: %s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
@@ -1608,6 +1609,22 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		{
 			buttons = btn;
 			return Plugin_Changed;
+		}
+	}
+	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
+	if (flg & UF_DISABLE_SCOPING)
+	{
+		//If you're holding a sniper rifle or scoped rifle, disallow zooming
+		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if (weap > 0)
+		{
+			char cls[64]; GetEntityClassname(weap, cls, sizeof(cls));
+			if (!strcmp(cls, "weapon_awp") || !strcmp(cls, "weapon_ssg08") || !strcmp(cls, "weapon_scar20")
+				|| !strcmp(cls, "weapon_g3sg1") || !strcmp(cls, "weapon_aug") || !strcmp(cls, "weapon_sg556"))
+			{
+				buttons &= ~(IN_ZOOM | IN_ATTACK2);
+				return Plugin_Changed;
+			}
 		}
 	}
 	return Plugin_Continue;
