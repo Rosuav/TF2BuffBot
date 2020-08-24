@@ -124,6 +124,13 @@ class UF(IntFlag):
 	PENETRATION_ONLY = auto() # ... it wasn't a penetration shot
 	# Unimplemented
 	FLYING = auto() # Damage only has effect if you are in the air
+	LOW_ACCURACY = auto() # Reduce all accuracy
+	HIGH_ACCURACY = auto() # Improve all accuracy - remove the penalties for movement and jumping?
+	MORE_RANGE_PENALTY = auto() # Increase damage at close range but drastically increase the range penalty
+	DISABLE_SCOPING = auto() # If anyone scopes in, automatically unscope them. Will confuse the bots, probably!
+	VLADOF = auto() # The longer you keep firing, the more your fire rate increases.
+	BETTER_ARMOR = auto() # All weapons have their armor penetration (armor ratio) reduced
+	DISABLE_AUTOMATIC_FIRE = auto() # After you fire a bullet, your gun will stop firing.
 	# These flags give free items to all CTs and are handled with a single block of code.
 	FREEBIES = FREE_HEGRENADE | FREE_FLASHBANG | FREE_MOLLY | FREE_TAGRENADE
 	# These flags require the ticking timer. As soon as one is seen, the timer will be started.
@@ -212,11 +219,43 @@ underdome_modes = [
 		"killok": "",
 		"killbad": "",
 	},
+	{
+		"intro": "GOAL: Anarchy! Use your SMG at close range for high damage!",
+		"needed": "%weapon_mac10% || %weapon_mp9% || %weapon_ump45% || %weapon_bizon% || %weapon_mp7% || %weapon_mp5sd% || %weapon_p90%",
+		"flags": UF.LOW_ACCURACY | UF.MORE_RANGE_PENALTY,
+		"killok": "",
+		"killbad": "",
+	},
+	{
+		"intro": "GOAL: Use your sidearm",
+		"needed": "%weapon_deagle% || %weapon_revolver% || %weapon_elite% || %weapon_fiveseven% || %weapon_cz75a% || %weapon_usp_silencer% || %weapon_hkp2000% || %weapon_p250% || %weapon_glock% || %weapon_tec9%",
+		"flags": UF.BETTER_ARMOR,
+		"killok": "",
+		"killbad": "",
+	},
+	{
+		"intro": "GOAL: LMG time - spray 'em down! Scopes are useless here.",
+		"needed": "%weapon_m249% || %weapon_negev%",
+		"flags": UF.DISABLE_SCOPING | UF.VLADOF,
+		"killok": "",
+		"killbad": "",
+	},
+	{
+		"intro": "GOAL: Semi-Automatics",
+		"needed": "%weapon_deagle% || %weapon_revolver% || %weapon_elite% || %weapon_fiveseven% || %weapon_usp_silencer% || %weapon_glock% || %weapon_hkp2000% || %weapon_p250% || %weapon_tec9% || %weapon_mag7% || %weapon_sawedoff% || %weapon_nova% || %weapon_awp% || %weapon_ssg08%",
+		"flags": UF.DISABLE_AUTOMATIC_FIRE,
+		"killok": "",
+		"killbad": "",
+	},
+	{
+		"intro": "GOAL: Go for the head.",
+		"needed": ANYTHING,
+		"flags": UF.HEADSHOTS_ONLY,
+		"killok": "",
+		"killbad": "",
+	},
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
-	# TODO: Weapon category challenges
-	# TODO: Headshot / no-headshot challenges
 	# TODO: "I punch it!" -- knife attacks deal 200 damage, but gun damage is reduced (both directions)
-	# TODO: Vladof mode - increase fire rates of all guns???
 ]
 
 with open("randeffects.inc", "w") as f:
