@@ -131,6 +131,7 @@ class UF(IntFlag):
 	VLADOF = auto() # The longer you keep firing, the more your fire rate increases.
 	BETTER_ARMOR = auto() # All weapons have their armor penetration (armor ratio) reduced
 	DISABLE_AUTOMATIC_FIRE = auto() # After you fire a bullet, your gun will stop firing.
+	PHASEPING = auto() # Ping, wait half a second, and then you will teleport to that location.
 	# These flags give free items to all CTs and are handled with a single block of code.
 	FREEBIES = FREE_HEGRENADE | FREE_FLASHBANG | FREE_MOLLY | FREE_TAGRENADE
 	# These flags require the ticking timer. As soon as one is seen, the timer will be started.
@@ -251,6 +252,13 @@ underdome_modes = [
 		"intro": "GOAL: Go for the head.",
 		"needed": ANYTHING,
 		"flags": UF.HEADSHOTS_ONLY,
+		"killok": "",
+		"killbad": "",
+	},
+	{
+		"intro": "GOAL: Phasewalk to Victory",
+		"needed": ANYTHING,
+		"flags": UF.PHASEPING,
 		"killok": "",
 		"killbad": "",
 	},
