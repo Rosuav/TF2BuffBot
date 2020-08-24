@@ -2482,7 +2482,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 		float proportion;
 		if (IsFakeClient(attacker)) proportion = GetConVarFloat(damage_scale_bots);
 		else proportion = GetConVarFloat(damage_scale_humans);
-		PrintToServer("Damage proportion: %.2f", proportion);
+		//PrintToServer("Damage proportion: %.2f", proportion);
 		if (proportion != 1.0) {ret = Plugin_Changed; damage *= proportion;}
 	}
 
