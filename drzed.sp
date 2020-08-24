@@ -2392,11 +2392,18 @@ void spawncheck(int entity)
 	}
 }
 
-//For some reason, attacker is -1 at all times (at least when playing Guardian - TODO: check compet).
-//Why? Did something change? Can I use inflictor instead??
-public Action healthgate(int victim, int &attacker, int &inflictor, float &damage, int &damagetype,
+//For some reason, attacker is -1 at all times. Why? Did something change?
+//Can I use inflictor instead?? It gets entity IDs for things like utility damage.
+public Action healthgate(int victim, int &atk, int &inflictor, float &damage, int &damagetype,
 	int &weapon, float damageForce[3], float damagePosition[3])
 {
+	int attacker = atk; //Disconnect from the mutable
+	if (attacker == -1)
+	{
+		//Attempt to figure out the "real" attacker from the inflictor
+		if (inflictor > 0 && inflictor < MAXPLAYERS) attacker = inflictor;
+		//else get the controller of the source of damage??
+	}
 	//If the attacking weapon is one you're currently wielding (ie not a grenade etc)
 	//in one of your first two slots (no knife etc), flag the user (or maybe gun) as
 	//being anarchy-ready. TODO: De-flag if the gun is changed?
@@ -2514,7 +2521,7 @@ public Action healthgate(int victim, int &attacker, int &inflictor, float &damag
 	{
 		//If the bomb kills a CT, credit the kill to the bomb planter.
 		//(Don't penalize for team kills or suicide though.)
-		if (bomb_planter > 0 && IsClientInGame(bomb_planter)) attacker = bomb_planter;
+		if (bomb_planter > 0 && IsClientInGame(bomb_planter)) atk = bomb_planter;
 		return Plugin_Changed;
 	}
 
