@@ -604,9 +604,11 @@ void keep_firing(any weap)
 {
 	//Increase fire rate based on the length of time you've been firing
 	//TODO: Keep track of how long ago the weapon wasn't firing, somehow
+	//TODO: Scale up so it gets to this halving of delay only after you've
+	//been firing for a good while. Start out with 1.0 and scale towards 0.5.
 	float delay = GetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack") - GetGameTime();
-	PrintCenterTextAll("Delay: %.3f", delay);
-	SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() /*+ delay / 2.0*/);
+	//PrintCenterTextAll("Delay: %.3f", delay);
+	SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + delay * 0.5);
 }
 
 //If you throw a grenade and it's the only thing you have, unselect.
@@ -635,13 +637,12 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	}
 
 	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
-	int hack = GetConVarInt(sm_drzed_hack);
-	if ((flg & UF_DISABLE_AUTOMATIC_FIRE) || hack == 4)
+	if (flg & UF_DISABLE_AUTOMATIC_FIRE)
 	{
 		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		RequestFrame(stop_firing, weap);
 	}
-	if ((flg & UF_VLADOF) || hack == 5)
+	if (flg & UF_VLADOF)
 	{
 		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		RequestFrame(keep_firing, weap);
