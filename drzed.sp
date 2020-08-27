@@ -586,6 +586,29 @@ public void player_jump(Event event, const char[] name, bool dontBroadcast)
 	last_jump[client] = now;
 }
 
+#include "underdome.inc"
+int underdome_mode = 0;
+int killsneeded;
+float last_guardian_buy_time = 0.0;
+Handle underdome_ticker = INVALID_HANDLE;
+
+void stop_firing(any weap)
+{
+	//Force weapons into semi-automatic mode
+	//Currently doesn't actually go semi-auto, just stops you from firing more than once per second.
+	//TODO: Cut the actual delay to half a second, and actually block so long as someone's holding attack1
+	SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 1.0);
+}
+
+void keep_firing(any weap)
+{
+	//Increase fire rate based on the length of time you've been firing
+	//TODO: Keep track of how long ago the weapon wasn't firing, somehow
+	float delay = GetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack") - GetGameTime();
+	PrintCenterTextAll("Delay: %.3f", delay);
+	SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() /*+ delay / 2.0*/);
+}
+
 //If you throw a grenade and it's the only thing you have, unselect.
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {
@@ -611,6 +634,18 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		last_smoke[client] = now;
 	}
 
+	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
+	int hack = GetConVarInt(sm_drzed_hack);
+	if ((flg & UF_DISABLE_AUTOMATIC_FIRE) || hack == 4)
+	{
+		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		RequestFrame(stop_firing, weap);
+	}
+	if ((flg & UF_VLADOF) || hack == 5)
+	{
+		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		RequestFrame(keep_firing, weap);
+	}
 	//If you empty your clip completely, add a stack of Anarchy
 	if (anarchy[client] < GetConVarInt(sm_drzed_max_anarchy))
 	{
@@ -970,12 +1005,6 @@ bool puzzle_highlight(int entity, int state)
 	CreateTimer(0.6, stabilize_weapon, entity, TIMER_FLAG_NO_MAPCHANGE);
 	return true;
 }
-
-#include "underdome.inc"
-int underdome_mode = 0;
-int killsneeded;
-float last_guardian_buy_time = 0.0;
-Handle underdome_ticker = INVALID_HANDLE;
 
 void adjust_underdome_gravity()
 {
@@ -2400,9 +2429,17 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 	int attacker = atk; //Disconnect from the mutable
 	if (attacker == -1)
 	{
+		//char cls[64]; GetEntityClassname(inflictor, cls, sizeof(cls));
+		//PrintToChatAll("Attacker is -1, inflictor is %d (%s)", inflictor, cls);
 		//Attempt to figure out the "real" attacker from the inflictor
 		if (inflictor > 0 && inflictor < MAXPLAYERS) attacker = inflictor;
-		//else get the controller of the source of damage??
+		else
+		{
+			//Can I be sure this won't bomb out?
+			int owner = GetEntPropEnt(inflictor, Prop_Send, "m_hOwnerEntity");
+			if (owner > 0 && owner < MAXPLAYERS) attacker = owner;
+		}
+		//else... I dunno who the attacker is. Leave it at -1 and don't do any player-based effects.
 	}
 	//If the attacking weapon is one you're currently wielding (ie not a grenade etc)
 	//in one of your first two slots (no knife etc), flag the user (or maybe gun) as
@@ -2491,6 +2528,13 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 	{
 		//Mess with damage based on who's dealing it. This is a total hack, and
 		//can change at any time while I play around with testing stuff.
+		if (hack == 4 || hack == 5)
+		{
+			//Don't deal any damage, just log how much WOULD have been dealt
+			PrintToChat(attacker, "That would have dealt %.0f damage.", damage);
+			damage = 0.0;
+			return Plugin_Changed;
+		}
 		if (hack == 3)
 		{
 			//Damage only while flashed

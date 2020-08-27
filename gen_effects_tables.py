@@ -118,6 +118,7 @@ class UF(IntFlag):
 	CT_HIGH_GRAVITY = auto()
 	LOW_ACCURACY = auto() # Reduce all accuracy
 	HIGH_ACCURACY = auto() # Improve all accuracy
+	VLADOF = auto() # The longer you keep firing, the more your fire rate increases.
 	# Extra conditions: Kill doesn't count if...
 	ASSISTED_ONLY = auto() # ... there's no assister; combine with the below to narrow it down
 	NO_TEAM_ASSISTS = auto() # ... assister is on same team as victim
@@ -126,12 +127,11 @@ class UF(IntFlag):
 	PENETRATION_ONLY = auto() # ... it wasn't a penetration shot
 	# Player restrictions
 	DISABLE_SCOPING = auto() # If anyone scopes in, automatically unscope them. Will confuse the bots, probably!
+	DISABLE_AUTOMATIC_FIRE = auto() # After you fire a bullet, your gun will stop firing.
 	# Unimplemented
 	FLYING = auto() # Damage only has effect if you are in the air
 	MORE_RANGE_PENALTY = auto() # Increase damage at close range but drastically increase the range penalty
-	VLADOF = auto() # The longer you keep firing, the more your fire rate increases.
 	BETTER_ARMOR = auto() # All weapons have their armor penetration (armor ratio) reduced
-	DISABLE_AUTOMATIC_FIRE = auto() # After you fire a bullet, your gun will stop firing.
 	PHASEPING = auto() # Ping, wait 1.5 seconds, and then you will teleport to that location. (Borrow code from Vanellope mode in TF2 mod.) Immune to damage while phasewalking and for 0.5s after.
 	KNIFE_FOCUS = auto() # Knife slashes deal 200 damage but guns deal half damage
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
