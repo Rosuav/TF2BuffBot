@@ -63,7 +63,8 @@ public void PrintToStream(const char[] fmt, any ...)
 StringMap weapon_names;
 StringMap weapon_is_primary;
 ConVar default_weapons[4];
-ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed, weapon_recoil_scale;
+ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
+ConVar weapon_recoil_scale, mp_damage_vampiric_amount;
 Handle switch_weapon_call = null;
 
 //For anything that needs default health, we'll use this. Any time a character spawns,
@@ -225,6 +226,7 @@ public void OnPluginStart()
 	mp_guardian_special_weapon_needed = FindConVar("mp_guardian_special_weapon_needed");
 	mp_guardian_special_kills_needed = FindConVar("mp_guardian_special_kills_needed");
 	weapon_recoil_scale = FindConVar("weapon_recoil_scale");
+	mp_damage_vampiric_amount = FindConVar("mp_damage_vampiric_amount");
 
 	Handle gamedata = LoadGameConfigFile("sdkhooks.games");
 	StartPrepSDKCall(SDKCall_Player);
@@ -1031,6 +1033,7 @@ void reset_underdome_config()
 		underdome_ticker = INVALID_HANDLE;
 	}
 	SetConVarFloat(weapon_recoil_scale, 2.0);
+	SetConVarFloat(mp_damage_vampiric_amount, 0.0);
 	underdome_mode = 0;
 	adjust_underdome_gravity();
 }
@@ -1703,6 +1706,16 @@ Action underdome_tick(Handle timer, any data)
 				GivePlayerItem(client, "weapon_tagrenade");
 		}
 	}
+	if (flg & UF_VAMPIRIC)
+	{
+		//Give all the bots a bit more health. You have to kill 'em fast.
+		for (int client = 1; client < MaxClients; ++client)
+		{
+			if (!IsClientInGame(client) || !IsPlayerAlive(client) || !IsFakeClient(client)) continue;
+			int hp = GetClientHealth(client);
+			if (hp < 200) SetEntityHealth(client, hp < 190 ? hp + 10 : 200);
+		}
+	}
 	adjust_underdome_gravity(); //Just in case
 	return Plugin_Continue;
 }
@@ -1732,9 +1745,14 @@ void devise_underdome_rules()
 	if ((underdome_flags[m] & UF_NEED_TIMER) && underdome_ticker == INVALID_HANDLE)
 		underdome_ticker = CreateTimer(7.0, underdome_tick, 0, TIMER_REPEAT);
 	SetConVarString(mp_guardian_special_weapon_needed, underdome_needed[m]);
+
 	if (flg & UF_LOW_ACCURACY) SetConVarFloat(weapon_recoil_scale, 3.0);
 	else if (flg & UF_HIGH_ACCURACY) SetConVarFloat(weapon_recoil_scale, 0.5); //Maybe "weapon_accuracy_nospread 1" as well?
 	else SetConVarFloat(weapon_recoil_scale, 2.0);
+
+	if (flg & UF_VAMPIRIC) SetConVarFloat(mp_damage_vampiric_amount, 0.25);
+	else SetConVarFloat(mp_damage_vampiric_amount, 0.0);
+
 	adjust_underdome_gravity();
 }
 

@@ -119,6 +119,7 @@ class UF(IntFlag):
 	LOW_ACCURACY = auto() # Reduce all accuracy
 	HIGH_ACCURACY = auto() # Improve all accuracy
 	VLADOF = auto() # The longer you keep firing, the more your fire rate increases.
+	VAMPIRIC = auto() # Damage is vampiric, and bots gain health periodically
 	# Extra conditions: Kill doesn't count if...
 	ASSISTED_ONLY = auto() # ... there's no assister; combine with the below to narrow it down
 	NO_TEAM_ASSISTS = auto() # ... assister is on same team as victim
@@ -138,7 +139,7 @@ class UF(IntFlag):
 	# These flags give free items to all CTs and are handled with a single block of code.
 	FREEBIES = FREE_HEGRENADE | FREE_FLASHBANG | FREE_MOLLY | FREE_TAGRENADE
 	# These flags require the ticking timer. As soon as one is seen, the timer will be started.
-	NEED_TIMER = FREEBIES | 1048576 # hack - has to be different from FREEBIES. Once something else uses the timer, remove the arbitrary 1M.
+	NEED_TIMER = FREEBIES | VAMPIRIC # Note: has to be different from FREEBIES (add a shim if necessary)
 
 # Tautology for "always true" because other methods failed. Used for warmup, and for
 # any wave where the actual conditions are defined by flags.
@@ -271,6 +272,14 @@ underdome_modes = [
 		"flags": UF.KNIFE_FOCUS | UF.FREE_HEGRENADE,
 		"killok": "",
 		"killbad": "",
+	},
+	{
+		"intro": "GOAL: Transfusion Grenades",
+		# TODO: Test this
+		"needed": "%weapon_hegrenade% || %weapon_molotov% || %weapon_incgrenade% || %weapon_flashbang% || %weapon_decoy% || %weapon_smoke%",
+		"flags": UF.VAMPIRIC | UF.FREE_HEGRENADE,
+		"killok": "",
+		"killbad": "G button.",
 	},
 ]
 
