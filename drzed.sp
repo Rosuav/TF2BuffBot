@@ -1454,8 +1454,15 @@ Action phase_ping(Handle timer, Handle params)
 	int ping = GetEntPropEnt(client, Prop_Send, "m_hPlayerPing");
 	if (ping == -1) return; //No ping? Shouldn't happen.
 	PrintToStream("Client %d is phasepinging! [cookie %d ent %d]", client, cookie, ping);
-	phaseping_cookie[client] = -1; //Mark that you can't ping for a bit
+
+	//Mark that you can't phaseping for a bit, nor can you fire any gun. Go ahead and throw nades though!
+	phaseping_cookie[client] = -1;
 	CreateTimer(1.5, reset_phaseping, client, TIMER_FLAG_NO_MAPCHANGE);
+	for (int slot = 0; slot < 2; ++slot)
+	{
+		int weap = GetPlayerWeaponSlot(client, slot);
+		if (weap != -1) SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 1.5);
+	}
 
 	float pos[3]; GetClientAbsOrigin(client, pos);
 	float mins[3]; GetClientMins(client, mins);
