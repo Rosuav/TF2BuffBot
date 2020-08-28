@@ -120,6 +120,7 @@ class UF(IntFlag):
 	HIGH_ACCURACY = auto() # Improve all accuracy
 	VLADOF = auto() # The longer you keep firing, the more your fire rate increases.
 	VAMPIRIC = auto() # Damage is vampiric, and bots gain health periodically
+	PHASEPING = auto() # Ping, wait 1.5 seconds, and then you will teleport to that location.
 	# Extra conditions: Kill doesn't count if...
 	ASSISTED_ONLY = auto() # ... there's no assister; combine with the below to narrow it down
 	NO_TEAM_ASSISTS = auto() # ... assister is on same team as victim
@@ -133,7 +134,6 @@ class UF(IntFlag):
 	FLYING = auto() # Damage only has effect if you are in the air
 	MORE_RANGE_PENALTY = auto() # Increase damage at close range but drastically increase the range penalty
 	BETTER_ARMOR = auto() # All weapons have their armor penetration (armor ratio) reduced
-	PHASEPING = auto() # Ping, wait 1.5 seconds, and then you will teleport to that location. (Borrow code from Vanellope mode in TF2 mod.) Immune to damage while phasewalking and for 0.5s after.
 	KNIFE_FOCUS = auto() # Knife slashes deal 200 damage but guns deal half damage
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
 	# These flags give free items to all CTs and are handled with a single block of code.
@@ -225,8 +225,8 @@ underdome_modes = [
 		"killbad": "",
 	},
 	{
-		"intro": "GOAL: Anarchy! Use your SMG at close range for high damage!",
-		"needed": "%weapon_mac10% || %weapon_mp9% || %weapon_ump45% || %weapon_bizon% || %weapon_mp7% || %weapon_mp5sd% || %weapon_p90%",
+		"intro": "GOAL: Anarchy! Close the distance for high damage!",
+		"needed": ANYTHING,
 		"flags": UF.LOW_ACCURACY | UF.MORE_RANGE_PENALTY,
 		"killok": "",
 		"killbad": "",
@@ -260,8 +260,9 @@ underdome_modes = [
 		"killbad": "",
 	},
 	{
-		"intro": "GOAL: Phasewalk to Victory",
-		"needed": ANYTHING,
+		"intro": "GOAL: Phasewalk your SMG to Victory",
+		# Lilith loves fire, so even though it isn't said in the description, burn kills count too.
+		"needed": "%weapon_mac10% || %weapon_mp9% || %weapon_ump45% || %weapon_bizon% || %weapon_mp7% || %weapon_mp5sd% || %weapon_p90% || %weapon_molotov% || %weapon_incgrenade%",
 		"flags": UF.PHASEPING,
 		"killok": "",
 		"killbad": "",

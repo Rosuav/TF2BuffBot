@@ -1432,6 +1432,72 @@ void blow_smoke(int client, float pos[3])
 	TE_SendToClient(client);
 }
 
+int phaseping_cookie[MAXPLAYERS+1];
+//Avoid counting the player's own model when testing for collisions
+bool collision_check(int entity, int mask, int client)
+{
+	ignore(mask);
+	return entity != client;
+}
+Action reset_phaseping(Handle timer, any client)
+{
+	phaseping_cookie[client] = 0;
+	//Reset any visual effects from phasewalking
+}
+Action phase_ping(Handle timer, Handle params)
+{
+	ignore(timer);
+	int client = ReadPackCell(params);
+	int cookie = ReadPackCell(params);
+	if (!IsClientInGame(client) || !IsPlayerAlive(client)) return; //Map changed, player left, or something like that
+	if (cookie != phaseping_cookie[client]) return; //Wrong cookie - player has repinged, just use the new one.
+	int ping = GetEntPropEnt(client, Prop_Send, "m_hPlayerPing");
+	if (ping == -1) return; //No ping? Shouldn't happen.
+	PrintToStream("Client %d is phasepinging! [cookie %d ent %d]", client, cookie, ping);
+	phaseping_cookie[client] = -1; //Mark that you can't ping for a bit
+	CreateTimer(1.5, reset_phaseping, client, TIMER_FLAG_NO_MAPCHANGE);
+
+	float pos[3]; GetClientAbsOrigin(client, pos);
+	float mins[3]; GetClientMins(client, mins);
+	float maxs[3]; GetClientMaxs(client, maxs);
+	float dest[3]; GetEntPropVector(ping, Prop_Data, "m_vecOrigin", dest);
+	//Since terrain is VERY likely to get in the way here, we try a few different traces and pick
+	//the most effective (the one that gets us furthest).
+
+	//First, a vanilla hull trace. Since this is first, guarantee to set its end position as the target.
+	Handle trace = TR_TraceHullFilterEx(pos, dest, mins, maxs, MASK_PLAYERSOLID, collision_check, client);
+	float target[3]; TR_GetEndPosition(target, trace);
+	float delta = GetVectorDistance(target, dest, true);
+	CloseHandle(trace);
+	PrintToStream("Direct trace: (%.0f,%.0f,%.0f) == %.2f", target[0], target[1], target[2], delta);
+
+	//Second, a "levitating" trace. Trace to waist height at the destination, then from there to the ground.
+	//Advantages: Not blocked by uneven terrain. Disadvantages: Blocked by anything overhead.
+	float waist = (maxs[2] + mins[2]) / 2;
+	pos[2] += waist; dest[2] += waist;
+	trace = TR_TraceHullFilterEx(pos, dest, mins, maxs, MASK_PLAYERSOLID, collision_check, client);
+	float levitate[3]; TR_GetEndPosition(levitate, trace);
+	CloseHandle(trace);
+	pos[2] -= waist; dest[2] -= waist;
+	//Take the X and Y from where we traced to, and then trace down as far as we can (but not TOO far).
+	float ground[3]; ground[0] = levitate[0]; ground[1] = levitate[1]; ground[2] = levitate[2] - 100.0;
+	trace = TR_TraceHullFilterEx(levitate, ground, mins, maxs, MASK_PLAYERSOLID, collision_check, client);
+	TR_GetEndPosition(ground, trace);
+	CloseHandle(trace);
+	float howclose = GetVectorDistance(ground, dest, true);
+	PrintToStream("Levitating trace: (%.0f,%.0f,%.0f) vv (%.0f,%.0f,%.0f) == %.2f", levitate[0], levitate[1], levitate[2], ground[0], ground[1], ground[2], howclose);
+	if (howclose < delta) {delta = howclose; target[0] = ground[0]; target[1] = ground[1]; target[2] = ground[2];} //New best!
+
+	//Any other options?
+
+	PrintToStream("From (%.0f,%.0f,%.0f) to (%.0f,%.0f,%.0f): stop at (%.0f,%.0f,%.0f)",
+		pos[0], pos[1], pos[2],
+		dest[0], dest[1], dest[2],
+		target[0], target[1], target[2]);
+	RemoveEntity(ping);
+	TeleportEntity(client, target, NULL_VECTOR, NULL_VECTOR);
+}
+
 public Action player_pinged(int client, const char[] command, int argc)
 {
 	//Put code here to be able to easily trigger it from the client
@@ -1442,6 +1508,25 @@ public Action player_pinged(int client, const char[] command, int argc)
 	//PrintToStream("Client %d pinged [ping = %d]", client, entity);
 	//if (entity != -1) CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
 	//report_new_entities = true; CreateTimer(1.0, unreport_new, 0, TIMER_FLAG_NO_MAPCHANGE);
+	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
+	if (flg & UF_PHASEPING) //ENABLED by game mode
+	{
+		//If entity isn't -1, you're already phasepinging. This needs to cancel
+		//the current phaseping and start a new one. Since cancelling timers is
+		//a bit fiddly, needs a properly-initialized and properly-reset array,
+		//and isn't any easier than this ultimately, we instead just carry a
+		//validation cookie with us; there's actually no code to check here.
+		//On the other hand, if you just recently phasepinged, then we'll let
+		//the ping happen, but not do any phasing.
+		if (phaseping_cookie[client] < 0) return;
+		Handle params;
+		CreateDataTimer(1.5, phase_ping, params, TIMER_FLAG_NO_MAPCHANGE);
+		WritePackCell(params, client);
+		WritePackCell(params, ++phaseping_cookie[client]);
+		ResetPack(params);
+		PrintToStream("Client %d phasepinged [cookie = %d]", client, phaseping_cookie[client]);
+		//TODO: Flicker or highlight the player in a really obvious way (reset when the phase pops)
+	}
 	if (entity == -11) //Currently disabled
 	{
 		int next = GameRules_GetProp("m_nGuardianModeSpecialWeaponNeeded") + 1;
@@ -2375,6 +2460,7 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 public void OnClientPutInServer(int client)
 {
 	healthbonus[client] = 0; anarchy[client] = 0; anarchy_available[client] = 0; puzzles_solved[client] = 0;
+	phaseping_cookie[client] = 0; //Shouldn't be necessary but if something leaves it stuck, this can reset it
 	SDKHookEx(client, SDKHook_GetMaxHealth, maxhealthcheck);
 	SDKHookEx(client, SDKHook_SpawnPost, spawncheck);
 	SDKHookEx(client, SDKHook_OnTakeDamageAlive, healthgate);
@@ -2540,6 +2626,16 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 		else proportion = GetConVarFloat(damage_scale_humans);
 		//PrintToServer("Damage proportion: %.2f", proportion);
 		if (proportion != 1.0) {ret = Plugin_Changed; damage *= proportion;}
+	}
+
+	//If you just phasewalked, you're immune to damage but also can't shoot.
+	if (phaseping_cookie[victim] < 0) {damage = 0.0; ret = Plugin_Changed;}
+	if (phaseping_cookie[attacker] < 0)
+	{
+		//Damage from other entities (mainly grenades) is permitted. Knife attacks are permitted.
+		if (attacker == inflictor && strcmp(atkcls, "Knife")) damage = 0.0;
+		else damage *= 2.0; //TODO: Figure out a proper damage bonus factor. Maybe 1.5?
+		ret = Plugin_Changed;
 	}
 
 	int hack = GetConVarInt(sm_drzed_hack);
