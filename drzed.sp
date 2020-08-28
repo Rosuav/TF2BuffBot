@@ -517,6 +517,7 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
+int assign_flame_owner = -1;
 bool report_new_entities = false;
 public void OnEntityCreated(int entity, const char[] cls)
 {
@@ -527,7 +528,7 @@ public void OnEntityCreated(int entity, const char[] cls)
 		smoke_not_bounced[entity] = true;
 		CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
 	}
-	//if (!strcmp(cls, "info_player_ping")) CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
+	if (!strcmp(cls, "entityflame")) SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", assign_flame_owner);
 	if (report_new_entities)
 		PrintToChatAll("New: %s [%d]", cls, entity);
 }
@@ -1453,7 +1454,6 @@ Action phase_ping(Handle timer, Handle params)
 	if (cookie != phaseping_cookie[client]) return; //Wrong cookie - player has repinged, just use the new one.
 	int ping = GetEntPropEnt(client, Prop_Send, "m_hPlayerPing");
 	if (ping == -1) return; //No ping? Shouldn't happen.
-	PrintToStream("Client %d is phasepinging! [cookie %d ent %d]", client, cookie, ping);
 
 	//Mark that you can't phaseping for a bit, nor can you fire any gun. Go ahead and throw nades though!
 	phaseping_cookie[client] = -1;
@@ -1463,6 +1463,15 @@ Action phase_ping(Handle timer, Handle params)
 		int weap = GetPlayerWeaponSlot(client, slot);
 		if (weap != -1) SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 1.5);
 	}
+	assign_flame_owner = client;
+	int team = GetClientTeam(client);
+	for (int bot = 1; bot < MAXPLAYERS; ++bot)
+		if (IsClientInGame(bot) && IsPlayerAlive(bot) && GetClientTeam(bot) != team)
+		{
+			//Living bot. (Technically "living enemy".) TODO: Check distance, ignite only those within a short range (150 HU maybe?)
+			IgniteEntity(bot, 1.0);
+		}
+	assign_flame_owner = -1;
 
 	float pos[3]; GetClientAbsOrigin(client, pos);
 	float mins[3]; GetClientMins(client, mins);
@@ -1492,15 +1501,14 @@ Action phase_ping(Handle timer, Handle params)
 	TR_GetEndPosition(ground, trace);
 	CloseHandle(trace);
 	float howclose = GetVectorDistance(ground, dest, true);
-	PrintToStream("Levitating trace: (%.0f,%.0f,%.0f) vv (%.0f,%.0f,%.0f) == %.2f", levitate[0], levitate[1], levitate[2], ground[0], ground[1], ground[2], howclose);
 	if (howclose < delta) {delta = howclose; target[0] = ground[0]; target[1] = ground[1]; target[2] = ground[2];} //New best!
 
 	//Any other options?
 
-	PrintToStream("From (%.0f,%.0f,%.0f) to (%.0f,%.0f,%.0f): stop at (%.0f,%.0f,%.0f)",
+	/*PrintToStream("From (%.0f,%.0f,%.0f) to (%.0f,%.0f,%.0f): stop at (%.0f,%.0f,%.0f)",
 		pos[0], pos[1], pos[2],
 		dest[0], dest[1], dest[2],
-		target[0], target[1], target[2]);
+		target[0], target[1], target[2]);*/
 	RemoveEntity(ping);
 	TeleportEntity(client, target, NULL_VECTOR, NULL_VECTOR);
 }
@@ -2541,8 +2549,6 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 	int attacker = atk; //Disconnect from the mutable
 	if (attacker == -1)
 	{
-		//char cls[64]; GetEntityClassname(inflictor, cls, sizeof(cls));
-		//PrintToChatAll("Attacker is -1, inflictor is %d (%s)", inflictor, cls);
 		//Attempt to figure out the "real" attacker from the inflictor
 		if (inflictor > 0 && inflictor < MAXPLAYERS) attacker = inflictor;
 		else
@@ -2552,6 +2558,8 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 			if (owner > 0 && owner < MAXPLAYERS) attacker = owner;
 		}
 		//else... I dunno who the attacker is. Leave it at -1 and don't do any player-based effects.
+		//char cls[64]; GetEntityClassname(inflictor, cls, sizeof(cls));
+		//PrintToChatAll("Attacker is now %d, inflictor is %d (%s), dmg %.2f type %x", attacker, inflictor, cls, damage, damagetype);
 	}
 	//If the attacking weapon is one you're currently wielding (ie not a grenade etc)
 	//in one of your first two slots (no knife etc), flag the user (or maybe gun) as
@@ -2637,12 +2645,19 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 
 	//If you just phasewalked, you're immune to damage but also can't shoot.
 	if (phaseping_cookie[victim] < 0) {damage = 0.0; ret = Plugin_Changed;}
-	if (phaseping_cookie[attacker] < 0)
+	if (attacker >= 0 && attacker < MAXPLAYERS && phaseping_cookie[attacker] < 0)
 	{
 		//Damage from other entities (mainly grenades) is permitted. Knife attacks are permitted.
 		if (attacker == inflictor && strcmp(atkcls, "Knife")) damage = 0.0;
 		else damage *= 2.0; //TODO: Figure out a proper damage bonus factor. Maybe 1.5?
 		ret = Plugin_Changed;
+	}
+
+	//Increase the damage done by igniting someone
+	if ((damagetype & 8) && attacker >= 0 && attacker < MAXPLAYERS && damage <= 2.0)
+	{
+		char cls[64]; GetEntityClassname(inflictor, cls, sizeof(cls));
+		if (!strcmp(cls, "entityflame")) {damage *= 2.5; atk = attacker; ret = Plugin_Changed;}
 	}
 
 	int hack = GetConVarInt(sm_drzed_hack);

@@ -262,7 +262,7 @@ underdome_modes = [
 	{
 		"intro": "GOAL: Phasewalk your SMG to Victory",
 		# Lilith loves fire, so even though it isn't said in the description, burn kills count too.
-		"needed": "%weapon_mac10% || %weapon_mp9% || %weapon_ump45% || %weapon_bizon% || %weapon_mp7% || %weapon_mp5sd% || %weapon_p90% || %weapon_molotov% || %weapon_incgrenade%",
+		"needed": "%weapon_mac10% || %weapon_mp9% || %weapon_ump45% || %weapon_bizon% || %weapon_mp7% || %weapon_mp5sd% || %weapon_p90% || %cond_damage_burn%",
 		"flags": UF.PHASEPING,
 		"killok": "",
 		"killbad": "",
