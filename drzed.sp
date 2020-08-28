@@ -1463,15 +1463,6 @@ Action phase_ping(Handle timer, Handle params)
 		int weap = GetPlayerWeaponSlot(client, slot);
 		if (weap != -1) SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 1.5);
 	}
-	assign_flame_owner = client;
-	int team = GetClientTeam(client);
-	for (int bot = 1; bot < MAXPLAYERS; ++bot)
-		if (IsClientInGame(bot) && IsPlayerAlive(bot) && GetClientTeam(bot) != team)
-		{
-			//Living bot. (Technically "living enemy".) TODO: Check distance, ignite only those within a short range (150 HU maybe?)
-			IgniteEntity(bot, 1.0);
-		}
-	assign_flame_owner = -1;
 
 	float pos[3]; GetClientAbsOrigin(client, pos);
 	float mins[3]; GetClientMins(client, mins);
@@ -1485,7 +1476,6 @@ Action phase_ping(Handle timer, Handle params)
 	float target[3]; TR_GetEndPosition(target, trace);
 	float delta = GetVectorDistance(target, dest, true);
 	CloseHandle(trace);
-	PrintToStream("Direct trace: (%.0f,%.0f,%.0f) == %.2f", target[0], target[1], target[2], delta);
 
 	//Second, a "levitating" trace. Trace to waist height at the destination, then from there to the ground.
 	//Advantages: Not blocked by uneven terrain. Disadvantages: Blocked by anything overhead.
@@ -1511,6 +1501,18 @@ Action phase_ping(Handle timer, Handle params)
 		target[0], target[1], target[2]);*/
 	RemoveEntity(ping);
 	TeleportEntity(client, target, NULL_VECTOR, NULL_VECTOR);
+
+	assign_flame_owner = client;
+	int team = GetClientTeam(client);
+	for (int bot = 1; bot < MAXPLAYERS; ++bot)
+		if (IsClientInGame(bot) && IsPlayerAlive(bot) && GetClientTeam(bot) != team)
+		{
+			//Living bot. (Technically "living enemy".) If within 200 HU, ignite 'em.
+			float botpos[3]; GetClientAbsOrigin(bot, botpos);
+			float dist = GetVectorDistance(target, botpos, true); //distance-squared
+			if (dist < 40000.0) IgniteEntity(bot, 1.0);
+		}
+	assign_flame_owner = -1;
 }
 
 public Action player_pinged(int client, const char[] command, int argc)
@@ -1539,8 +1541,8 @@ public Action player_pinged(int client, const char[] command, int argc)
 		WritePackCell(params, client);
 		WritePackCell(params, ++phaseping_cookie[client]);
 		ResetPack(params);
-		PrintToStream("Client %d phasepinged [cookie = %d]", client, phaseping_cookie[client]);
-		//TODO: Flicker or highlight the player in a really obvious way (reset when the phase pops)
+		//PrintToStream("Client %d phasepinged [cookie = %d]", client, phaseping_cookie[client]);
+		//TODO: Flicker or highlight the player in a really obvious way (reset when the phase expires)
 	}
 	if (entity == -11) //Currently disabled
 	{
