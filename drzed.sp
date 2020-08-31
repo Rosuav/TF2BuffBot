@@ -43,6 +43,7 @@ ConVar bot_purchase_delay = null; //(0.0) Delay bot primary weapon purchases by 
 ConVar damage_scale_humans = null; //(1.0) Scale all damage dealt by humans
 ConVar damage_scale_bots = null; //(1.0) Scale all damage dealt by bots
 ConVar learn_smoke = null; //(0) Set things up to learn a particular smoke (1 = Dust II Xbox)
+ConVar learn_stutterstep = null; //(0) Show information on each shot fired to help you master stutter-stepping
 ConVar bomb_defusal_puzzles = null; //(0) Issue this many puzzles before allowing the bomb to be defused (can't be changed during a round)
 ConVar insta_respawn_damage_lag = null; //(0) Instantly respawn on death, with this many seconds of damage immunity and inability to fire
 ConVar guardian_underdome_waves = null; //(0) Utilize Underdome rules
@@ -614,7 +615,6 @@ void keep_firing(any weap)
 	SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + delay * 0.5);
 }
 
-//If you throw a grenade and it's the only thing you have, unselect.
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
@@ -637,6 +637,25 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 			SmokeLog("[%d-B] JumpThrow +%d", client, now - last_jump[client]);
 		}
 		last_smoke[client] = now;
+	}
+
+	if (GetConVarInt(learn_stutterstep))
+	{
+		//Stutter stepping
+		//Every time a shot is fired:
+		// * Show the total velocity. Should match cl_showpos 1
+		// * Get eye angles. Calculate the proportion of velocity which is perpendicular to the horizontal eye angle.
+		//   - What about the vertical proportion?
+		// * Inspect currently-held buttons. Are you increasing or decreasing velocity?
+		// * Summarize with a score number: 0.0 is perfect, positive means too late, negative too soon
+		// * Don't bother doing anything about aim synchronization - the pockmarks can teach that.
+		// * Show the current keys and the sideways movement as center text
+		float vel[3]; //Velocity seems to be three floats, NOT a vector. Why? No clue.
+		vel[0] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[0]");
+		vel[1] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[1]");
+		vel[2] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[2]");
+		float spd = GetVectorLength(vel, false); //Should be equal to what cl_showpos tells you your velocity is
+		PrintToChat(client, "Stutter: %.2f", spd);
 	}
 
 	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
@@ -693,6 +712,7 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	//to zero means it goes the same way every time.
 	SetEntPropFloat(weap, Prop_Send, "m_flRecoilIndex", 0.0);
 	#endif
+	//If you throw a grenade and it's the only thing you have, unselect.
 	if (GetPlayerWeaponSlot(client, 2) != -1) return; //Normally you'll have a knife, and things are fine.
 	int ammo_offset = 0;
 	if (!strcmp(weapon, "weapon_hegrenade")) ammo_offset = 14;
