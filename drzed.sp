@@ -615,6 +615,7 @@ void keep_firing(any weap)
 	SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + delay * 0.5);
 }
 
+int strafe_direction[MAXPLAYERS + 1]; //1 = right, 0 = neither/both, -1 = left. This is your *goal*, not your velocity or acceleration.
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
@@ -655,7 +656,29 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		vel[1] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[1]");
 		vel[2] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[2]");
 		float spd = GetVectorLength(vel, false); //Should be equal to what cl_showpos tells you your velocity is
-		PrintToChat(client, "Stutter: %.2f", spd);
+		float angle[3]; GetClientEyeAngles(client, angle);
+		float right[3]; GetAngleVectors(angle, NULL_VECTOR, right, NULL_VECTOR); //Unit vector perpendicular to the way you're facing
+		float right_vel = GetVectorDotProduct(vel, right); //Magnitude of the velocity projected onto the (unit) right hand vector
+		int sidestep = spd > 0.0 ? RoundToNearest(FloatAbs(right_vel) * 100.0 / spd) : 0; //Proportion of your total velocity that is across your screen (and presumably your enemy's)
+		if (strafe_direction[client] == 0)
+		{
+			//You're holding neither A nor D (or both, which has the same effect).
+			//This doesn't work for stutter stepping, and we can't really do much here.
+			//Give basic info only.
+			PrintToChat(client, "Stutter: speed %.2f side %d%%", spd, sidestep);
+		}
+		else
+		{
+			//Ideally your spd should be close to zero. However, it's the right_vel
+			//(which is a signed value) that can be usefully compared to your goal
+			//(in strafe_direction). By multiplying them, we get a signed velocity
+			//relative to your goal direction; a positive number means you're now
+			//increasing your velocity (unless at max), negative means decreasing.
+			right_vel *= strafe_direction[client];
+			int score = RoundToFloor(spd); if (right_vel < 0) score = -score;
+			//Why can't I just display a number with %+d ??? sigh.
+			PrintToChat(client, "Stutter: speed %.2f side %d%% SCORE %s%d", spd, sidestep, score > 0 ? "+" : "", score);
+		}
 	}
 
 	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
@@ -1767,6 +1790,12 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			buttons = btn;
 			return Plugin_Changed;
 		}
+	}
+	if (GetConVarInt(learn_stutterstep))
+	{
+		strafe_direction[client] = (buttons & IN_MOVELEFT ? -1 : 0) + (buttons & IN_MOVERIGHT ? 1 : 0); //Why doesn't && work for these??
+		if (buttons & (IN_MOVELEFT|IN_MOVERIGHT))
+			PrintCenterText(client, "Strafing %s%s", buttons & IN_MOVELEFT ? " Left" : "", buttons & IN_MOVERIGHT ? " Right" : "");
 	}
 	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
 	if (flg & UF_DISABLE_SCOPING)
