@@ -1791,11 +1791,18 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			return Plugin_Changed;
 		}
 	}
-	if (GetConVarInt(learn_stutterstep))
+	int st = GetConVarInt(learn_stutterstep);
+	if (st)
 	{
 		strafe_direction[client] = (buttons & IN_MOVELEFT ? -1 : 0) + (buttons & IN_MOVERIGHT ? 1 : 0); //Why doesn't && work for these??
-		if (buttons & (IN_MOVELEFT|IN_MOVERIGHT))
-			PrintCenterText(client, "Strafing %s%s", buttons & IN_MOVELEFT ? " Left" : "", buttons & IN_MOVERIGHT ? " Right" : "");
+		//Set learn_stutterstep to 2 to alert your current strafe direction while strafing, or to 3 to show it always.
+		if (st >= 2)
+		{
+			if ((buttons & (IN_MOVELEFT|IN_MOVERIGHT)) || st >= 3)
+				PrintCenterText(client, "Strafing %s%s", buttons & IN_MOVELEFT ? " Left" : "", buttons & IN_MOVERIGHT ? " Right" : "");
+			else
+				PrintCenterText(client, "");
+		}
 	}
 	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
 	if (flg & UF_DISABLE_SCOPING)
