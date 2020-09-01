@@ -63,6 +63,8 @@ public void PrintToStream(const char[] fmt, any ...)
 
 StringMap weapon_names;
 StringMap weapon_is_primary;
+StringMap weapondata_index; //weapondata_item_name[index] mapped to index
+#include "cs_weapons.inc"
 ConVar default_weapons[4];
 ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
 ConVar weapon_recoil_scale, mp_damage_vampiric_amount;
@@ -218,6 +220,10 @@ public void OnPluginStart()
 	SetTrieValue(weapon_is_primary, "mag7", 1);
 	SetTrieValue(weapon_is_primary, "m249", 2);
 	SetTrieValue(weapon_is_primary, "negev", 1);
+
+	//Build a reverse lookup. Given an item name, find all its other details (price, max speed, etc).
+	weapondata_index = CreateTrie();
+	for (int i = 0; i < sizeof(weapondata_item_name); ++i) {SetTrieValue(weapondata_index, weapondata_item_name[i], i);}
 
 	default_weapons[0] = FindConVar("mp_ct_default_primary");
 	default_weapons[1] = FindConVar("mp_t_default_primary");
@@ -616,6 +622,16 @@ void keep_firing(any weap)
 }
 
 int strafe_direction[MAXPLAYERS + 1]; //1 = right, 0 = neither/both, -1 = left. This is your *goal*, not your velocity or acceleration.
+int stutterstep_score[MAXPLAYERS + 1][3]; //For each player, ({stationary, accurate, inaccurate}), and is reset on weapon reload
+
+void show_stutterstep_stats(int client)
+{
+	char player[64]; GetClientName(client, player, sizeof(player));
+	PrintToChatAll("%s: stopped %d, accurate %d, inaccurate %d", player,
+		stutterstep_score[client][0], stutterstep_score[client][1], stutterstep_score[client][2]);
+	stutterstep_score[client][0] = stutterstep_score[client][1] = stutterstep_score[client][2] = 0;
+}
+
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
@@ -660,14 +676,29 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		float right[3]; GetAngleVectors(angle, NULL_VECTOR, right, NULL_VECTOR); //Unit vector perpendicular to the way you're facing
 		float right_vel = GetVectorDotProduct(vel, right); //Magnitude of the velocity projected onto the (unit) right hand vector
 		int sidestep = spd > 0.0 ? RoundToNearest(FloatAbs(right_vel) * 100.0 / spd) : 0; //Proportion of your total velocity that is across your screen (and presumably your enemy's)
-		if (strafe_direction[client] == 0)
+		float maxspeed = 250.0; //Or use the value from sv_maxspeed?
+		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if (weap > 0)
 		{
-			//You're holding neither A nor D (or both, which has the same effect).
-			//This doesn't work for stutter stepping, and we can't really do much here.
-			//Give basic info only.
-			PrintToChat(client, "Stutter: speed %.2f side %d%%", spd, sidestep);
+			//Try to figure out the weapon's maximum speed
+			//Since this is (ultimately) a lookup into items_game.txt, its validity depends on
+			//keeping the data tables up to date. Also, this doesn't have entries for non-weapons,
+			//so (for instance) grenades show up at the default of 250, even though their actual
+			//max speed is 245. It also doesn't take scoping into account, which drops max speed
+			//to 150, 120, or 100, depending on the weapon. None of this impacts the primary goal
+			//of this code, which is to learn stutter stepping; just be aware if you copy/paste it.
+			char cls[64]; GetEntityClassname(weap, cls, sizeof(cls));
+			int idx;
+			if (GetTrieValue(weapondata_index, cls, idx)) maxspeed = weapondata_max_player_speed[idx];
 		}
-		else
+		maxspeed *= 0.34; //Below 34% of a weapon's maximum speed, you are fully accurate.
+		int quality = spd == 0 ? 0 : //Stationary shot.
+				spd < maxspeed ? 1 : //Accurate shot.
+				2; //Inaccurate shot.
+		stutterstep_score[client][quality]++; 
+		char quality_desc[][] = {"stopped", "good", "bad"};
+		char score_desc[64] = "";
+		if (strafe_direction[client])
 		{
 			//Ideally your spd should be close to zero. However, it's the right_vel
 			//(which is a signed value) that can be usefully compared to your goal
@@ -677,8 +708,12 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 			right_vel *= strafe_direction[client];
 			int score = RoundToFloor(spd); if (right_vel < 0) score = -score;
 			//Why can't I just display a number with %+d ??? sigh.
-			PrintToChat(client, "Stutter: speed %.2f side %d%% SCORE %s%d", spd, sidestep, score > 0 ? "+" : "", score);
+			Format(score_desc, sizeof(score_desc), " SCORE %s%d", score > 0 ? "+" : "", score);
 		}
+		PrintToChat(client, "Stutter: speed %.2f/%.0f side %d%% %s%s", spd, maxspeed, sidestep, quality_desc[quality], score_desc);
+		//If this is the last shot from the magazine, show stats, since the weapon_reload
+		//event doesn't fire.
+		if (GetEntProp(weap, Prop_Send, "m_iClip1") == 1) show_stutterstep_stats(client);
 	}
 
 	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
@@ -1017,7 +1052,6 @@ public Action return_bomb(Handle timer, any bomb)
 	TeleportEntity(bomb, pos, NULL_VECTOR, NULL_VECTOR);
 }
 
-#include "cs_weapons.inc"
 #define MAX_CLUES_PER_CAT 10
 int puzzle_clues[MAX_CLUES_PER_CAT * WEAPON_TYPE_CATEGORIES];
 int num_puzzle_clues = 0;
@@ -2035,6 +2069,7 @@ public void weapon_reload(Event event, const char[] name, bool dontBroadcast)
 	//So if you're running a Sawed-Off, Nova, or XM1014, don't tap R.
 	if (anarchy[client]) PrintCenterText(client, "You reloaded prematurely, wasting %d anarchy!", anarchy[client]);
 	anarchy[client] = 0; anarchy_available[client] = 0;
+	if (GetConVarInt(learn_stutterstep)) show_stutterstep_stats(client);
 }
 
 public void player_team(Event event, const char[] name, bool dontBroadcast)
