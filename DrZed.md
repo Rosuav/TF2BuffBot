@@ -9,6 +9,9 @@ gameplay modes. Some such game modes are [documented by example](gamemodes.md),
 and for the rest, the limit is your own imagination! Of course, not everything
 has been tested with everything else, but have fun, go wild!
 
+Not documented here are a number of training and practice features. For those,
+[see this separate file of learning modes](learning).
+
 ## Major features
 
 ### Healing

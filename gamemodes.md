@@ -6,6 +6,9 @@ be built using the plugin and some cvars. Each is derived from a standard game
 mode; configure your server with just a few additional directives (eg with an
 "exec" command in your server_last.cfg).
 
+These modes are designed for gameplay. See also the [learning modes](learning),
+which are designed for training and practice.
+
 ## Arms & Armor
 
 Base game mode: Arms Race (aka Gun Game Progressive, type 1 mode 0)
