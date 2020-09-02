@@ -702,7 +702,7 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		stutterstep_score[client][quality]++; 
 		if (quality == 2) stutterstep_inaccuracy[client] += Pow(spd / maxspeed, 2.0) - 1.0;
 		char quality_desc[][] = {"stopped", "good", "bad"};
-		char score_desc[64] = "";
+		char sync_desc[64] = "";
 		if (strafe_direction[client])
 		{
 			//Ideally your spd should be close to zero. However, it's the right_vel
@@ -711,11 +711,11 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 			//relative to your goal direction; a positive number means you're now
 			//increasing your velocity (unless at max), negative means decreasing.
 			right_vel *= strafe_direction[client];
-			int score = RoundToFloor(spd); if (right_vel < 0) score = -score;
+			int sync = RoundToFloor(spd); if (right_vel < 0) sync = -sync;
 			//Why can't I just display a number with %+d ??? sigh.
-			Format(score_desc, sizeof(score_desc), " SCORE %s%d", score > 0 ? "+" : "", score);
+			Format(sync_desc, sizeof(sync_desc), " SYNC %s%d", sync > 0 ? "+" : "", sync);
 		}
-		PrintToChat(client, "Stutter: speed %.2f/%.0f side %d%% %s%s", spd, maxspeed, sidestep, quality_desc[quality], score_desc);
+		PrintToChat(client, "Stutter: speed %.2f/%.0f side %d%% %s%s", spd, maxspeed, sidestep, quality_desc[quality], sync_desc);
 		//If this is the last shot from the magazine, show stats, since the weapon_reload
 		//event doesn't fire.
 		if (GetEntProp(weap, Prop_Send, "m_iClip1") == 1) show_stutterstep_stats(client);
