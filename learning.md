@@ -22,13 +22,13 @@ before or after you threw, and by how many server ticks.
 
 Specifically to smoking Xbox on Dust II, this also automatically validates the
 above statistics and tells you whether the first bounce is promising or not,
-and whether the smoke landed in the right place. "Promising" is based on the
-throw from T spawn, a jump throw straight down Mid that bounces on the steps.
-Ignoring the "Promising" flag, this can still be used to test other ways to
-smoke the same location, such as a run-throw from outside Bedroom towards Mid,
-or a highly specific standing throw from the white X near the origin.
-
-(TODO: Take some screenshots to illustrate the above throws)
+and whether the smoke landed in the right place. "Promising" is based on
+[the throw from T spawn](images/Xbox_TSpawn.png), a jump throw straight down
+Mid that bounces on the steps. Ignoring the "Promising" flag, this can still be
+used to test other ways to smoke the same location, such as a run-throw from
+outside Bedroom towards Mid, or a highly specific standing throw
+[from the white X near the origin](images/Xbox_standhere.png) tossed
+[over the building](images/Xbox_throwhere.png).
 
 ## Stutter-stepping
 
