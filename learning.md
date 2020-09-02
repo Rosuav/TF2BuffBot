@@ -50,6 +50,7 @@ Core CS:GO features that work well with this:
 * cl_showpos 1 - get some numbers on your speed
 
 Every time you fire a shot, the server informs you of its accuracy in this way:
+
     Stutter: speed NNNN/NN side NN% good/bad SYNC +/- NN
 
 The speed is compared against the maximum accurate speed with this weapon. If
@@ -61,6 +62,7 @@ indicator says whether you are shooting after the direction change (positive)
 or before it (negative), so you can adjust your key and click synchronization.
 
 Each time you reload, stats for that magazine are shown to everyone:
+
     Yourname: stopped NN, accurate NN, inaccurate NN - spread NNNN
 
 Shots taken while completely stationary and not holding either strafe key (or
