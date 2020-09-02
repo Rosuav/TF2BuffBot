@@ -628,10 +628,10 @@ float stutterstep_inaccuracy[MAXPLAYERS + 1]; //For each player, the sum of squa
 void show_stutterstep_stats(int client)
 {
 	char player[64]; GetClientName(client, player, sizeof(player));
-	int inac = stutterstep_score[client][2];
+	int shots = stutterstep_score[client][1] + stutterstep_score[client][2];
 	PrintToChatAll("%s: stopped %d, accurate %d, inaccurate %d - spread %.2f", player,
-		stutterstep_score[client][0], stutterstep_score[client][1], inac,
-		inac ? stutterstep_inaccuracy[client] / inac : 0.0);
+		stutterstep_score[client][0], stutterstep_score[client][1], stutterstep_score[client][2],
+		shots ? stutterstep_inaccuracy[client] / shots : 0.0);
 	stutterstep_score[client][0] = stutterstep_score[client][1] = stutterstep_score[client][2] = 0;
 	stutterstep_inaccuracy[client] = 0.0;
 }
