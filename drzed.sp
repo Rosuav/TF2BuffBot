@@ -696,7 +696,7 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 			if (GetTrieValue(weapondata_index, cls, idx)) maxspeed = weapondata_max_player_speed[idx];
 		}
 		maxspeed *= 0.34; //Below 34% of a weapon's maximum speed, you are fully accurate.
-		int quality = spd == 0 ? 0 : //Stationary shot.
+		int quality = spd == 0.0 && !strafe_direction[client] ? 0 : //Stationary shot.
 				spd <= maxspeed ? 1 : //Accurate shot.
 				2; //Inaccurate shot.
 		stutterstep_score[client][quality]++; 
