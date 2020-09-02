@@ -693,7 +693,7 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		}
 		maxspeed *= 0.34; //Below 34% of a weapon's maximum speed, you are fully accurate.
 		int quality = spd == 0 ? 0 : //Stationary shot.
-				spd < maxspeed ? 1 : //Accurate shot.
+				spd <= maxspeed ? 1 : //Accurate shot.
 				2; //Inaccurate shot.
 		stutterstep_score[client][quality]++; 
 		char quality_desc[][] = {"stopped", "good", "bad"};
