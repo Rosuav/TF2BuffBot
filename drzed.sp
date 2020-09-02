@@ -623,13 +623,17 @@ void keep_firing(any weap)
 
 int strafe_direction[MAXPLAYERS + 1]; //1 = right, 0 = neither/both, -1 = left. This is your *goal*, not your velocity or acceleration.
 int stutterstep_score[MAXPLAYERS + 1][3]; //For each player, ({stationary, accurate, inaccurate}), and is reset on weapon reload
+float stutterstep_inaccuracy[MAXPLAYERS + 1]; //For each player, the sum of squares of the inaccuracies, for the third field above.
 
 void show_stutterstep_stats(int client)
 {
 	char player[64]; GetClientName(client, player, sizeof(player));
-	PrintToChatAll("%s: stopped %d, accurate %d, inaccurate %d", player,
-		stutterstep_score[client][0], stutterstep_score[client][1], stutterstep_score[client][2]);
+	int inac = stutterstep_score[client][2];
+	PrintToChatAll("%s: stopped %d, accurate %d, inaccurate %d - spread %.2f", player,
+		stutterstep_score[client][0], stutterstep_score[client][1], inac,
+		inac ? stutterstep_inaccuracy[client] / inac : 0.0);
 	stutterstep_score[client][0] = stutterstep_score[client][1] = stutterstep_score[client][2] = 0;
+	stutterstep_inaccuracy[client] = 0.0;
 }
 
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
@@ -696,6 +700,7 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 				spd <= maxspeed ? 1 : //Accurate shot.
 				2; //Inaccurate shot.
 		stutterstep_score[client][quality]++; 
+		if (quality == 2) stutterstep_inaccuracy[client] += Pow(spd / maxspeed, 2.0) - 1.0;
 		char quality_desc[][] = {"stopped", "good", "bad"};
 		char score_desc[64] = "";
 		if (strafe_direction[client])
