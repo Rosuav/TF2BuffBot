@@ -1923,6 +1923,8 @@ void devise_underdome_rules()
 	killsneeded = GameRules_GetProp("m_nGuardianModeSpecialKillsRemaining");
 	//First wave? Force it to the warmup settings.
 	if (killsneeded == GetConVarInt(mp_guardian_special_kills_needed)) m = 0;
+	//Finished? Don't do anything.
+	else if (killsneeded <= 0) {reset_underdome_config(); return;}
 	int cfg = GetConVarInt(guardian_underdome_waves);
 	if (cfg > sizeof(underdome_flags))
 	{
