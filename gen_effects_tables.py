@@ -118,7 +118,7 @@ class UF(IntFlag):
 	CT_HIGH_GRAVITY = auto()
 	LOW_ACCURACY = auto() # Reduce all accuracy
 	HIGH_ACCURACY = auto() # Improve all accuracy
-	VLADOF = auto() # The longer you keep firing, the more your fire rate increases.
+	SALLY = auto() # The longer you keep firing, the more your fire rate increases.
 	VAMPIRIC = auto() # Damage is vampiric, and bots gain health periodically
 	PHASEPING = auto() # Ping, wait 1.5 seconds, and then you will teleport to that location.
 	# Extra conditions: Kill doesn't count if...
@@ -241,7 +241,7 @@ underdome_modes = [
 	{
 		"intro": "GOAL: LMG time - spray 'em down! Scopes are useless here.",
 		"needed": "%weapon_m249% || %weapon_negev%",
-		"flags": UF.DISABLE_SCOPING | UF.VLADOF,
+		"flags": UF.DISABLE_SCOPING | UF.SALLY,
 		"killok": "",
 		"killbad": "",
 	},

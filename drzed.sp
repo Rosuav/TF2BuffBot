@@ -601,24 +601,31 @@ int underdome_mode = 0;
 int killsneeded;
 float last_guardian_buy_time = 0.0;
 Handle underdome_ticker = INVALID_HANDLE;
+int spray_count[MAXPLAYERS + 1]; //Number of bullets fired since the last time all attack buttons were released
 
-void stop_firing(any weap)
-{
-	//Force weapons into semi-automatic mode
-	//Currently doesn't actually go semi-auto, just stops you from firing more than once per second.
-	//TODO: Cut the actual delay to half a second, and actually block so long as someone's holding attack1
-	SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 1.0);
-}
-
-void keep_firing(any weap)
+void keep_firing(int client)
 {
 	//Increase fire rate based on the length of time you've been firing
-	//TODO: Keep track of how long ago the weapon wasn't firing, somehow
-	//TODO: Scale up so it gets to this halving of delay only after you've
-	//been firing for a good while. Start out with 1.0 and scale towards 0.5.
+	int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	float clip = 1.0;
+	char cls[64]; GetEntityClassname(weap, cls, sizeof(cls));
+	int idx;
+	if (GetTrieValue(weapondata_index, cls, idx)) clip = weapondata_primary_clip_size[idx];
+	if (clip < 1.0) clip = 1.0; //Shouldn't happen
 	float delay = GetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack") - GetGameTime();
 	//PrintCenterTextAll("Delay: %.3f", delay);
-	SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + delay * 0.5);
+	float scale = 1.0 - 0.5 * spray_count[client] / clip;
+	if (scale < 0.25) scale = 0.25; //Max out at four-to-one fire rate boosting (otherwise scale could even go negative in theory)
+	SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + delay * scale);
+	//Random chance to consume no ammo, based on spray length
+	//If clip is full or empty, always consume ammo (to prevent weirdnesses)
+	//Cap the chance at 75%, which will mean that you should eventually run out
+	int clipleft = GetEntProp(weap, Prop_Send, "m_iClip1");
+	int chance = spray_count[client];
+	if (clipleft == RoundToFloor(clip) || clipleft == 0) chance = 0;
+	else if (chance > 75) chance = 75;
+	if (randrange(100) < chance)
+		SetEntProp(weap, Prop_Send, "m_iClip1", clipleft + 1);
 }
 
 int strafe_direction[MAXPLAYERS + 1]; //1 = right, 0 = neither/both, -1 = left. This is your *goal*, not your velocity or acceleration.
@@ -659,6 +666,9 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		}
 		last_smoke[client] = now;
 	}
+
+	spray_count[client]++;
+	PrintToChat(client, "Spray count: %d", spray_count[client]);
 
 	if (GetConVarInt(learn_stutterstep))
 	{
@@ -722,16 +732,8 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	}
 
 	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
-	if (flg & UF_DISABLE_AUTOMATIC_FIRE)
-	{
-		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		RequestFrame(stop_firing, weap);
-	}
-	if (flg & UF_VLADOF)
-	{
-		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		RequestFrame(keep_firing, weap);
-	}
+	
+	if (flg & UF_SALLY) RequestFrame(keep_firing, client);
 	//If you empty your clip completely, add a stack of Anarchy
 	if (anarchy[client] < GetConVarInt(sm_drzed_max_anarchy))
 	{
@@ -1812,6 +1814,10 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		was_jumping[client] = true;
 	}
 	else was_jumping[client] = false;
+
+	//When you're not firing, reset your spray count for Sally, Semi-Auto, etc
+	if ((buttons & (IN_ATTACK | IN_ATTACK2 | IN_ATTACK3)) == 0) spray_count[client] = 0;
+
 	if (IsPlayerAlive(client) && is_crippled(client))
 	{
 		//While you're crippled, you can't do certain things. There may be more restrictions to add.
@@ -1857,6 +1863,21 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 				buttons &= ~(IN_ZOOM | IN_ATTACK2);
 				return Plugin_Changed;
 			}
+		}
+	}
+	if ((flg & UF_DISABLE_AUTOMATIC_FIRE) && spray_count[client])
+	{
+		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if (weap > 0)
+		{
+			//If you've fired without letting up the mouse button, delay the next shot.
+			//So long as you keep the button held, this will keep delaying shots.
+			//TODO: Save the *actual* next attack time, and when you release the button,
+			//reinstate it. That way, we can set this to a crazy-high value like "now + 1.0"
+			//and it should get rid of the client-side "oops I think I fired a shot" problem.
+			float next = GetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack");
+			float wait = GetGameTime() + 0.1;
+			if (next < wait) SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", wait);
 		}
 	}
 	return Plugin_Continue;
