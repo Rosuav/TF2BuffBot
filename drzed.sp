@@ -607,6 +607,7 @@ void keep_firing(int client)
 {
 	//Increase fire rate based on the length of time you've been firing
 	int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if (weap <= 0) return;
 	float clip = 1.0;
 	char cls[64]; GetEntityClassname(weap, cls, sizeof(cls));
 	int idx;
@@ -668,7 +669,6 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	}
 
 	spray_count[client]++;
-	PrintToChat(client, "Spray count: %d", spray_count[client]);
 
 	if (GetConVarInt(learn_stutterstep))
 	{
