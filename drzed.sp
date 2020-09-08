@@ -637,6 +637,7 @@ void show_stutterstep_stats(int client)
 {
 	char player[64]; GetClientName(client, player, sizeof(player));
 	int shots = stutterstep_score[client][1] + stutterstep_score[client][2];
+	if (stutterstep_score[client][0] + shots == 0) return; //No stats to show (can happen if you reload two weapons in succession)
 	PrintToChatAll("%s: stopped %d, accurate %d, inaccurate %d - spread %.2f", player,
 		stutterstep_score[client][0], stutterstep_score[client][1], stutterstep_score[client][2],
 		shots ? stutterstep_inaccuracy[client] / shots : 0.0);
