@@ -47,6 +47,7 @@ ConVar learn_stutterstep = null; //(0) Show information on each shot fired to he
 ConVar bomb_defusal_puzzles = null; //(0) Issue this many puzzles before allowing the bomb to be defused (can't be changed during a round)
 ConVar insta_respawn_damage_lag = null; //(0) Instantly respawn on death, with this many seconds of damage immunity and inability to fire
 ConVar guardian_underdome_waves = null; //(0) Utilize Underdome rules
+ConVar limit_fire_rate = null; //(0) If nonzero, guns cannot fire faster than N rounds/minute; if 1, will show fire rate each shot.
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
@@ -629,6 +630,22 @@ void keep_firing(int client)
 		SetEntProp(weap, Prop_Send, "m_iClip1", clipleft + 1);
 }
 
+void slow_firing(int client)
+{
+	int rate = GetConVarInt(limit_fire_rate); //Restrict fire rate to X rounds/min
+	int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if (weap <= 0 || rate <= 0) return;
+	float delay = GetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack") - GetGameTime();
+	if (rate == 1) //Show, rather than changing, the limit
+	{
+		PrintCenterText(client, "Calculated fire rate: %.2f", 60.0 / delay);
+		return;
+	}
+	float min_delay = 60.0 / rate; //Seconds between shots (usually a small fraction of one)
+	if (delay < min_delay)
+		SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + min_delay);
+}
+
 int strafe_direction[MAXPLAYERS + 1]; //1 = right, 0 = neither/both, -1 = left. This is your *goal*, not your velocity or acceleration.
 int stutterstep_score[MAXPLAYERS + 1][3]; //For each player, ({stationary, accurate, inaccurate}), and is reset on weapon reload
 float stutterstep_inaccuracy[MAXPLAYERS + 1]; //For each player, the sum of squares of the inaccuracies, for the third field above.
@@ -734,7 +751,8 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 
 	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
 	
-	if (flg & UF_SALLY) RequestFrame(keep_firing, client);
+	if (GetConVarInt(limit_fire_rate)) RequestFrame(slow_firing, client);
+	else if (flg & UF_SALLY) RequestFrame(keep_firing, client);
 	//If you empty your clip completely, add a stack of Anarchy
 	if (anarchy[client] < GetConVarInt(sm_drzed_max_anarchy))
 	{
