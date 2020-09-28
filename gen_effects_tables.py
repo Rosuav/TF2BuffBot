@@ -121,6 +121,7 @@ class UF(IntFlag):
 	SALLY = auto() # The longer you keep firing, the more your fire rate increases.
 	VAMPIRIC = auto() # Damage is vampiric, and bots gain health periodically
 	PHASEPING = auto() # Ping, wait 1.5 seconds, and then you will teleport to that location.
+	KNIFE_FOCUS = auto() # Guns deal fractional damage. TODO: Make knife slashes deal 200, and reduce tagging.
 	# Extra conditions: Kill doesn't count if...
 	ASSISTED_ONLY = auto() # ... there's no assister; combine with the below to narrow it down
 	NO_TEAM_ASSISTS = auto() # ... assister is on same team as victim
@@ -134,7 +135,6 @@ class UF(IntFlag):
 	FLYING = auto() # Damage only has effect if you are in the air
 	MORE_RANGE_PENALTY = auto() # Increase damage at close range but drastically increase the range penalty
 	BETTER_ARMOR = auto() # All weapons have their armor penetration (armor ratio) reduced
-	KNIFE_FOCUS = auto() # Knife slashes deal 200 damage but guns deal half damage
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
 	# These flags give free items to all CTs and are handled with a single block of code.
 	FREEBIES = FREE_HEGRENADE | FREE_FLASHBANG | FREE_MOLLY | FREE_TAGRENADE

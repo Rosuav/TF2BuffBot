@@ -1995,10 +1995,11 @@ void devise_underdome_rules()
 	if (flg & UF_VAMPIRIC) SetConVarFloat(mp_damage_vampiric_amount, 0.25);
 	else SetConVarFloat(mp_damage_vampiric_amount, 0.0);
 
-	SetConVarFloat(mp_damage_scale_ct_head, (flg & UF_NO_HEADSHOTS) ? 0.25 : 1.0);
-	SetConVarFloat(mp_damage_scale_t_head, (flg & UF_NO_HEADSHOTS) ? 0.25 : 1.0);
-	SetConVarFloat(mp_damage_scale_ct_body, (flg & UF_HEADSHOTS_ONLY) ? 0.0 : 1.0);
-	SetConVarFloat(mp_damage_scale_t_body, (flg & UF_HEADSHOTS_ONLY) ? 0.25 : 1.0); //The AI cheats.
+	float knife = (flg & UF_KNIFE_FOCUS) ? 0.125 : 1.0;
+	SetConVarFloat(mp_damage_scale_ct_head, ((flg & UF_NO_HEADSHOTS) ? 0.25 : 1.0) * knife);
+	SetConVarFloat(mp_damage_scale_t_head, ((flg & UF_NO_HEADSHOTS) ? 0.25 : 1.0) * knife);
+	SetConVarFloat(mp_damage_scale_ct_body, ((flg & UF_HEADSHOTS_ONLY) ? 0.0 : 1.0) * knife);
+	SetConVarFloat(mp_damage_scale_t_body, ((flg & UF_HEADSHOTS_ONLY) ? 0.25 : 1.0) * knife); //The AI cheats.
 
 	adjust_underdome_gravity();
 }
