@@ -228,6 +228,7 @@ public void OnPluginStart()
 	weapondata_index = CreateTrie();
 	for (int i = 0; i < sizeof(weapondata_item_name); ++i) {SetTrieValue(weapondata_index, weapondata_item_name[i], i);}
 
+	//Not handled by the automated system as it's easier if we can loop over these
 	default_weapons[0] = FindConVar("mp_ct_default_primary");
 	default_weapons[1] = FindConVar("mp_t_default_primary");
 	default_weapons[2] = FindConVar("mp_ct_default_secondary");
