@@ -184,8 +184,8 @@ public void OnPluginStart()
 	SetTrieString(weapon_names, "flashbang_projectile", "Flash");
 	SetTrieString(weapon_names, "weapon_smokegrenade", "Smoke"); //Ditto
 	SetTrieString(weapon_names, "smokegrenade_projectile", "Smoke");
-	SetTrieString(weapon_names, "weapon_decoy", "Smoke"); //When wielded
-	SetTrieString(weapon_names, "decoy_projectile", "Smoke"); //Beaning and also the tiny boom at the end
+	SetTrieString(weapon_names, "weapon_decoy", "Decoy"); //When wielded
+	SetTrieString(weapon_names, "decoy_projectile", "Decoy"); //Beaning and also the tiny boom at the end
 	//Other
 	SetTrieString(weapon_names, "weapon_m249", "M249");
 	SetTrieString(weapon_names, "weapon_negev", "Negev");

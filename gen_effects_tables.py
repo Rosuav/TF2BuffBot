@@ -269,15 +269,15 @@ underdome_modes = [
 	},
 	{
 		"intro": "GOAL: Brick, have fun",
-		"needed": "%weapon_knife%",
+		"needed": "%weapon_knife% || %weapon_hegrenade%",
 		"flags": UF.KNIFE_FOCUS | UF.FREE_HEGRENADE,
 		"killok": "",
 		"killbad": "",
 	},
 	{
 		"intro": "GOAL: Transfusion Grenades",
-		# TODO: Test this
-		"needed": "%weapon_hegrenade% || %weapon_molotov% || %weapon_incgrenade% || %weapon_flashbang% || %weapon_decoy% || %weapon_smoke%",
+		# TODO: Figure out why Decoys don't count
+		"needed": "%weapon_hegrenade% || %weapon_molotov% || %weapon_incgrenade% || %weapon_flashbang% || %weapon_decoy% || %decoy_projectile% || %weapon_smokegrenade%",
 		"flags": UF.VAMPIRIC | UF.FREE_HEGRENADE,
 		"killok": "",
 		"killbad": "G button.",
