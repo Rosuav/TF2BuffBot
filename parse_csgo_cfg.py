@@ -154,6 +154,7 @@ for weapon, data in info["prefabs"].items():
 		"primary reserve ammo max": "-1",
 		"in game price": "-1",
 		"kill award": "300",
+		"range modifier": "0.98",
 	}.items():
 		arrays[attr.replace(" ", "_")].append(float(data["attributes"].get(attr, dflt)))
 	arrays["armor_pen"].append(float(data["attributes"]["armor ratio"]) * 50)

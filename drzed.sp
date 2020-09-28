@@ -2783,6 +2783,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 
 	//Scale damage according to who's dealing with it (non-hackily)
 	Action ret = Plugin_Continue;
+	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
 	if (attacker >= 0 && attacker < MAXPLAYERS)
 	{
 		float proportion;
@@ -2790,6 +2791,25 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 		else proportion = GetConVarFloat(damage_scale_humans);
 		//PrintToServer("Damage proportion: %.2f", proportion);
 		if (proportion != 1.0) {ret = Plugin_Changed; damage *= proportion;}
+		if (flg & UF_MORE_RANGE_PENALTY)
+		{
+			float atkpos[3]; GetClientAbsOrigin(attacker, atkpos);
+			float dist = GetVectorDistance(atkpos, damagePosition, false);
+			//Normally damage is scaled by rangefactor**(dist/500)
+			//This means that point blank shots deal 100% damage, and it falls off quadratically.
+			//We're going to change that so that at 500 HU you deal 100% damage, and it ramps UP
+			//if you're closer. Also, ramp up and down are way way faster.
+			float rangemod = 1.0; //For anything that isn't a weapon, don't rescale.
+			int idx;
+			char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
+			if (GetTrieValue(weapondata_index, cls, idx)) rangemod = weapondata_range_modifier[idx];
+			float orig = damage;
+			damage /= Pow(rangemod, dist / 500.0); //Undo the range modification already done
+			float base = damage;
+			damage *= Pow(rangemod, (dist - 500.0) / 100.0); //Apply our new range modifier.
+			//PrintToChatAll("Range %.2f; would have dealt %.2f from base %.2f, now %.2f", dist, orig, base, damage);
+			ret = Plugin_Changed;
+		}
 	}
 
 	//If you just phasewalked, you're immune to damage but also can't shoot.
