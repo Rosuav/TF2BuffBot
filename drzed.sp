@@ -1154,10 +1154,11 @@ Action check_wave_end(Handle timer, int victim)
 	}
 	killsneeded = killsnowneeded;
 	float buytime = GameRules_GetPropFloat("m_flGuardianBuyUntilTime");
-	if (buytime != last_guardian_buy_time)
+	if (buytime != last_guardian_buy_time && !GameRules_GetProp("m_bWarmupPeriod"))
 	{
 		last_guardian_buy_time = buytime;
 		//See if any bots are currently alive. If there aren't, it's a new wave!
+		//(Although, if all bots die simultaneously in warmup, that ISN'T a new wave.)
 		for (int client = 1; client < MAXPLAYERS; ++client)
 			if (IsClientInGame(client) && IsPlayerAlive(client) && IsFakeClient(client))
 				return; //There's a living bot. Don't redo rules.
