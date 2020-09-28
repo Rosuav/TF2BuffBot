@@ -69,6 +69,7 @@ StringMap weapondata_index; //weapondata_item_name[index] mapped to index
 ConVar default_weapons[4];
 ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
 ConVar weapon_recoil_scale, mp_damage_vampiric_amount;
+ConVar mp_damage_scale_ct_head, mp_damage_scale_t_head, mp_damage_scale_ct_body, mp_damage_scale_t_body;
 Handle switch_weapon_call = null;
 
 //For anything that needs default health, we'll use this. Any time a character spawns,
@@ -235,6 +236,10 @@ public void OnPluginStart()
 	mp_guardian_special_kills_needed = FindConVar("mp_guardian_special_kills_needed");
 	weapon_recoil_scale = FindConVar("weapon_recoil_scale");
 	mp_damage_vampiric_amount = FindConVar("mp_damage_vampiric_amount");
+	mp_damage_scale_ct_head = FindConVar("mp_damage_scale_ct_head");
+	mp_damage_scale_t_head = FindConVar("mp_damage_scale_t_head");
+	mp_damage_scale_ct_body = FindConVar("mp_damage_scale_ct_body");
+	mp_damage_scale_t_body = FindConVar("mp_damage_scale_t_body");
 
 	Handle gamedata = LoadGameConfigFile("sdkhooks.games");
 	StartPrepSDKCall(SDKCall_Player);
@@ -1138,6 +1143,10 @@ void reset_underdome_config()
 	}
 	SetConVarFloat(weapon_recoil_scale, 2.0);
 	SetConVarFloat(mp_damage_vampiric_amount, 0.0);
+	SetConVarFloat(mp_damage_scale_ct_head, 1.0);
+	SetConVarFloat(mp_damage_scale_t_head, 1.0);
+	SetConVarFloat(mp_damage_scale_ct_body, 1.0);
+	SetConVarFloat(mp_damage_scale_t_body, 1.0);
 	underdome_mode = 0;
 	adjust_underdome_gravity();
 }
@@ -1992,6 +2001,11 @@ void devise_underdome_rules()
 
 	if (flg & UF_VAMPIRIC) SetConVarFloat(mp_damage_vampiric_amount, 0.25);
 	else SetConVarFloat(mp_damage_vampiric_amount, 0.0);
+
+	SetConVarFloat(mp_damage_scale_ct_head, (flg & UF_NO_HEADSHOTS) ? 0.25 : 1.0);
+	SetConVarFloat(mp_damage_scale_t_head, (flg & UF_NO_HEADSHOTS) ? 0.25 : 1.0);
+	SetConVarFloat(mp_damage_scale_ct_body, (flg & UF_HEADSHOTS_ONLY) ? 0.0 : 1.0);
+	SetConVarFloat(mp_damage_scale_t_body, (flg & UF_HEADSHOTS_ONLY) ? 0.25 : 1.0); //The AI cheats.
 
 	adjust_underdome_gravity();
 }
