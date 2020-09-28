@@ -176,7 +176,7 @@ underdome_modes = [
 		"killbad": "No good, he saw that coming!",
 	},
 	{
-		"intro": "GOAL: Burn, baby, burn!", # "I'm sending you some of my old bottles of wine. Bomb those bandits from the air!"
+		"intro": "I'm sending you some of my old bottles of wine. Bomb those bandits from the air!",
 		"needed": "%cond_damage_burn%",
 		"flags": UF.FREE_MOLLY | UF.CT_LOW_GRAVITY | UF.T_LOW_GRAVITY | UF.FLYING,
 		"killok": "Sick burn, bro...",
