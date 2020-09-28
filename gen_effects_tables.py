@@ -329,6 +329,10 @@ def parse_convars(fn, **mappings):
 			m = re.match(r'^ConVar ([a-z_]+) = null; //\("([^"]*)"\) (.*)', line)
 			if m: # String cvar (default value may not contain nested quotes)
 				print("\t{0} = CreateConVar(\"{0}\", \"{1}\", \"{2}\", 0);".format(*m.groups()), file=cv)
+			m = re.match(r'^ConVar ([a-z_, ]+);$', line)
+			if m: # References to other cvars - may be multiple, separated by ", "
+				for cvar in m.group(1).split(", "):
+					print("\t{0} = FindConVar(\"{0}\");".format(cvar), file=cv)
 		for name, values in mappings.items():
 			for code, value in values.items():
 				print("\t%s[%s] = %s;" % (name, code, json.dumps(value)), file=cv)

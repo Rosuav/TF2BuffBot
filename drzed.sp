@@ -48,6 +48,11 @@ ConVar bomb_defusal_puzzles = null; //(0) Issue this many puzzles before allowin
 ConVar insta_respawn_damage_lag = null; //(0) Instantly respawn on death, with this many seconds of damage immunity and inability to fire
 ConVar guardian_underdome_waves = null; //(0) Utilize Underdome rules
 ConVar limit_fire_rate = null; //(0) If nonzero, guns cannot fire faster than N rounds/minute; if 1, will show fire rate each shot.
+
+ConVar default_weapons[4];
+ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
+ConVar weapon_recoil_scale, mp_damage_vampiric_amount;
+ConVar mp_damage_scale_ct_head, mp_damage_scale_t_head, mp_damage_scale_ct_body, mp_damage_scale_t_body;
 #include "convars_drzed"
 
 //Write something to the server console and also the live-stream display (if applicable)
@@ -66,10 +71,6 @@ StringMap weapon_names;
 StringMap weapon_is_primary;
 StringMap weapondata_index; //weapondata_item_name[index] mapped to index
 #include "cs_weapons.inc"
-ConVar default_weapons[4];
-ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
-ConVar weapon_recoil_scale, mp_damage_vampiric_amount;
-ConVar mp_damage_scale_ct_head, mp_damage_scale_t_head, mp_damage_scale_ct_body, mp_damage_scale_t_body;
 Handle switch_weapon_call = null;
 
 //For anything that needs default health, we'll use this. Any time a character spawns,
@@ -231,15 +232,6 @@ public void OnPluginStart()
 	default_weapons[1] = FindConVar("mp_t_default_primary");
 	default_weapons[2] = FindConVar("mp_ct_default_secondary");
 	default_weapons[3] = FindConVar("mp_t_default_secondary");
-	ammo_grenade_limit_total = FindConVar("ammo_grenade_limit_total");
-	mp_guardian_special_weapon_needed = FindConVar("mp_guardian_special_weapon_needed");
-	mp_guardian_special_kills_needed = FindConVar("mp_guardian_special_kills_needed");
-	weapon_recoil_scale = FindConVar("weapon_recoil_scale");
-	mp_damage_vampiric_amount = FindConVar("mp_damage_vampiric_amount");
-	mp_damage_scale_ct_head = FindConVar("mp_damage_scale_ct_head");
-	mp_damage_scale_t_head = FindConVar("mp_damage_scale_t_head");
-	mp_damage_scale_ct_body = FindConVar("mp_damage_scale_ct_body");
-	mp_damage_scale_t_body = FindConVar("mp_damage_scale_t_body");
 
 	Handle gamedata = LoadGameConfigFile("sdkhooks.games");
 	StartPrepSDKCall(SDKCall_Player);
