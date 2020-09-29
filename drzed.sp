@@ -748,9 +748,10 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 	}
 
 	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
-	
+
 	if (GetConVarInt(limit_fire_rate)) RequestFrame(slow_firing, client);
 	else if (flg & UF_SALLY) RequestFrame(keep_firing, client);
+
 	//If you empty your clip completely, add a stack of Anarchy
 	if (anarchy[client] < GetConVarInt(sm_drzed_max_anarchy))
 	{
@@ -2803,9 +2804,9 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 			int idx;
 			char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
 			if (GetTrieValue(weapondata_index, cls, idx)) rangemod = weapondata_range_modifier[idx];
-			float orig = damage;
+			//float orig = damage;
 			damage /= Pow(rangemod, dist / 500.0); //Undo the range modification already done
-			float base = damage;
+			//float base = damage;
 			damage *= Pow(rangemod, (dist - 500.0) / 100.0); //Apply our new range modifier.
 			//PrintToChatAll("Range %.2f; would have dealt %.2f from base %.2f, now %.2f", dist, orig, base, damage);
 			ret = Plugin_Changed;
