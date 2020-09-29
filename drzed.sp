@@ -1526,6 +1526,23 @@ public void OnGameFrame()
 		last_money[show_positions[i]] = money;
 		#endif
 	}
+	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
+	if (flg & UF_LOW_ACCURACY)
+	{
+		//NOTE: This produces a flicker as the server repeatedly corrects the client's
+		//expectation of accuracy recovery. For the Underdome, this isn't a bad thing -
+		//it makes your display go fuzzy and flickery to indicate inaccuracy. For other
+		//use-cases, this might be a bit ugly :)
+		for (int client = 1; client < MaxClients; ++client)
+		{
+			if (!IsClientInGame(client) || !IsPlayerAlive(client)) continue;
+			float min_penalty = IsFakeClient(client) ? 0.25 : 0.125; //The AI cheats a bit (but still has a penalty)
+			int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+			if (weap <= 0) continue;
+			float penalty = GetEntPropFloat(weap, Prop_Send, "m_fAccuracyPenalty");
+			if (penalty < min_penalty) SetEntPropFloat(weap, Prop_Send, "m_fAccuracyPenalty", min_penalty);
+		}
+	}
 }
 
 //Create a cloud of smoke, visible to this client, at this pos
