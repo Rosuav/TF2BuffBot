@@ -1536,7 +1536,7 @@ public void OnGameFrame()
 		for (int client = 1; client < MaxClients; ++client)
 		{
 			if (!IsClientInGame(client) || !IsPlayerAlive(client)) continue;
-			float min_penalty = IsFakeClient(client) ? 0.25 : 0.125; //The AI cheats a bit (but still has a penalty)
+			float min_penalty = IsFakeClient(client) ? 0.125 : 0.0625; //The AI cheats a bit (but still has a penalty)
 			int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 			if (weap <= 0) continue;
 			float penalty = GetEntPropFloat(weap, Prop_Send, "m_fAccuracyPenalty");
@@ -2809,7 +2809,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 		else proportion = GetConVarFloat(damage_scale_humans);
 		//PrintToServer("Damage proportion: %.2f", proportion);
 		if (proportion != 1.0) {ret = Plugin_Changed; damage *= proportion;}
-		if (flg & UF_MORE_RANGE_PENALTY)
+		if ((flg & UF_MORE_RANGE_PENALTY) && weapon > 0)
 		{
 			float atkpos[3]; GetClientAbsOrigin(attacker, atkpos);
 			float dist = GetVectorDistance(atkpos, damagePosition, false);
