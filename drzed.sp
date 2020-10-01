@@ -596,7 +596,7 @@ public void player_jump(Event event, const char[] name, bool dontBroadcast)
 }
 
 #include "underdome.inc"
-int underdome_mode = 0;
+int underdome_mode = 0, underdome_flg = 0;
 int killsneeded;
 float last_guardian_buy_time = 0.0;
 Handle underdome_ticker = INVALID_HANDLE;
@@ -747,10 +747,8 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		if (GetEntProp(weap, Prop_Send, "m_iClip1") == 1) show_stutterstep_stats(client);
 	}
 
-	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
-
 	if (GetConVarInt(limit_fire_rate)) RequestFrame(slow_firing, client);
-	else if (flg & UF_SALLY) RequestFrame(keep_firing, client);
+	else if (underdome_flg & UF_SALLY) RequestFrame(keep_firing, client);
 
 	//If you empty your clip completely, add a stack of Anarchy
 	if (anarchy[client] < GetConVarInt(sm_drzed_max_anarchy))
@@ -1114,14 +1112,13 @@ bool puzzle_highlight(int entity, int state)
 
 void adjust_underdome_gravity()
 {
-	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
 	for (int client = 1; client < MaxClients; ++client)
 	{
 		if (!IsClientInGame(client) || !IsPlayerAlive(client)) continue;
 		float grav = 1.0;
 		int ct = GetClientTeam(client) == 3;
-		if (flg & (ct ? UF_CT_LOW_GRAVITY : UF_T_LOW_GRAVITY)) grav = 0.5;
-		if (flg & (ct ? UF_CT_HIGH_GRAVITY : UF_T_HIGH_GRAVITY)) grav = 1.75;
+		if (underdome_flg & (ct ? UF_CT_LOW_GRAVITY : UF_T_LOW_GRAVITY)) grav = 0.5;
+		if (underdome_flg & (ct ? UF_CT_HIGH_GRAVITY : UF_T_HIGH_GRAVITY)) grav = 1.75;
 		SetEntityGravity(client, grav);
 	}
 }
@@ -1176,17 +1173,16 @@ public void player_death(Event event, const char[] name, bool dontBroadcast)
 	{
 		if (underdome_mode) //This can never happen during the warmup wave - ALL kills count.
 		{
-			int flg = underdome_flags[underdome_mode - 1];
 			bool deny = false;
 			int assister = event.GetInt("assister");
-			if ((flg & UF_ASSISTED_ONLY) && !assister) deny = true;
-			if ((flg & UF_NO_TEAM_ASSISTS) && assister &&
+			if ((underdome_flg & UF_ASSISTED_ONLY) && !assister) deny = true;
+			if ((underdome_flg & UF_NO_TEAM_ASSISTS) && assister &&
 				//Ahem. *cough* *cough*
 				GetClientTeam(GetClientOfUserId(event.GetInt("userid"))) == GetClientTeam(GetClientOfUserId(assister))
 			) deny = true;
-			if ((flg & UF_NO_FLASH_ASSISTS) && event.GetInt("assistedflash")) deny = true;
-			if ((flg & UF_NO_NONFLASH_ASSISTS) && !event.GetInt("assistedflash")) deny = true;
-			if ((flg & UF_PENETRATION_ONLY) && !event.GetInt("penetrated")) deny = true;
+			if ((underdome_flg & UF_NO_FLASH_ASSISTS) && event.GetInt("assistedflash")) deny = true;
+			if ((underdome_flg & UF_NO_NONFLASH_ASSISTS) && !event.GetInt("assistedflash")) deny = true;
+			if ((underdome_flg & UF_PENETRATION_ONLY) && !event.GetInt("penetrated")) deny = true;
 			if (deny)
 				//Use the exact counterpart of the tautology used for "always true" in gen_effects_tables
 				SetConVarString(mp_guardian_special_weapon_needed, "%cond_player_zoomed% && !%cond_player_zoomed%");
@@ -1526,8 +1522,7 @@ public void OnGameFrame()
 		last_money[show_positions[i]] = money;
 		#endif
 	}
-	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
-	if (flg & UF_LOW_ACCURACY)
+	if (underdome_flg & UF_LOW_ACCURACY)
 	{
 		//NOTE: This produces a flicker as the server repeatedly corrects the client's
 		//expectation of accuracy recovery. For the Underdome, this isn't a bad thing -
@@ -1649,8 +1644,7 @@ public Action player_pinged(int client, const char[] command, int argc)
 	//PrintToStream("Client %d pinged [ping = %d]", client, entity);
 	//if (entity != -1) CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
 	//report_new_entities = true; CreateTimer(1.0, unreport_new, 0, TIMER_FLAG_NO_MAPCHANGE);
-	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
-	if (flg & UF_PHASEPING) //ENABLED by game mode
+	if (underdome_flg & UF_PHASEPING) //ENABLED by game mode
 	{
 		//If entity isn't -1, you're already phasepinging. This needs to cancel
 		//the current phaseping and start a new one. Since cancelling timers is
@@ -1889,8 +1883,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 				PrintCenterText(client, "");
 		}
 	}
-	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
-	if (flg & UF_DISABLE_SCOPING)
+	if (underdome_flg & UF_DISABLE_SCOPING)
 	{
 		//If you're holding a sniper rifle or scoped rifle, disallow zooming
 		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
@@ -1905,7 +1898,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			}
 		}
 	}
-	if ((flg & UF_DISABLE_AUTOMATIC_FIRE) && spray_count[client])
+	if ((underdome_flg & UF_DISABLE_AUTOMATIC_FIRE) && spray_count[client])
 	{
 		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		if (weap > 0)
@@ -1940,8 +1933,7 @@ Action show_underdome_mode(Handle timer, any entity) {PrintCenterTextAll(underdo
 Action underdome_tick(Handle timer, any data)
 {
 	if (!underdome_mode) {underdome_ticker = INVALID_HANDLE; return Plugin_Stop;}
-	int flg = underdome_flags[underdome_mode - 1];
-	if (flg & UF_FREEBIES)
+	if (underdome_flg & UF_FREEBIES)
 	{
 		int max_nades = GetConVarInt(ammo_grenade_limit_total);
 		for (int client = 1; client < MaxClients; ++client)
@@ -1954,17 +1946,17 @@ Action underdome_tick(Handle timer, any data)
 			int have_decoy = GetEntProp(client, Prop_Data, "m_iAmmo", _, 18);
 			int have_ta = GetEntProp(client, Prop_Data, "m_iAmmo", _, 22);
 			int total_nades = have_he + have_flash + have_smoke + have_molly + have_decoy + have_ta;
-			if ((flg & UF_FREE_HEGRENADE) && !have_he && total_nades < max_nades)
+			if ((underdome_flg & UF_FREE_HEGRENADE) && !have_he && total_nades < max_nades)
 				GivePlayerItem(client, "weapon_hegrenade");
-			if ((flg & UF_FREE_FLASHBANG) && !have_flash && total_nades < max_nades)
+			if ((underdome_flg & UF_FREE_FLASHBANG) && !have_flash && total_nades < max_nades)
 				GivePlayerItem(client, "weapon_flashbang");
-			if ((flg & UF_FREE_MOLLY) && !have_molly && total_nades < max_nades)
+			if ((underdome_flg & UF_FREE_MOLLY) && !have_molly && total_nades < max_nades)
 				GivePlayerItem(client, "weapon_molotov");
-			if ((flg & UF_FREE_TAGRENADE) && !have_ta && total_nades < max_nades)
+			if ((underdome_flg & UF_FREE_TAGRENADE) && !have_ta && total_nades < max_nades)
 				GivePlayerItem(client, "weapon_tagrenade");
 		}
 	}
-	if (flg & UF_VAMPIRIC)
+	if (underdome_flg & UF_VAMPIRIC)
 	{
 		//Give all the bots a bit more health. You have to kill 'em fast.
 		for (int client = 1; client < MaxClients; ++client)
@@ -1999,7 +1991,7 @@ void devise_underdome_rules()
 	else if (cfg > 1) m = cfg - 1;
 	//GameRules_SetProp("m_nGuardianModeSpecialWeaponNeeded", ???); //Change the gun displayed on the middle left of the screen
 	underdome_mode = m + 1;
-	int flg = underdome_flags[m];
+	int flg = underdome_flg = underdome_flags[m];
 	PrintToChatAll(underdome_intro[m]);
 	CreateTimer(0.25, show_underdome_mode, 0, TIMER_FLAG_NO_MAPCHANGE);
 	if ((underdome_flags[m] & UF_NEED_TIMER) && underdome_ticker == INVALID_HANDLE)
@@ -2801,7 +2793,6 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 
 	//Scale damage according to who's dealing with it (non-hackily)
 	Action ret = Plugin_Continue;
-	int flg = underdome_mode == 0 ? 0 : underdome_flags[underdome_mode - 1];
 	if (attacker >= 0 && attacker < MAXPLAYERS)
 	{
 		float proportion;
@@ -2809,7 +2800,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 		else proportion = GetConVarFloat(damage_scale_humans);
 		//PrintToServer("Damage proportion: %.2f", proportion);
 		if (proportion != 1.0) {ret = Plugin_Changed; damage *= proportion;}
-		if ((flg & UF_MORE_RANGE_PENALTY) && weapon > 0)
+		if ((underdome_flg & UF_MORE_RANGE_PENALTY) && weapon > 0)
 		{
 			float atkpos[3]; GetClientAbsOrigin(attacker, atkpos);
 			float dist = GetVectorDistance(atkpos, damagePosition, false);
