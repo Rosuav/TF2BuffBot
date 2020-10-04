@@ -2812,12 +2812,16 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 			int idx;
 			char cls[64]; GetEntityClassname(weapon, cls, sizeof(cls));
 			if (GetTrieValue(weapondata_index, cls, idx)) rangemod = weapondata_range_modifier[idx];
-			//float orig = damage;
-			damage /= Pow(rangemod, dist / 500.0); //Undo the range modification already done
-			//float base = damage;
-			damage *= Pow(rangemod, (dist - 500.0) / 100.0); //Apply our new range modifier.
-			//PrintToChatAll("Range %.2f; would have dealt %.2f from base %.2f, now %.2f", dist, orig, base, damage);
-			ret = Plugin_Changed;
+			if (rangemod < 1.0)
+			{
+				//float orig = damage;
+				damage /= Pow(rangemod, dist / 500.0); //Undo the range modification already done
+				//float base = damage;
+				if (dist > 500.0 && rangemod < 0.80) rangemod = 0.80; //Mandate a minimum of 20% damage falloff
+				damage *= Pow(rangemod, (dist - 500.0) / 100.0); //Apply our new range modifier.
+				//PrintToChatAll("Range %.2f; would have dealt %.2f from base %.2f, now %.2f", dist, orig, base, damage);
+				ret = Plugin_Changed;
+			}
 		}
 	}
 

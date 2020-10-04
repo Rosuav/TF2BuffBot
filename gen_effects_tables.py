@@ -122,6 +122,7 @@ class UF(IntFlag):
 	VAMPIRIC = auto() # Damage is vampiric, and bots gain health periodically
 	PHASEPING = auto() # Ping, wait 1.5 seconds, and then you will teleport to that location.
 	KNIFE_FOCUS = auto() # Guns deal fractional damage. TODO: Make knife slashes deal 200, and reduce tagging.
+	MORE_RANGE_PENALTY = auto() # Increase damage at close range but drastically increase the range penalty
 	# Extra conditions: Kill doesn't count if...
 	ASSISTED_ONLY = auto() # ... there's no assister; combine with the below to narrow it down
 	NO_TEAM_ASSISTS = auto() # ... assister is on same team as victim
@@ -133,7 +134,6 @@ class UF(IntFlag):
 	DISABLE_AUTOMATIC_FIRE = auto() # After you fire a bullet, your gun will stop firing.
 	# Unimplemented
 	FLYING = auto() # Damage only has effect if you are in the air
-	MORE_RANGE_PENALTY = auto() # Increase damage at close range but drastically increase the range penalty
 	BETTER_ARMOR = auto() # All weapons have their armor penetration (armor ratio) reduced
 	# TODO: Low movement speed, high movement speed - separate flags for Ts and CTs
 	# These flags give free items to all CTs and are handled with a single block of code.
@@ -227,7 +227,9 @@ underdome_modes = [
 	{
 		"intro": "GOAL: Anarchy! Close the distance for high damage!",
 		"needed": ANYTHING,
-		"flags": UF.LOW_ACCURACY | UF.MORE_RANGE_PENALTY,
+		# Note that MORE_RANGE_PENALTY seems to be be largely bypassed by scoping in with
+		# an AUG/SG, so disallow scopes to stop that from being cheesed.
+		"flags": UF.LOW_ACCURACY | UF.MORE_RANGE_PENALTY | UF.DISABLE_SCOPING,
 		"killok": "",
 		"killbad": "",
 	},
