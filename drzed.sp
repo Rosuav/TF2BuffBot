@@ -1880,7 +1880,8 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			//TODO: See if the player is currently below 34% speed, and count the number
 			//of ticks that this lasts for. Clear the counter when the strafe direction
 			//is changed. If you hit max speed each time, the count should be the same.
-			//Is it the same for all weapons?
+			//Is it the same for all weapons? Also, how long does it take to reach max
+			//speed, per weapon?
 			if ((buttons & (IN_MOVELEFT|IN_MOVERIGHT)) || st >= 3)
 				PrintCenterText(client, "Strafing %s%s", buttons & IN_MOVELEFT ? " Left" : "", buttons & IN_MOVERIGHT ? " Right" : "");
 			else
