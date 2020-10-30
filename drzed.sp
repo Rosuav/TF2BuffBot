@@ -647,6 +647,7 @@ void slow_firing(int client)
 int strafe_direction[MAXPLAYERS + 1]; //1 = right, 0 = neither/both, -1 = left. This is your *goal*, not your velocity or acceleration.
 int stutterstep_score[MAXPLAYERS + 1][3]; //For each player, ({stationary, accurate, inaccurate}), and is reset on weapon reload
 float stutterstep_inaccuracy[MAXPLAYERS + 1]; //For each player, the sum of squares of the inaccuracies, for the third field above.
+float current_weapon_speed[MAXPLAYERS + 1]; //For each player, the max speed of the weapon that was last equipped. An optimization.
 
 void show_stutterstep_stats(int client)
 {
@@ -706,21 +707,8 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		float right[3]; GetAngleVectors(angle, NULL_VECTOR, right, NULL_VECTOR); //Unit vector perpendicular to the way you're facing
 		float right_vel = GetVectorDotProduct(vel, right); //Magnitude of the velocity projected onto the (unit) right hand vector
 		int sidestep = spd > 0.0 ? RoundToNearest(FloatAbs(right_vel) * 100.0 / spd) : 0; //Proportion of your total velocity that is across your screen (and presumably your enemy's)
-		float maxspeed = 250.0; //Or use the value from sv_maxspeed?
-		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if (weap > 0)
-		{
-			//Try to figure out the weapon's maximum speed
-			//Since this is (ultimately) a lookup into items_game.txt, its validity depends on
-			//keeping the data tables up to date. Also, this doesn't have entries for non-weapons,
-			//so (for instance) grenades show up at the default of 250, even though their actual
-			//max speed is 245. It also doesn't take scoping into account, which drops max speed
-			//to 150, 120, or 100, depending on the weapon. None of this impacts the primary goal
-			//of this code, which is to learn stutter stepping; just be aware if you copy/paste it.
-			char cls[64]; GetEntityClassname(weap, cls, sizeof(cls));
-			int idx;
-			if (GetTrieValue(weapondata_index, cls, idx)) maxspeed = weapondata_max_player_speed[idx];
-		}
+		float maxspeed = current_weapon_speed[client];
+		if (maxspeed == 0.0) maxspeed = 250.0; //Or use the value from sv_maxspeed?
 		maxspeed *= 0.34; //Below 34% of a weapon's maximum speed, you are fully accurate.
 		int quality = spd == 0.0 && !strafe_direction[client] ? 0 : //Stationary shot.
 				spd <= maxspeed ? 1 : //Accurate shot.
@@ -744,7 +732,8 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		PrintToChat(client, "Stutter: speed %.2f/%.0f side %d%% %s%s", spd, maxspeed, sidestep, quality_desc[quality], sync_desc);
 		//If this is the last shot from the magazine, show stats, since the weapon_reload
 		//event doesn't fire.
-		if (GetEntProp(weap, Prop_Send, "m_iClip1") == 1) show_stutterstep_stats(client);
+		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if (weap > 0 && GetEntProp(weap, Prop_Send, "m_iClip1") == 1) show_stutterstep_stats(client);
 	}
 
 	if (GetConVarInt(limit_fire_rate)) RequestFrame(slow_firing, client);
@@ -1783,7 +1772,11 @@ void uncripple(int client)
 }
 
 bool was_jumping[MAXPLAYERS + 1];
-public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3],
+int strafing_max[MAXPLAYERS + 1]; //Number of ticks strafing at max speed (for that weapon)
+int strafing_fast[MAXPLAYERS + 1]; //Number of ticks strafing above 34% but not at max
+int strafing_slow[MAXPLAYERS + 1]; //Below 34% but not zero
+int strafing_stopped[MAXPLAYERS + 1]; //At zero speed
+public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desiredvelocity[3], float angles[3],
 	int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
 	//IN_ALT1 comes from the commands "+alt1" in client, and appears to have no effect
@@ -1873,20 +1866,45 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	int st = GetConVarInt(learn_stutterstep);
 	if (st)
 	{
-		strafe_direction[client] = (buttons & IN_MOVELEFT ? -1 : 0) + (buttons & IN_MOVERIGHT ? 1 : 0); //Why doesn't && work for these??
 		//Set learn_stutterstep to 2 to alert your current strafe direction while strafing, or to 3 to show it always.
-		if (st >= 2)
+		if (st == 2 || st == 3)
 		{
-			//TODO: See if the player is currently below 34% speed, and count the number
-			//of ticks that this lasts for. Clear the counter when the strafe direction
-			//is changed. If you hit max speed each time, the count should be the same.
-			//Is it the same for all weapons? Also, how long does it take to reach max
-			//speed, per weapon?
 			if ((buttons & (IN_MOVELEFT|IN_MOVERIGHT)) || st >= 3)
 				PrintCenterText(client, "Strafing %s%s", buttons & IN_MOVELEFT ? " Left" : "", buttons & IN_MOVERIGHT ? " Right" : "");
 			else
 				PrintCenterText(client, "");
 		}
+		int dir = (buttons & IN_MOVELEFT ? -1 : 0) + (buttons & IN_MOVERIGHT ? 1 : 0); //Why doesn't && work for these??
+		if (st == 4)
+		{
+			//Set learn_stutterstep to 4 to get some metrics on acceleration.
+			//Whenever you change strafe direction, it shows the number of ticks
+			//that were spent stopped, <34%, >34%, and at max speed.
+			//It takes just as long to accelerate to max speed regardless of your
+			//weapon, meaning that acceleration is faster with a knife than with
+			//a Negev. If you set sv_maxspeed to 150, a knife will top out at 150
+			//before a Negev does.
+			if (strafe_direction[client] != dir)
+			{
+				PrintToChat(client, "Now strafing %s%s; max %d, fast %d, slow %d, stopped %d",
+					buttons & IN_MOVELEFT ? " Left" : "", buttons & IN_MOVERIGHT ? " Right" : "",
+					strafing_max[client], strafing_fast[client], strafing_slow[client], strafing_stopped[client]
+				);
+				strafing_max[client] = strafing_fast[client] = strafing_slow[client] = strafing_stopped[client] = 0;
+			}
+			float vel[3];
+			vel[0] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[0]");
+			vel[1] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[1]");
+			vel[2] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[2]");
+			float spd = GetVectorLength(vel, false); //Should be equal to what cl_showpos tells you your velocity is
+			float maxspeed = current_weapon_speed[client];
+			if (maxspeed == 0.0) maxspeed = 250.0; //Or use the value from sv_maxspeed?
+			if (spd == 0.0) ++strafing_stopped[client];
+			else if (spd <= maxspeed * 0.34) ++strafing_slow[client];
+			else if (spd <= maxspeed - 1.0) ++strafing_fast[client];
+			else ++strafing_max[client];
+		}
+		strafe_direction[client] = dir;
 	}
 	if (underdome_flg & UF_DISABLE_SCOPING)
 	{
@@ -2645,6 +2663,7 @@ public void OnClientPutInServer(int client)
 	SDKHookEx(client, SDKHook_OnTakeDamageAlive, healthgate);
 	SDKHookEx(client, SDKHook_WeaponCanSwitchTo, weaponlock);
 	SDKHookEx(client, SDKHook_WeaponCanUse, weaponusecheck);
+	SDKHookEx(client, SDKHook_WeaponSwitchPost, getweaponstats);
 }
 public Action maxhealthcheck(int entity, int &maxhealth)
 {
@@ -2987,6 +3006,30 @@ Action weaponusecheck(int client, int weapon)
 	//When we're doing puzzle games, you don't use weapons normally.
 	if (num_puzzles) return Plugin_Stop;
 	return Plugin_Continue;
+}
+void getweaponstats(int client, int weap)
+{
+	if (GetConVarInt(learn_stutterstep))
+	{
+		show_stutterstep_stats(client);
+		current_weapon_speed[client] = 250.0;
+		if (weap > 0)
+		{
+			//Try to figure out the weapon's maximum speed
+			//Since this is (ultimately) a lookup into items_game.txt, its validity depends on
+			//keeping the data tables up to date. Also, this doesn't have entries for non-weapons,
+			//so (for instance) grenades show up at the default of 250, even though their actual
+			//max speed is 245. It also doesn't take scoping into account, which drops max speed
+			//to 150, 120, or 100, depending on the weapon. None of this impacts the primary goal
+			//of this code, which is to learn stutter stepping; just be aware if you copy/paste it.
+			char cls[64]; GetEntityClassname(weap, cls, sizeof(cls));
+			int idx;
+			if (GetTrieValue(weapondata_index, cls, idx)) current_weapon_speed[client] = weapondata_max_player_speed[idx];
+			describe_weapon(weap, cls, sizeof(cls));
+			PrintToChat(client, "With %s, max %.0f, 34%% %.0f", cls,
+				current_weapon_speed[client], current_weapon_speed[client] * 0.34);
+		}
+	}
 }
 /*
 Revival of Teammates mode:
