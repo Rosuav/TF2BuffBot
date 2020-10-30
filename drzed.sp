@@ -434,6 +434,7 @@ float smoke_targets[1][2][3] = { //Unfortunately the size has to be specified :(
 * Car: Same passageway, hug left wall, come all the way to the arch (but not the freestanding pillar). Same hole, aim parallel to the top corrugated iron.
 * Alt site: From the ambush nook just in tuns proper, aim into the biggest opening, on the right edge of it.
 * Doors: Jump past the AWPer at blue box, get all the way to the corner. Aim into the rectangular gap, in the middle of the long side (left).
+  - Alternatively, hug the edge of the ambush nook, aim parallel to main corrugated iron, standing throw.
 * Window: No standing throw found but I suspect that a moving/jumping throw will be possible.
   - Best partial success so far comes from standing squarely in front of blue box, right in the corner, and aiming near the tip of the stonework.
 * Flagstones: Stand btwn white angled box and pillar, aim into opening below stonework (left of ctr for safety)
