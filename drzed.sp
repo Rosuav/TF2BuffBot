@@ -1937,6 +1937,50 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 			if (next < wait) SetEntPropFloat(weap, Prop_Send, "m_flNextPrimaryAttack", wait);
 		}
 	}
+	#if 0
+	if ((buttons & IN_ALT1) && GetConVarInt(sm_drzed_hack) >= 10)
+	{
+		//Lag out the server to see what happens. This pretends to be a really badly written aimbot.
+		//Coding style heavily inspired by posts on TheDailyWTF. This is overelaborate and just bad.
+		//(How many atrocious examples can you find here?)
+		float base[3]; GetClientEyePosition(client, base);
+		int nearest = -1, tries = 0;
+		char message[256]; Format(message, sizeof(message), "Distances: ");
+		for (int cl = 1; cl < MAXPLAYERS; ++cl) if (IsClientInGame(cl))
+		{
+			PrintCenterText(cl, "You are client %d, and client %d is lagging the server.", cl, client);
+			if (cl == client || !IsPlayerAlive(cl)) continue;
+			for (int i = 0; i < GetConVarInt(sm_drzed_hack); ++i) //Lag scale factor
+			{
+				++tries;
+				float pos[3]; GetClientEyePosition(cl, pos);
+				float dist = GetVectorDistance(base, pos, false); //Inefficiently demand the actual distance, not d^2
+				char tmp[256]; Format(tmp, sizeof(tmp), "%s", message);
+				Format(message, sizeof(message), "%s%.0f, ", tmp, dist);
+				//Also inefficiently: Track the client ID of the nearest client, but don't cache the distance.
+				if (nearest != -1)
+				{
+					float otherpos[3]; GetClientEyePosition(nearest, otherpos);
+					float otherdist = GetVectorDistance(base, otherpos, false);
+					if (otherdist < dist) continue;
+				}
+				nearest = cl;
+			}
+		}
+		if (nearest != -1)
+		{
+			char name[64]; GetClientName(nearest, name, sizeof(name));
+			float otherpos[3]; GetClientEyePosition(nearest, otherpos);
+			float otherdist = GetVectorDistance(base, otherpos, false);
+			PrintCenterText(client, "[%d tries] The nearest player to you is %s%s, %.0f away",
+				tries, IsFakeClient(nearest) ? "BOT " : "", name, otherdist);
+			//Remove the last two characters from the message
+			char fmt[256]; Format(fmt, sizeof(fmt), "%%%d.%ds", strlen(message) - 2, strlen(message) - 2);
+			char msg[256]; Format(msg, sizeof(msg), fmt, message);
+			//PrintCenterText(client, msg);
+		}
+	}
+	#endif
 	return Plugin_Continue;
 }
 public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
