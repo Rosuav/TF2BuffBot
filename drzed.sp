@@ -42,7 +42,7 @@ ConVar bots_get_empty_weapon = null; //("") Give bots an ammo-less weapon on sta
 ConVar bot_purchase_delay = null; //(0.0) Delay bot primary weapon purchases by this many seconds
 ConVar damage_scale_humans = null; //(1.0) Scale all damage dealt by humans
 ConVar damage_scale_bots = null; //(1.0) Scale all damage dealt by bots
-ConVar learn_smoke = null; //(0) Set things up to learn a particular smoke (1 = Dust II Xbox)
+ConVar learn_smoke = null; //(0) Show information on smoke throws and where they pop
 ConVar learn_stutterstep = null; //(0) Show information on each shot fired to help you master stutter-stepping
 ConVar bomb_defusal_puzzles = null; //(0) Issue this many puzzles before allowing the bomb to be defused (can't be changed during a round)
 ConVar insta_respawn_damage_lag = null; //(0) Instantly respawn on death, with this many seconds of damage immunity and inability to fire
@@ -421,15 +421,20 @@ public void SmokeLog(const char[] fmt, any ...)
 }
 
 //Would it be better to have six float cvars to define the box??
-float smoke_targets[3][2][3] = { //Unfortunately the size has to be specified :(
-	//1: Dust II Xbox
+#define SMOKE_TARGETS 3
+float smoke_targets[SMOKE_TARGETS][2][3] = { //Unfortunately the size has to be specified :(
+	//Dust II
+	//- Xbox
 	{{-400.0, 1350.0, -27.0}, {-257.0, 1475.0, -24.0}},
-	//2: Dust II Long A Corner
+	//- Long A Corner
 	{{1186.0, 1082.0, -4.0}, {1304.0, 1260.0, 3.0}},
-	//3: Dust II B site Window
+	//- B site Window
 	{{-1437.0, 2591.0, 108.0}, {-1250.0, 2723.0, 130.0}},
 	//Add others as needed - {{x1,y1,z1},{x2,y2,z2}} where the
 	//second coords are all greater than the firsts.
+};
+char smoke_target_desc[][] = {
+	"Xbox smoke! ", "Corner smoke! ", "Window smoke! ",
 };
 /*
 * Blue box: From the passageway from backyard into tuns, standing throw between the rafters (middle of opening).
@@ -447,40 +452,39 @@ float smoke_targets[3][2][3] = { //Unfortunately the size has to be specified :(
   - This partly smokes off Window
 * Alternate car: Stand ON the white box, up against the pillar, on top of the wood slat. Aim through the hole, about two thirds down, a tad to the right.
 */
-float smoke_first_bounce[3][2][3] = {
+#define SMOKE_BOUNCE_TARGETS 1
+float smoke_first_bounce[SMOKE_BOUNCE_TARGETS][2][3] = {
 	//1: Dust II Xbox
 	//NOTE: If the bounce is extremely close to the wall (-265 to -257), the
 	//smoke will bounce off the wall and miss. The actual boundary is somewhere
 	//between -260 and -265.
 	//(-309.23, 1135.53, -84.53) failed. Might be necessary to adjust the boundary.
 	{{-321.0, 1130.0, -120.0}, {-265.0, 1275.0, -80.0}},
-	//As above.
-	//2, 3, not relevant
-	{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}},
-	{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}},
 };
 
 public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
 {
-	int learn = GetConVarInt(learn_smoke);
-	if (!learn) return;
+	if (!GetConVarInt(learn_smoke)) return;
 	float x = event.GetFloat("x"), y = event.GetFloat("y"), z = event.GetFloat("z");
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	bool on_target = false;
-	if (learn <= sizeof(smoke_targets))
+	int target = -1;
+	//TODO: Look at the map name and pick a block of target boxes. Or maybe
+	//not - what are the chances that two maps will have important smoke
+	//targets that overlap?
+	for (int i = 0; i < SMOKE_TARGETS; ++i)
 	{
 		//Is there an easier way to ask if a point is inside a cube?
-		if (smoke_targets[learn - 1][0][0] < x && x < smoke_targets[learn - 1][1][0] &&
-			smoke_targets[learn - 1][0][1] < y && y < smoke_targets[learn - 1][1][1] &&
-			smoke_targets[learn - 1][0][2] < z && z < smoke_targets[learn - 1][1][2])
-				on_target = true;
+		if (smoke_targets[i][0][0] < x && x < smoke_targets[i][1][0] &&
+			smoke_targets[i][0][1] < y && y < smoke_targets[i][1][1] &&
+			smoke_targets[i][0][2] < z && z < smoke_targets[i][1][2])
+				target = i;
 	}
 	PrintToChat(client, "%sYour smoke popped at (%.2f, %.2f, %.2f)",
-		on_target ? "Nailed it! " : "",
+		target >= 0 ? smoke_target_desc[target] : "",
 		x, y, z);
 	SmokeLog("[%d-E-%d] Pop (%.2f, %.2f, %.2f) - %s", client,
 		event.GetInt("entityid"),
-		x, y, z, on_target ? "GOOD" : "FAIL");
+		x, y, z, target >= 0 ? "GOOD" : "FAIL");
 }
 
 /*
@@ -496,8 +500,7 @@ Maybe mark that in response to player_ping.
 bool smoke_not_bounced[4096];
 public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 {
-	int learn = GetConVarInt(learn_smoke);
-	if (!learn) return;
+	if (!GetConVarInt(learn_smoke)) return;
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	float x = event.GetFloat("x"), y = event.GetFloat("y"), z = event.GetFloat("z"); //Undocumented event parameters!
 	//So, this is where things get REALLY stupid
@@ -518,10 +521,11 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 			{
 				smoke_not_bounced[ent] = false;
 				bool on_target = false;
-				if (smoke_first_bounce[learn - 1][0][0] < x && x < smoke_first_bounce[learn - 1][1][0] &&
-					smoke_first_bounce[learn - 1][0][1] < y && y < smoke_first_bounce[learn - 1][1][1] &&
-					smoke_first_bounce[learn - 1][0][2] < z && z < smoke_first_bounce[learn - 1][1][2])
-						on_target = true;
+				for (int i = 0; i < SMOKE_BOUNCE_TARGETS; ++i)
+					if (smoke_first_bounce[i][0][0] < x && x < smoke_first_bounce[i][1][0] &&
+						smoke_first_bounce[i][0][1] < y && y < smoke_first_bounce[i][1][1] &&
+						smoke_first_bounce[i][0][2] < z && z < smoke_first_bounce[i][1][2])
+							on_target = true;
 				PrintToChat(client, "%sgrenade_bounce: (%.2f, %.2f, %.2f)",
 					on_target ? "Promising! " : "",
 					x, y, z);
@@ -588,8 +592,7 @@ int last_jump[64];
 int last_smoke[64];
 public void player_jump(Event event, const char[] name, bool dontBroadcast)
 {
-	int learn = GetConVarInt(learn_smoke);
-	if (!learn) return;
+	if (!GetConVarInt(learn_smoke)) return;
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	//Record timestamp for the sake of a jump-throw. If you then throw a smoke,
 	//or if you just recently did, report it.
