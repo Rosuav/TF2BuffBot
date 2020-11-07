@@ -421,9 +421,13 @@ public void SmokeLog(const char[] fmt, any ...)
 }
 
 //Would it be better to have six float cvars to define the box??
-float smoke_targets[1][2][3] = { //Unfortunately the size has to be specified :(
+float smoke_targets[3][2][3] = { //Unfortunately the size has to be specified :(
 	//1: Dust II Xbox
 	{{-400.0, 1350.0, -27.0}, {-257.0, 1475.0, -24.0}},
+	//2: Dust II Long A Corner
+	{{1186.0, 1082.0, -4.0}, {1304.0, 1260.0, 3.0}},
+	//3: Dust II B site Window
+	{{-1437.0, 2591.0, 108.0}, {-1250.0, 2723.0, 130.0}},
 	//Add others as needed - {{x1,y1,z1},{x2,y2,z2}} where the
 	//second coords are all greater than the firsts.
 };
@@ -435,13 +439,15 @@ float smoke_targets[1][2][3] = { //Unfortunately the size has to be specified :(
 * Alt site: From the ambush nook just in tuns proper, aim into the biggest opening, on the right edge of it.
 * Doors: Jump past the AWPer at blue box, get all the way to the corner. Aim into the rectangular gap, in the middle of the long side (left).
   - Alternatively, hug the edge of the ambush nook, aim parallel to main corrugated iron, standing throw.
-* Window: No standing throw found but I suspect that a moving/jumping throw will be possible.
-  - Best partial success so far comes from standing squarely in front of blue box, right in the corner, and aiming near the tip of the stonework.
+* Window: No standing throw found. Various moving and jumping throws possible.
+  - Get past the AWPer and into the corner. Hug the far wall (not the rear wall towards T spawn). Aim onto the dark spot above the door.
+    Then hold a crouch; your crosshair should be just above the corner of the door crease. Jump throw.
+    Eye angles -25.54,67.50 will work. It's fairly precise and hard to describe, takes practice.
 * Flagstones: Stand btwn white angled box and pillar, aim into opening below stonework (left of ctr for safety)
   - This partly smokes off Window
 * Alternate car: Stand ON the white box, up against the pillar, on top of the wood slat. Aim through the hole, about two thirds down, a tad to the right.
 */
-float smoke_first_bounce[1][2][3] = {
+float smoke_first_bounce[3][2][3] = {
 	//1: Dust II Xbox
 	//NOTE: If the bounce is extremely close to the wall (-265 to -257), the
 	//smoke will bounce off the wall and miss. The actual boundary is somewhere
@@ -449,6 +455,9 @@ float smoke_first_bounce[1][2][3] = {
 	//(-309.23, 1135.53, -84.53) failed. Might be necessary to adjust the boundary.
 	{{-321.0, 1130.0, -120.0}, {-265.0, 1275.0, -80.0}},
 	//As above.
+	//2, 3, not relevant
+	{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}},
+	{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}},
 };
 
 public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
