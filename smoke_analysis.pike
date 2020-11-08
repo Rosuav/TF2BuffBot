@@ -2,7 +2,8 @@
 
 mapping(string:object) scatterplots = ([]);
 //Scale the resulting image such that the edges of the display are these values
-constant top = -16.0, bottom = -14.0, left = 88.0, right = 91.0;
+//constant top = -16.0, bottom = -14.0, left = 88.0, right = 91.0; //Good for Xbox smokes (-22.09, 89.07) - (-13.79, 90.51)
+constant top = -26.0, bottom = -25.0, left = 67.0, right = 68.0; //Good for B window smokes (-25.65, 67.44) - (-25.33, 67.55)
 constant img_width = 800, img_height = 600;
 constant colors = ([
 	"GOOD": ({0, 255, 0}),
@@ -38,7 +39,8 @@ void place_marker(string timing, float a1, float a2, string type)
 //See if the throw location was near enough to our specified point
 int near_enough(float x, float y)
 {
-	return ((x - -299.96) ** 2 + (y - -1163.96) ** 2) < 1;
+	//return ((x - -299.96) ** 2 + (y - -1163.96) ** 2) < 1; //Analyze Xbox smokes
+	return ((x - -2185.96) ** 2 + (y - 1059.02) ** 2) < 1; //Analyze B Window smokes
 }
 
 int main()
@@ -99,6 +101,7 @@ int main()
 			int client, int entity, float x, float y, float z, string status) == 6)
 		{
 			array nade = m_delete(nades, entity);
+			if (!nade) continue;
 			nade += ({lno - nade[-1]});
 			nade[10] = x;
 			nade[11] = y;
