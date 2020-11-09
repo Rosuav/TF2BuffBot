@@ -551,6 +551,9 @@ public void OnEntityCreated(int entity, const char[] cls)
 		smoke_not_bounced[entity] = true;
 		CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
 		/*
+		//These numbers are good for testing B Window; bind a key to "exec next_throw" and
+		//alternate that with a jump-throw key. To test Xbox, change or remove the setpos,
+		//remove the duck, and probably widen the possible pitch/yaw values quite a bit.
 		if (++nextyaw > 6760) {nextyaw = 6740; ++nextpitch;}
 		File fp = OpenFile("next_throw.cfg", "w");
 		WriteFileLine(fp, "setpos_exact -2185.968750 1059.031250 39.801247");
@@ -558,7 +561,7 @@ public void OnEntityCreated(int entity, const char[] cls)
 		WriteFileLine(fp, "+duck");
 		WriteFileLine(fp, "+attack");
 		CloseHandle(fp);
-		*/
+		// */
 	}
 	if (!strcmp(cls, "entityflame")) SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", assign_flame_owner);
 	if (report_new_entities)
