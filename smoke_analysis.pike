@@ -2,7 +2,7 @@
 
 mapping(string:object) scatterplots = ([]);
 //Scale the resulting image such that the edges of the display are these values
-//constant top = -16.0, bottom = -14.0, left = 88.0, right = 91.0; //Good for Xbox smokes (-22.09, 89.07) - (-13.79, 90.51)
+//constant top = -24.0, bottom = -12.0, left = 88.0, right = 91.0; //Good for Xbox smokes (-22.09, 89.07) - (-13.79, 90.51)
 constant top = -26.0, bottom = -25.0, left = 67.0, right = 68.0; //Good for B window smokes (-25.65, 67.44) - (-25.33, 67.55)
 constant img_width = 800, img_height = 600;
 constant colors = ([
