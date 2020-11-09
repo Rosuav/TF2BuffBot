@@ -556,6 +556,7 @@ public void OnEntityCreated(int entity, const char[] cls)
 		//remove the duck, and probably widen the possible pitch/yaw values quite a bit.
 		if (++nextyaw > 6760) {nextyaw = 6740; ++nextpitch;}
 		File fp = OpenFile("next_throw.cfg", "w");
+		WriteFileLine(fp, "//Created by drzed.sp for smoke aim drilling");
 		WriteFileLine(fp, "setpos_exact -2185.968750 1059.031250 39.801247");
 		WriteFileLine(fp, "setang -%d.%02d %d.%02d 0.0", nextpitch / 100, nextpitch % 100, nextyaw / 100, nextyaw % 100);
 		WriteFileLine(fp, "+duck");
