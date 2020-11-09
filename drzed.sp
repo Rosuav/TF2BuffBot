@@ -541,6 +541,7 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 
 int assign_flame_owner = -1;
 bool report_new_entities = false;
+//int nextpitch = 2530, nextyaw = 6740; //Note that pitch is the magnitude of pitch, but we actually negate it for execution.
 public void OnEntityCreated(int entity, const char[] cls)
 {
 	if (GetConVarInt(learn_smoke) && !strcmp(cls, "smokegrenade_projectile"))
@@ -549,6 +550,15 @@ public void OnEntityCreated(int entity, const char[] cls)
 		//first bounce (if we're reporting grenade bounces).
 		smoke_not_bounced[entity] = true;
 		CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
+		/*
+		if (++nextyaw > 6760) {nextyaw = 6740; ++nextpitch;}
+		File fp = OpenFile("next_throw.cfg", "w");
+		WriteFileLine(fp, "setpos_exact -2185.968750 1059.031250 39.801247");
+		WriteFileLine(fp, "setang -%d.%02d %d.%02d 0.0", nextpitch / 100, nextpitch % 100, nextyaw / 100, nextyaw % 100);
+		WriteFileLine(fp, "+duck");
+		WriteFileLine(fp, "+attack");
+		CloseHandle(fp);
+		*/
 	}
 	if (!strcmp(cls, "entityflame")) SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", assign_flame_owner);
 	if (report_new_entities)
