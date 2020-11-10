@@ -48,6 +48,12 @@ ConVar bomb_defusal_puzzles = null; //(0) Issue this many puzzles before allowin
 ConVar insta_respawn_damage_lag = null; //(0) Instantly respawn on death, with this many seconds of damage immunity and inability to fire
 ConVar guardian_underdome_waves = null; //(0) Utilize Underdome rules
 ConVar limit_fire_rate = null; //(0) If nonzero, guns cannot fire faster than N rounds/minute; if 1, will show fire rate each shot.
+ConVar autosmoke_pitch_min = null; //("0.0") Hold +alt1 to autothrow smokes
+ConVar autosmoke_pitch_max = null; //("0.0") Hold +alt1 to autothrow smokes
+ConVar autosmoke_pitch_delta = null; //(0.0) Hold +alt1 to autothrow smokes
+ConVar autosmoke_yaw_min = null; //("0.0") Hold +alt1 to autothrow smokes
+ConVar autosmoke_yaw_max = null; //("0.0") Hold +alt1 to autothrow smokes
+ConVar autosmoke_yaw_delta = null; //(0.0) Hold +alt1 to autothrow smokes
 
 ConVar default_weapons[4];
 ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
@@ -1805,6 +1811,8 @@ int strafing_max[MAXPLAYERS + 1]; //Number of ticks strafing at max speed (for t
 int strafing_fast[MAXPLAYERS + 1]; //Number of ticks strafing above 34% but not at max
 int strafing_slow[MAXPLAYERS + 1]; //Below 34% but not zero
 int strafing_stopped[MAXPLAYERS + 1]; //At zero speed
+float autosmoke_pitch = 1024.0, autosmoke_yaw; //Invalid value as sentinel
+int autosmoke_lasttick = -1, autosmoke_needjump = 0;
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desiredvelocity[3], float angles[3],
 	int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
@@ -2009,6 +2017,50 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 		}
 	}
 	#endif
+	if ((buttons & IN_ALT1) && GetConVarInt(learn_smoke))
+	{
+		//Autofire smokes while +alt1 is active
+		//Go somewhere and !mark. Set the six cvars to define a box.
+		//Have nothing but a smoke in hand. Activate alt1, and watch the smokes fly!
+		int tick = GetGameTickCount();
+		int since = tick - autosmoke_lasttick;
+		if (autosmoke_pitch != 2048.0 && since > 88) //96 works, 64 doesn't, 80 is unreliable
+		{
+			//Throw a smoke - max one per second
+			float angle[3] = {0.0, 0.0, 0.0};
+			if (autosmoke_pitch == 1024.0)
+			{
+				autosmoke_pitch = GetConVarFloat(autosmoke_pitch_min);
+				autosmoke_yaw = GetConVarFloat(autosmoke_yaw_min);
+			}
+			angle[0] = autosmoke_pitch; angle[1] = autosmoke_yaw;
+			autosmoke_yaw += GetConVarFloat(autosmoke_yaw_delta);
+			if (autosmoke_yaw > GetConVarFloat(autosmoke_yaw_max))
+			{
+				autosmoke_yaw = GetConVarFloat(autosmoke_yaw_min);
+				autosmoke_pitch += GetConVarFloat(autosmoke_pitch_delta);
+				if (autosmoke_pitch > GetConVarFloat(autosmoke_pitch_max)) autosmoke_pitch = 2048.0; //All done!
+			}
+			float not_moving[3] = {0.0, 0.0, 0.0};
+			TeleportEntity(client, marked_pos, angle, not_moving);
+			PrintToChat(client, "Attacking b/c lasttick %d tick %d since %d - %.2f,%.2f", autosmoke_lasttick, tick, since, angle[0], angle[1]);
+			buttons |= IN_ATTACK;
+			autosmoke_lasttick = tick; autosmoke_needjump = 1;
+			return Plugin_Changed;
+		}
+		if (autosmoke_needjump && since > 0)
+		{
+			//One tick (or thereabouts) after throwing a smoke, release attack and hit jump.
+			PrintToChat(client, "Jumping - lasttick %d tick %d since %d", autosmoke_lasttick, tick, since);
+			buttons &= IN_ATTACK;
+			buttons |= IN_JUMP;
+			autosmoke_needjump = 0;
+			return Plugin_Changed;
+		}
+		//PrintToChat(client, "Neither b/c lasttick %d tick %d since %d", autosmoke_lasttick, tick, since);
+		buttons &= IN_JUMP | IN_ATTACK;
+		return Plugin_Changed;
+	}
 	return Plugin_Continue;
 }
 public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
