@@ -427,7 +427,7 @@ public void SmokeLog(const char[] fmt, any ...)
 }
 
 //Would it be better to have six float cvars to define the box??
-#define SMOKE_TARGETS 4
+#define SMOKE_TARGETS 5
 float smoke_targets[SMOKE_TARGETS][2][3] = { //Unfortunately the size has to be specified :(
 	//Dust II
 	//- Xbox
@@ -438,11 +438,13 @@ float smoke_targets[SMOKE_TARGETS][2][3] = { //Unfortunately the size has to be 
 	{{-1437.0, 2591.0, 108.0}, {-1250.0, 2723.0, 130.0}},
 	//- CT spawn (the Mid side, good for pushing into B site)
 	{{-251.0, 2090.0, -126.0}, {-115.0, 2175.0, -122.0}},
+	//- A site - protects a Long push from Goose, Site, and nearby areas
+	{{1070.0, 2300.0, 100.0}, {1284.0, 2625.0, 125.0}},
 	//Add others as needed - {{x1,y1,z1},{x2,y2,z2}} where the
 	//second coords are all greater than the firsts.
 };
 char smoke_target_desc[][] = {
-	"Xbox smoke! ", "Corner smoke! ", "Window smoke! ", "CT spawn! ",
+	"Xbox smoke! ", "Corner smoke! ", "Window smoke! ", "CT spawn! ", "A site! "
 };
 /*
 * Blue box: From the passageway from backyard into tuns, standing throw between the rafters (middle of opening).
