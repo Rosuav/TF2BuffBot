@@ -1686,6 +1686,17 @@ public Action player_pinged(int client, const char[] command, int argc)
 		//PrintToStream("Client %d phasepinged [cookie = %d]", client, phaseping_cookie[client]);
 		//TODO: Flicker or highlight the player in a really obvious way (reset when the phase expires)
 	}
+	if (entity == -12) //Currently disabled
+	{
+		float pos[3]; GetClientEyePosition(client, pos);
+		float angle[3]; GetClientEyeAngles(client, angle);
+		TR_TraceRayFilter(pos, angle, MASK_PLAYERSOLID, RayType_Infinite, filter_notself, client);
+		if (!TR_DidHit(INVALID_HANDLE)) {PrintToChat(client, "-- didn't hit --"); return;}
+		char surface[128]; TR_GetSurfaceName(INVALID_HANDLE, surface, sizeof(surface));
+		int ent = TR_GetEntityIndex(INVALID_HANDLE);
+		char entdesc[64]; describe_weapon(ent, entdesc, sizeof(entdesc));
+		PrintToChat(client, "You're looking at: %s / %s", surface, entdesc);
+	}
 	if (entity == -11) //Currently disabled
 	{
 		int next = GameRules_GetProp("m_nGuardianModeSpecialWeaponNeeded") + 1;
@@ -2206,7 +2217,7 @@ int heal_cooldown_tick[66];
 void reset_health_bonuses() {for (int i = 0; i < sizeof(healthbonus); ++i) healthbonus[i] = heal_cooldown_tick[i] = 0;}
 public void OnMapStart() {reset_health_bonuses();}
 
-bool filter_notself(int entity, int flags, int self) {PrintToServer("filter: %d/%d/%d", entity, flags, self); return entity != self;}
+bool filter_notself(int entity, int flags, int self) {/*PrintToServer("filter: %d/%x/%d", entity, flags, self);*/ return entity != self;}
 public void player_hurt(Event event, const char[] name, bool dontBroadcast)
 {
 	/*
