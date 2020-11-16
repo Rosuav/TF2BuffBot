@@ -439,7 +439,7 @@ float smoke_targets[SMOKE_TARGETS][2][3] = { //Unfortunately the size has to be 
 	//- CT spawn (the Mid side, good for pushing into B site)
 	{{-251.0, 2090.0, -126.0}, {-115.0, 2175.0, -122.0}},
 	//- A site - protects a Long push from Goose, Site, and nearby areas
-	{{1070.0, 2300.0, 100.0}, {1284.0, 2625.0, 125.0}},
+	{{1064.0, 2300.0, 97.0}, {1284.0, 2625.0, 131.0}},
 	//Add others as needed - {{x1,y1,z1},{x2,y2,z2}} where the
 	//second coords are all greater than the firsts.
 };
