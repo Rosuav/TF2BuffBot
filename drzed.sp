@@ -54,6 +54,7 @@ ConVar autosmoke_pitch_delta = null; //(0.0) Hold +alt1 to autothrow smokes
 ConVar autosmoke_yaw_min = null; //("0.0") Hold +alt1 to autothrow smokes
 ConVar autosmoke_yaw_max = null; //("0.0") Hold +alt1 to autothrow smokes
 ConVar autosmoke_yaw_delta = null; //(0.0) Hold +alt1 to autothrow smokes
+ConVar bot_placement = null; //("") Place bots at these exact positions, on map/round start or cvar change
 
 ConVar default_weapons[4];
 ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
@@ -131,6 +132,7 @@ public void OnPluginStart()
 	AddCommandListener(player_pinged, "player_ping");
 	//As per carnage.sp, convars are created by the Python script.
 	CreateConVars();
+	HookConVarChange(bot_placement, update_bot_placements);
 
 	weapon_names = CreateTrie();
 	//Weapons not mentioned will be shown by their class names.
@@ -415,6 +417,56 @@ Action add_anarchy(Handle timer, any client)
 	anarchy_available[client] = 0; anarchy[client]++;
 	char player[64]; GetClientName(client, player, sizeof(player));
 	PrintCenterText(client, "You now have %d anarchy!", anarchy[client]);
+}
+
+//Position and orient a bot (technically any client) based on 3-6 floats separated by commas
+void place_bot(int bot, const char[] position)
+{
+	char posstr[7][20];
+	int numpos = ExplodeString(position, ",", posstr, sizeof(posstr), sizeof(posstr[]));
+	if (numpos < 3) return; //Broken, ignore
+	float pos[3], ang[3] = {0.0, 0.0, 0.0};
+	int n = 0;
+	if (numpos >= 4 && StrEqual(posstr[n], "T" )) {ChangeClientTeam(bot, 2); n++;} //I think Ts are team 2?
+	if (numpos >= 4 && StrEqual(posstr[n], "CT")) {ChangeClientTeam(bot, 3); n++;}
+	for (int i = 0; i < 3; ++i) pos[i] = StringToFloat(posstr[n++]);
+	for (int i = 0; i < 3 && n < numpos; ++i) ang[i] = StringToFloat(posstr[n++]);
+	float not_moving[3] = {0.0, 0.0, 0.0};
+	PrintToStream("Moving bot %d to location %.1f,%.1f,%.1f / %.1f,%.1f,%.1f", bot,
+		pos[0], pos[1], pos[2], ang[0], ang[1], ang[2]);
+	TeleportEntity(bot, pos, ang, not_moving);
+}
+
+public void update_bot_placements(ConVar cvar, const char[] previous, const char[] locations)
+{
+	if (!strlen(locations)) return;
+	PrintToStream("update_bot_placements from '%s' to '%s'", previous, locations);
+	//Is there any sscanf-like function in SourcePawn?
+	//Absent such, we fracture the string, then fracture each part, then parse.
+	//In Pike, this would be (array(array(float)))((locations/" ")[*]/",")
+	char spots[MAXPLAYERS + 1][128];
+	int numbots = ExplodeString(locations, " ", spots, sizeof(spots), sizeof(spots[]));
+	int p = 0;
+	for (int bot = 1; bot < MAXPLAYERS; ++bot)
+		if (IsClientInGame(bot) && IsPlayerAlive(bot) && IsFakeClient(bot))
+		{
+			//Update bot position. If we've run out of numbots, kick the bot,
+			//otherwise set its position to the next one.
+			if (p >= numbots)
+			{
+				PrintToStream("Kicking bot %d, excess to requirements", bot);
+				KickClient(bot, "Bot placements reduced, kicking redundant bot (you're fired!)");
+				continue;
+			}
+			place_bot(bot, spots[p++]);
+		}
+	while (p < numbots)
+	{
+		PrintToStream("Adding a bot %d", p);
+		char name[64]; Format(name, sizeof(name), "Target %d", p + 1);
+		int bot = CreateFakeClient(name);
+		place_bot(bot, spots[p++]);
+	}
 }
 
 public void SmokeLog(const char[] fmt, any ...)
@@ -2188,6 +2240,8 @@ char armory_weapons[][] = {
 };
 public void round_started(Event event, const char[] name, bool dontBroadcast)
 {
+	char placements[1024]; GetConVarString(bot_placement, placements, sizeof(placements));
+	update_bot_placements(bot_placement, "", placements);
 	if (GetConVarInt(guardian_underdome_waves) && !GameRules_GetProp("m_bWarmupPeriod"))
 	{
 		for (int i = 0; i < 2; ++i)
