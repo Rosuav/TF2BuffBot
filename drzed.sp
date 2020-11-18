@@ -433,15 +433,15 @@ void place_bot(int bot, const char[] position)
 	for (int i = 0; i < 3; ++i) pos[i] = StringToFloat(posstr[n++]);
 	for (int i = 0; i < 3 && n < numpos; ++i) ang[i] = StringToFloat(posstr[n++]);
 	float not_moving[3] = {0.0, 0.0, 0.0};
-	PrintToStream("Moving bot %d to location %.1f,%.1f,%.1f / %.1f,%.1f,%.1f", bot,
-		pos[0], pos[1], pos[2], ang[0], ang[1], ang[2]);
+	//PrintToStream("Moving bot %d to location %.1f,%.1f,%.1f / %.1f,%.1f,%.1f", bot,
+	//	pos[0], pos[1], pos[2], ang[0], ang[1], ang[2]);
 	TeleportEntity(bot, pos, ang, not_moving);
 }
 
 public void update_bot_placements(ConVar cvar, const char[] previous, const char[] locations)
 {
 	if (!strlen(locations)) return;
-	PrintToStream("update_bot_placements from '%s' to '%s'", previous, locations);
+	//PrintToStream("update_bot_placements from '%s' to '%s'", previous, locations);
 	//Is there any sscanf-like function in SourcePawn?
 	//Absent such, we fracture the string, then fracture each part, then parse.
 	//In Pike, this would be (array(array(float)))((locations/" ")[*]/",")
@@ -456,7 +456,7 @@ public void update_bot_placements(ConVar cvar, const char[] previous, const char
 			//otherwise set its position to the next one.
 			if (p >= numbots)
 			{
-				PrintToStream("Kicking bot %d, excess to requirements", bot);
+				//PrintToStream("Kicking bot %d, excess to requirements", bot);
 				KickClient(bot, "You have been made redundant");
 				continue;
 			}
@@ -464,9 +464,10 @@ public void update_bot_placements(ConVar cvar, const char[] previous, const char
 		}
 	while (p < numbots)
 	{
-		PrintToStream("Adding a bot %d", p);
+		//PrintToStream("Adding a bot %d", p);
 		char name[64]; Format(name, sizeof(name), "Target %d", p + 1);
 		int bot = CreateFakeClient(name);
+		SetEntProp(bot, Prop_Send, "m_bGunGameImmunity", 1);
 		SetEntPropFloat(bot, Prop_Send, "m_fImmuneToGunGameDamageTime", GetGameTime() + 1.0); //Protect from damage for the first tick
 		place_bot(bot, spots[p++]);
 	}
@@ -2922,6 +2923,8 @@ void spawncheck(int entity)
 	}
 }
 
+Action unimmunify(Handle timer, any victim) {SetEntProp(victim, Prop_Send, "m_bGunGameImmunity", 0);}
+
 //For some reason, attacker is -1 at all times. Why? Did something change?
 //Can I use inflictor instead?? It gets entity IDs for things like utility damage.
 public Action healthgate(int victim, int &atk, int &inflictor, float &damage, int &damagetype,
@@ -3161,9 +3164,12 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 			SetEntProp(victim, Prop_Send, "m_ArmorValue", 100);
 		//NOTE: For some bizarre reason, immunity time is capped at one second
 		//during warmup. I have been unable to find a reason for this, nor any
-		//way to control it. Weird weird.
+		//way to control it. Weird weird. Even weirder: It isn't ALWAYS capped
+		//during warmup. Some clients unimmunify after one second while others
+		//don't. And some don't unimmunify at all - hence the timer.
 		SetEntProp(victim, Prop_Send, "m_bGunGameImmunity", 1);
 		SetEntPropFloat(victim, Prop_Send, "m_fImmuneToGunGameDamageTime", GetGameTime() + respawn_lag);
+		CreateTimer(respawn_lag + 0.01, unimmunify, victim, TIMER_FLAG_NO_MAPCHANGE);
 		//Update the scoreboard. TODO: Register assists. That might require
 		//manually tracking all damage, which would be stupid, since the game
 		//already tracks it. But I can't find that info anywhere.
