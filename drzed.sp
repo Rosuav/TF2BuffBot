@@ -427,8 +427,9 @@ void place_bot(int bot, const char[] position)
 	if (numpos < 3) return; //Broken, ignore
 	float pos[3], ang[3] = {0.0, 0.0, 0.0};
 	int n = 0;
-	if (numpos >= 4 && StrEqual(posstr[n], "T" )) {ChangeClientTeam(bot, 2); n++;} //I think Ts are team 2?
-	if (numpos >= 4 && StrEqual(posstr[n], "CT")) {ChangeClientTeam(bot, 3); n++;}
+	if (numpos >= 4 && StrEqual(posstr[n], "T" )) {ChangeClientTeam(bot, 2); n++;}
+	else if (numpos >= 4 && StrEqual(posstr[n], "CT")) {ChangeClientTeam(bot, 3); n++;}
+	else ChangeClientTeam(bot, 2); //Default to T side bots if it's not specified. I think things bug out if there's no team set.
 	for (int i = 0; i < 3; ++i) pos[i] = StringToFloat(posstr[n++]);
 	for (int i = 0; i < 3 && n < numpos; ++i) ang[i] = StringToFloat(posstr[n++]);
 	float not_moving[3] = {0.0, 0.0, 0.0};
@@ -446,6 +447,7 @@ public void update_bot_placements(ConVar cvar, const char[] previous, const char
 	//In Pike, this would be (array(array(float)))((locations/" ")[*]/",")
 	char spots[MAXPLAYERS + 1][128];
 	int numbots = ExplodeString(locations, " ", spots, sizeof(spots), sizeof(spots[]));
+	while (numbots && !strlen(spots[numbots - 1])) --numbots; //Trim off any empties at the end
 	int p = 0;
 	for (int bot = 1; bot < MAXPLAYERS; ++bot)
 		if (IsClientInGame(bot) && IsPlayerAlive(bot) && IsFakeClient(bot))
@@ -455,7 +457,7 @@ public void update_bot_placements(ConVar cvar, const char[] previous, const char
 			if (p >= numbots)
 			{
 				PrintToStream("Kicking bot %d, excess to requirements", bot);
-				KickClient(bot, "Bot placements reduced, kicking redundant bot (you're fired!)");
+				KickClient(bot, "You have been made redundant");
 				continue;
 			}
 			place_bot(bot, spots[p++]);
@@ -465,6 +467,7 @@ public void update_bot_placements(ConVar cvar, const char[] previous, const char
 		PrintToStream("Adding a bot %d", p);
 		char name[64]; Format(name, sizeof(name), "Target %d", p + 1);
 		int bot = CreateFakeClient(name);
+		SetEntPropFloat(bot, Prop_Send, "m_fImmuneToGunGameDamageTime", GetGameTime() + 1.0); //Protect from damage for the first tick
 		place_bot(bot, spots[p++]);
 	}
 }
@@ -2588,6 +2591,9 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		//int ent = FindEntityByClassname(-1, "weapon_zone_repulsor");
 		//if (ent != -1) GetEntPropVector(ent, Prop_Send, "m_vecOrigin", marked_pos);
 		PrintToChat(self, "Marked position: %f, %f, %f", marked_pos[0], marked_pos[1], marked_pos[2]);
+		char placements[1024]; GetConVarString(bot_placement, placements, sizeof(placements));
+		if (strlen(placements)) PrintToServer("bot_placement \"%s %f,%f,%f,%f,%f\"",
+			placements, marked_pos[0], marked_pos[1], marked_pos[2], marked_angle[0], marked_angle[1]);
 		return;
 	}
 	if (!strcmp(msg, "!mark2"))
