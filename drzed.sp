@@ -468,8 +468,7 @@ public void update_bot_placements(ConVar cvar, const char[] previous, const char
 		char name[64]; Format(name, sizeof(name), "Target %d", p + 1);
 		int bot = CreateFakeClient(name);
 		SetEntityFlags(bot, GetEntityFlags(bot) | FL_ATCONTROLS);
-		SetEntProp(bot, Prop_Send, "m_bGunGameImmunity", 1);
-		SetEntPropFloat(bot, Prop_Send, "m_fImmuneToGunGameDamageTime", GetGameTime() + 1.0); //Protect from damage for the first tick
+		damage_lag_immunify(bot, 1.0);
 		place_bot(bot, spots[p++]);
 	}
 }
@@ -1923,8 +1922,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 	);*/
 	if (GetConVarInt(insta_respawn_damage_lag)
 		&& (buttons & (IN_ATTACK | IN_ATTACK2 | IN_ATTACK3 | IN_USE))
-		&& GetEntProp(client, Prop_Send, "m_bGunGameImmunity")
-		&& GetEntPropFloat(client, Prop_Send, "m_fImmuneToGunGameDamageTime") > GetGameTime())
+		&& damage_lag_is_immune(client))
 	{
 		PrintCenterText(client, "-- You are dead --");
 		buttons &= ~(IN_ATTACK | IN_ATTACK2 | IN_ATTACK3 | IN_USE);
@@ -2932,7 +2930,60 @@ void spawncheck(int entity)
 	}
 }
 
-Action unimmunify(Handle timer, any victim) {SetEntProp(victim, Prop_Send, "m_bGunGameImmunity", 0);}
+void fade_screen(int target, int time)
+{
+	if (!IsClientInGame(target) || !IsPlayerAlive(target)) return;
+	int duration = 256, holdtime = 512 * time; //16-bit fixed point, not sure how many bits are the fraction (guessing 9)
+	int color[4] = { 32, 32, 32, 128 }; //RGBA
+	int flags = 17; //s/be fade in and purge - or try 10 instead
+	//See https://wiki.alliedmods.net/User_messages
+	//Borrowed from funcommands::blind.sp
+	//This code is governed by the terms of the GPL. (The rest of this file
+	//is under even more free terms.)
+	
+	int targets[2]; targets[0] = target; targets[1] = 0;
+	Handle message = StartMessageEx(GetUserMessageId("Fade"), targets, 1);
+	if (GetUserMessageType() == UM_Protobuf)
+	{
+		Protobuf pb = UserMessageToProtobuf(message);
+		pb.SetInt("duration", duration);
+		pb.SetInt("hold_time", holdtime);
+		pb.SetInt("flags", flags);
+		pb.SetColor("clr", color);
+	}
+	else
+	{
+		BfWrite bf = UserMessageToBfWrite(message);
+		bf.WriteShort(duration);
+		bf.WriteShort(holdtime);
+		bf.WriteShort(flags);		
+		bf.WriteByte(color[0]);
+		bf.WriteByte(color[1]);
+		bf.WriteByte(color[2]);
+		bf.WriteByte(color[3]);
+	}
+	
+	EndMessage();
+	//End code governed by the GPL.
+}
+
+Action damage_lag_unimmunify(Handle timer, any victim)
+{
+	if (!IsClientInGame(victim)) return;
+	SetEntProp(victim, Prop_Data, "m_takedamage", 2);
+	SetEntityRenderColor(victim, 255, 255, 255, 255);
+}
+void damage_lag_immunify(int victim, float time)
+{
+	SetEntProp(victim, Prop_Data, "m_takedamage", 0);
+	SetEntityRenderColor(victim, 32, 32, 32, 255); //Wile E Coyote, super genius.
+	fade_screen(victim, RoundToFloor(time));
+	CreateTimer(time, damage_lag_unimmunify, victim, TIMER_FLAG_NO_MAPCHANGE);
+}
+bool damage_lag_is_immune(int victim)
+{
+	return GetEntProp(victim, Prop_Data, "m_takedamage") == 0;
+}
 
 //For some reason, attacker is -1 at all times. Why? Did something change?
 //Can I use inflictor instead?? It gets entity IDs for things like utility damage.
@@ -3171,14 +3222,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 		//Give back armor if you still have any. Assumes 100 max armor.
 		if (GetEntProp(victim, Prop_Send, "m_ArmorValue") > 0)
 			SetEntProp(victim, Prop_Send, "m_ArmorValue", 100);
-		//NOTE: For some bizarre reason, immunity time is capped at one second
-		//during warmup. I have been unable to find a reason for this, nor any
-		//way to control it. Weird weird. Even weirder: It isn't ALWAYS capped
-		//during warmup. Some clients unimmunify after one second while others
-		//don't. And some don't unimmunify at all - hence the timer.
-		SetEntProp(victim, Prop_Send, "m_bGunGameImmunity", 1);
-		SetEntPropFloat(victim, Prop_Send, "m_fImmuneToGunGameDamageTime", GetGameTime() + respawn_lag);
-		CreateTimer(respawn_lag + 0.01, unimmunify, victim, TIMER_FLAG_NO_MAPCHANGE);
+		damage_lag_immunify(victim, respawn_lag + 0.01);
 		//Update the scoreboard. TODO: Register assists. That might require
 		//manually tracking all damage, which would be stupid, since the game
 		//already tracks it. But I can't find that info anywhere.
@@ -3186,6 +3230,8 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 		if (attacker >= 0 && attacker < MAXPLAYERS)
 			SetEntProp(attacker, Prop_Data, "m_iFrags", GetClientFrags(attacker) + 1);
 		SetEntProp(victim, Prop_Data, "m_iDeaths", GetClientDeaths(victim) + 1);
+		damage = 0.0;
+		return Plugin_Changed;
 	}
 	//
 	int gate = GetConVarInt(sm_drzed_gate_health_left);
