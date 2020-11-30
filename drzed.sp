@@ -467,6 +467,7 @@ public void update_bot_placements(ConVar cvar, const char[] previous, const char
 		//PrintToStream("Adding a bot %d", p);
 		char name[64]; Format(name, sizeof(name), "Target %d", p + 1);
 		int bot = CreateFakeClient(name);
+		SetEntityFlags(bot, GetEntityFlags(bot) | FL_ATCONTROLS);
 		SetEntProp(bot, Prop_Send, "m_bGunGameImmunity", 1);
 		SetEntPropFloat(bot, Prop_Send, "m_fImmuneToGunGameDamageTime", GetGameTime() + 1.0); //Protect from damage for the first tick
 		place_bot(bot, spots[p++]);
@@ -2121,6 +2122,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 		{
 			//One tick (or thereabouts) after throwing a smoke, release attack and hit jump.
 			PrintToChat(client, "Jumping - lasttick %d tick %d since %d", autosmoke_lasttick, tick, since);
+			//FIXME: Should this be &=~ ? And correspondingly below. Check intent here.
 			buttons &= IN_ATTACK;
 			buttons |= IN_JUMP;
 			autosmoke_needjump = 0;
@@ -2128,6 +2130,13 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 		}
 		//PrintToChat(client, "Neither b/c lasttick %d tick %d since %d", autosmoke_lasttick, tick, since);
 		buttons &= IN_JUMP | IN_ATTACK;
+		return Plugin_Changed;
+	}
+	if (IsFakeClient(client) && (GetEntityFlags(client) & FL_ATCONTROLS))
+	{
+		//Bots placed in specific locations have the "at controls" flag to stop
+		//them from moving. We'll also stop them from attacking.
+		buttons &= ~(IN_ATTACK | IN_ATTACK2 | IN_ATTACK3);
 		return Plugin_Changed;
 	}
 	return Plugin_Continue;
