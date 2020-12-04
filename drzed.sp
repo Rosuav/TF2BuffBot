@@ -55,6 +55,7 @@ ConVar autosmoke_yaw_min = null; //("0.0") Hold +alt1 to autothrow smokes
 ConVar autosmoke_yaw_max = null; //("0.0") Hold +alt1 to autothrow smokes
 ConVar autosmoke_yaw_delta = null; //(0.0) Hold +alt1 to autothrow smokes
 ConVar bot_placement = null; //("") Place bots at these exact positions, on map/round start or cvar change
+ConVar disable_warmup_arenas = null; //(0) If 1, will disable the 1v1 warmup scripts
 
 ConVar default_weapons[4];
 ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
@@ -2251,6 +2252,24 @@ char armory_weapons[][] = {
 };
 public void round_started(Event event, const char[] name, bool dontBroadcast)
 {
+	if (GetConVarInt(disable_warmup_arenas) && GameRules_GetProp("m_bWarmupPeriod"))
+	{
+		//Attempt to disable the 1v1 warmup arenas by removing the logic scripts
+		//that activate them. Unfortunately this doesn't really work cleanly, and
+		//will result in a noisy spam on the console as the script (which already
+		//got loaded) crashes out trying to do things. But it DOES allow us to use
+		//warmup the way we always have: as a way to explore the map and do things
+		//without worrying about respawns, rounds, people joining late, etc.
+		int ent = -1;
+		while ((ent = FindEntityByClassname(ent, "logic_script")) != -1)
+		{
+			char entname[64]; GetEntPropString(ent, Prop_Send, "m_iName", entname, sizeof(entname));
+			if (!strncmp(entname, "arena", 5) && !strcmp(entname[6], "-script")) //eg arena1-script
+				AcceptEntityInput(ent, "Kill");
+			//else PrintToServer("logic_script %d: %s (%s)", ent, entname, entname[6]);
+		}
+		//SetConVarInt(FindConVar("sv_disable_radar"), 0); //The script disables radar but this doesn't reenable it
+	}
 	char placements[1024]; GetConVarString(bot_placement, placements, sizeof(placements));
 	update_bot_placements(bot_placement, "", placements);
 	if (GetConVarInt(guardian_underdome_waves) && !GameRules_GetProp("m_bWarmupPeriod"))
@@ -2404,6 +2423,30 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 	//TODO some time: Break out all these handlers into functions, and build a
 	//hashtable of "!heal" ==> function. Split the message on the first space,
 	//look it up in the misnamed "trie", and then call the function.
+	if (0 && !strcmp(msg, "!hack"))
+	{
+		int max = GetMaxEntities();
+		StringMap entcount = CreateTrie();
+		for (int ent = 0; ent < max; ++ent) if (IsValidEntity(ent))
+		{
+			char cls[64]; GetEntityClassname(ent, cls, sizeof(cls));
+			int count = 0;
+			if (!GetTrieValue(entcount, cls, count)) count = 0;
+			SetTrieValue(entcount, cls, count + 1);
+		}
+		//Iterate over the trie, reporting the counts.
+		//It'd be really nice to use collections.Counter and report them in frequency order.
+		Handle snap = CreateTrieSnapshot(entcount);
+		for (int i = 0; i < TrieSnapshotLength(snap); ++i)
+		{
+			char cls[64]; GetTrieSnapshotKey(snap, i, cls, sizeof(cls));
+			int count = 0; GetTrieValue(entcount, cls, count);
+			PrintToServer("[%4d] %s", count, cls);
+		}
+		CloseHandle(snap);
+		CloseHandle(entcount);
+		return;
+	}
 	if (0 && !strcmp(msg, "!hack"))
 	{
 		int ent = CreateEntityByName("game_player_equip");
