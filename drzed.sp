@@ -742,17 +742,23 @@ int strafe_direction[MAXPLAYERS + 1]; //1 = right, 0 = neither/both, -1 = left. 
 int stutterstep_score[MAXPLAYERS + 1][3]; //For each player, ({stationary, accurate, inaccurate}), and is reset on weapon reload
 float stutterstep_inaccuracy[MAXPLAYERS + 1]; //For each player, the sum of squares of the inaccuracies, for the third field above.
 float current_weapon_speed[MAXPLAYERS + 1]; //For each player, the max speed of the weapon that was last equipped. An optimization.
+float stutterstep_lastpos[MAXPLAYERS + 1][3]; //F e p, position when last shot was taken.
+int stutterstep_lastshottime[MAXPLAYERS + 1]; //F e p, game tick count when last shot was taken.
+float stutterstep_width[MAXPLAYERS + 1]; //F e p, running tally of your "width score", the exact definition of which may change
+int stutterstep_widthcnt[MAXPLAYERS + 1]; //F e p, number of entries in the width score (for averaging)
 
 void show_stutterstep_stats(int client)
 {
 	char player[64]; GetClientName(client, player, sizeof(player));
 	int shots = stutterstep_score[client][1] + stutterstep_score[client][2];
 	if (stutterstep_score[client][0] + shots == 0) return; //No stats to show (can happen if you reload two weapons in succession)
-	PrintToChatAll("%s: stopped %d, accurate %d, inaccurate %d - spread %.2f", player,
+	PrintToChatAll("%s: stopped %d, accurate %d, inaccurate %d - spread %.2f, width %.2f", player,
 		stutterstep_score[client][0], stutterstep_score[client][1], stutterstep_score[client][2],
-		shots ? stutterstep_inaccuracy[client] / shots : 0.0);
+		shots ? stutterstep_inaccuracy[client] / shots : 0.0,
+		stutterstep_widthcnt[client] ? stutterstep_width[client] / stutterstep_widthcnt[client] : 0.0);
 	stutterstep_score[client][0] = stutterstep_score[client][1] = stutterstep_score[client][2] = 0;
-	stutterstep_inaccuracy[client] = 0.0;
+	stutterstep_inaccuracy[client] = stutterstep_width[client] = 0.0;
+	stutterstep_lastshottime[client] = stutterstep_widthcnt[client] = 0;
 }
 
 public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast)
@@ -821,9 +827,28 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 			right_vel *= strafe_direction[client];
 			int sync = RoundToFloor(spd); if (right_vel < 0) sync = -sync;
 			//Why can't I just display a number with %+d ??? sigh.
-			Format(sync_desc, sizeof(sync_desc), " SYNC %s%d", sync > 0 ? "+" : "", sync);
+			Format(sync_desc, sizeof(sync_desc), " sync %s%d", sync > 0 ? "+" : "", sync);
 		}
-		PrintToChat(client, "Stutter: speed %.2f/%.0f side %d%% %s%s", spd, maxspeed, sidestep, quality_desc[quality], sync_desc);
+		int tm = GetGameTickCount();
+		float pos[3]; GetClientEyePosition(client, pos);
+		char width_desc[64] = "";
+		if (tm - stutterstep_lastshottime[client] < 64) //Assuming 64-tick server for now
+		{
+			float dist = GetVectorDistance(pos, stutterstep_lastpos[client], false);
+			Format(width_desc, sizeof(width_desc), " WIDTH %.1f/%d", dist, tm - stutterstep_lastshottime[client]);
+			//Rather than simply averaging the distances, would it be better to
+			//take the distance-squared ("true" for third arg to GetVectorDistance)
+			//and average those, and take the sqrt at the end? That skews the average
+			//towards the higher numbers. Alternatively, should the min and max be
+			//taken into account? Bear in mind that there'll be outliers (eg if you
+			//short burst instead of single firing, it'll probably give you a very
+			//low distance moved).
+			stutterstep_width[client] += dist; stutterstep_widthcnt[client]++;
+		}
+		stutterstep_lastshottime[client] = tm;
+		GetClientEyePosition(client, stutterstep_lastpos[client]); //Yes, I could assign from pos, can't be bothered
+		PrintToChat(client, "Stutter: speed %.2f/%.0f side %d%% %s%s%s",
+			spd, maxspeed, sidestep, quality_desc[quality], sync_desc, width_desc);
 		//If this is the last shot from the magazine, show stats, since the weapon_reload
 		//event doesn't fire.
 		int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
