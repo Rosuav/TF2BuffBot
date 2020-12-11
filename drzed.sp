@@ -842,7 +842,10 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 			//towards the higher numbers. Alternatively, should the min and max be
 			//taken into account? Bear in mind that there'll be outliers (eg if you
 			//short burst instead of single firing, it'll probably give you a very
-			//low distance moved).
+			//low distance moved). The current calculation assumes an intention of
+			//single-shot stutter stepping where you move left, fire once, move right,
+			//fire once more, etc. Firing more than one shot per strafe will lower
+			//the average width.
 			stutterstep_width[client] += dist; stutterstep_widthcnt[client]++;
 		}
 		stutterstep_lastshottime[client] = tm;
