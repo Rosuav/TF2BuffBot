@@ -39,7 +39,6 @@ ConVar sm_drzed_allow_recall = null; //(0) Set to 1 to enable !recall and !recal
 ConVar sm_drzed_admin_chat_name = null; //("") Name of admin for chat purposes
 ConVar bot_autobuy_nades = null; //(1) Bots will buy more grenades than they otherwise might
 ConVar bots_get_empty_weapon = null; //("") Give bots an ammo-less weapon on startup (eg weapon_glock). Use only if they wouldn't get a weapon in that slot.
-ConVar bot_purchase_delay = null; //(0.0) Delay bot primary weapon purchases by this many seconds
 ConVar damage_scale_humans = null; //(1.0) Scale all damage dealt by humans
 ConVar damage_scale_bots = null; //(1.0) Scale all damage dealt by bots
 ConVar learn_smoke = null; //(0) Show information on smoke throws and where they pop
@@ -96,7 +95,6 @@ float marked_angle2[3];
 int show_positions[MAXPLAYERS + 1];
 int nshowpos = 0;
 int last_freeze = -1;
-int freeze_started = 0;
 int last_money[MAXPLAYERS + 1];
 
 //Crippling is done by reducing your character's max speed. Uncrippling means getting
@@ -967,57 +965,15 @@ public Action add_bonus_health(Handle timer, int client)
 	}
 }
 	
-Action bot_delayed_purchase(Handle timer, Handle params)
-{
-	ignore(timer);
-	int client = ReadPackCell(params);
-	int primary = ReadPackCell(params);
-	SetEntityRenderFx(client, RENDERFX_NONE);
-	if (GetPlayerWeaponSlot(client, 0) != primary) return;
-	char desired[64]; ReadPackString(params, desired, sizeof(desired));
-	char command[68]; FormatEx(command, sizeof(command), "buy %s", desired);
-	FakeClientCommandEx(client, command);
-}
-
+#if 0
+//NOTE: As of 20201218, this breaks all purchasing - every buy is an attempted donate. Not sure
+//what's going on; possibly an update to SourceMod or MetaMod will fix it. For now, since there
+//isn't a lot in here, I'm just disabling it. Look into it later.
 public Action CS_OnBuyCommand(int buyer, const char[] weap)
 {
 	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return Plugin_Continue;
-	//If a bot buys a primary weapon, announce it to team chat, wait a cvar-controlled time, and then:
-	//1) If the bot's state has not changed, repeat the buy
-	//2) If the bot now has a primary weapon that he did not previously have, do nothing.
-	//3) If a command has been entered to stop bots buying at all, do nothing.
-	//4) If, subsequently, the bot-don't-buy command is re-entered, redo the buy. Maybe.
-	//NOTE: The bot_autobuy_nades check must be done after this delay, and be disabled if
-	//the command is entered.
-	float time_since_freeze = (GetGameTickCount() - freeze_started) * GetTickInterval();
-	//char name[64]; GetClientName(buyer, name, sizeof(name));
-	//PrintToStream("[%.2f] %s%s attempted to buy %s", time_since_freeze, IsFakeClient(buyer) ? "BOT " : "", name, weap);
 	//Disallow defusers during warmup (they're useless anyway)
 	if (StrEqual(weap, "defuser") && GameRules_GetProp("m_bWarmupPeriod")) return Plugin_Stop;
-	//Make bots wait before buying, if they're buying within the first few seconds of freeze
-	float delay = GetConVarFloat(bot_purchase_delay) - time_since_freeze;
-	if (!GameRules_GetProp("m_bWarmupPeriod") && IsFakeClient(buyer) && delay > 0.0)
-	{
-		//See if the weapon is a primary
-		int use_a_or_an = 0;
-		if (!GetTrieValue(weapon_is_primary, weap, use_a_or_an)) return Plugin_Continue;
-		//If you're already waiting on a purchase, deny without deferring.
-		if (GetEntityRenderFx(buyer) != RENDERFX_NONE) return Plugin_Stop;
-		//Announce in team chat "I'm going to buy a/an " + weap
-		char command[100]; FormatEx(command, sizeof(command), "say_team I was going to buy %s %s",
-			use_a_or_an == 1 ? "a" : "an", weap);
-		FakeClientCommandEx(buyer, command);
-		SetEntityRenderFx(buyer, RENDERFX_STROBE_FASTER);
-		Handle params;
-		CreateDataTimer(delay, bot_delayed_purchase, params, TIMER_FLAG_NO_MAPCHANGE);
-		WritePackCell(params, buyer);
-		//See what primary, if any, the bot has
-		int primary = GetPlayerWeaponSlot(buyer, 0);
-		WritePackCell(params, primary);
-		WritePackString(params, weap);
-		ResetPack(params);
-		return Plugin_Stop; //Don't buy it yet
-	}
 	if (StrEqual(weap, "heavyassaultsuit"))
 	{
 		//Crippling mode uses the suit, so when that's happening, you can't buy the suit.
@@ -1046,6 +1002,7 @@ public Action CS_OnBuyCommand(int buyer, const char[] weap)
 	#endif
 	return Plugin_Continue;
 }
+#endif
 
 void jayne(int team)
 {
@@ -1359,7 +1316,6 @@ public void OnGameFrame()
 	int freeze = GameRules_GetProp("m_bFreezePeriod");
 	if (freeze && !last_freeze)
 	{
-		freeze_started = GetGameTickCount();
 		//When we go into freeze time, wait half a second, then get the bots to buy nades.
 		//Note that they won't buy nades if we're out of freeze time, so you need at least
 		//one full second of freeze in order to do this reliably.
