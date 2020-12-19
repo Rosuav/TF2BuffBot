@@ -964,14 +964,11 @@ public Action add_bonus_health(Handle timer, int client)
 		if (hp) SetEntityHealth(client, GetClientHealth(client) + hp);
 	}
 }
-	
-#if 0
-//NOTE: As of 20201218, this breaks all purchasing - every buy is an attempted donate. Not sure
-//what's going on; possibly an update to SourceMod or MetaMod will fix it. For now, since there
-//isn't a lot in here, I'm just disabling it. Look into it later.
+
 public Action CS_OnBuyCommand(int buyer, const char[] weap)
 {
 	if (!IsClientInGame(buyer) || !IsPlayerAlive(buyer)) return Plugin_Continue;
+	//char name[64]; GetClientName(buyer, name, sizeof(name)); PrintToChatAll("%s%s attempted to buy %s", IsFakeClient(buyer) ? "BOT " : "", name, weap);
 	//Disallow defusers during warmup (they're useless anyway)
 	if (StrEqual(weap, "defuser") && GameRules_GetProp("m_bWarmupPeriod")) return Plugin_Stop;
 	if (StrEqual(weap, "heavyassaultsuit"))
@@ -1002,7 +999,6 @@ public Action CS_OnBuyCommand(int buyer, const char[] weap)
 	#endif
 	return Plugin_Continue;
 }
-#endif
 
 void jayne(int team)
 {
