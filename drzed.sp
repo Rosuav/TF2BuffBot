@@ -516,6 +516,10 @@ char smoke_target_desc[][] = {
 * Flagstones: Stand btwn white angled box and pillar, aim into opening below stonework (left of ctr for safety)
   - This partly smokes off Window
 * Alternate car: Stand ON the white box, up against the pillar, on top of the wood slat. Aim through the hole, about two thirds down, a tad to the right.
+* CT before pushing Truck:
+  - Jump to under Xbox. An AWPer might take a shot at you but would have to be REALLY fast. Clear Mid-to-Short.
+  - Push into the back corner, then step out a bit so you can see the wall behind Mid-to-Short.
+  - Left-click throw at the left side of the arch on the far wall. Elevation approx level with dirty patch. Fairly forgiving.
 */
 #define SMOKE_BOUNCE_TARGETS 1
 float smoke_first_bounce[SMOKE_BOUNCE_TARGETS][2][3] = {
