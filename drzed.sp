@@ -474,9 +474,27 @@ public void update_bot_placements(ConVar cvar, const char[] previous, const char
 }
 
 //Choose the eye position (as shown by cl_showpos) of all viable targets
+//TODO: Group them into sets based on target region (say, "A Long"). When
+//a flash would have been visible to any of them, report it with the count
+//eg "flashed %d, half %d, missed %d at A Long". If it catches people from
+//multiple regions, report multiple lines, with "It also " replacing the
+//start of the line (with the coordinates).
+//TODO: Have a target gathering mode where, when you ping, it grabs your
+//current map region (or the one where you pinged??) and your eye location,
+//and prints them out on the server in a particular format. Then have a
+//Python script that turns that into an include file, which can then make
+//the array here.
 float flash_targets[][3] = {
 	{1309.3, 1238.4, 65.03},
 };
+//float flash_targets[total_targets][3] = {{...},{...},{...}};
+//char flash_target_regions[][num_regions] = {"A Long", "A Short", "B site", ...};
+//int flash_region_targets[num_regions] = {5, 2, 3, ...};
+//Iterate to num_regions. Maintain a separate target index. (Or a pointer,
+//if we were working in actual C.) Within each region, iterate its targets,
+//produce line of output. Know whether this is the first region we've hit.
+//Have a zero-target sentinel region, for convenience. (Minimal cost since
+//the arrays will be script-generated anyway.)
 
 public void flash_popped(Event event, const char[] name, bool dontBroadcast)
 {
@@ -484,16 +502,21 @@ public void flash_popped(Event event, const char[] name, bool dontBroadcast)
 	float pos[3];
 	pos[0] = event.GetFloat("x"); pos[1] = event.GetFloat("y"); pos[2] = event.GetFloat("z");
 	int client = GetClientOfUserId(event.GetInt("userid"));
+	int entity = event.GetInt("entityid");
 	//Trace to every possible target. If it doesn't reach it, skip.
 	//If it's more than 3000 HU away, skip (insignificant flash).
 	//If it reaches it after 1500 HU or more, "half flash". Otherwise,
 	//"full flash". We ignore the direction you'd be facing.
 	int flashed = 0, half = 0;
 	for (int i = 0; i < sizeof(flash_targets); ++i) {
-		TR_TraceRay(pos, flash_targets[i], MASK_OPAQUE, RayType_EndPoint);
-		if (TR_DidHit(INVALID_HANDLE)) continue;
+		TR_TraceRayFilter(pos, flash_targets[i], MASK_OPAQUE, RayType_EndPoint, filter_notself, entity);
+		/*float hit[3]; TR_GetEndPosition(hit);
+		PrintToChatAll("Tracing ray: %s at %.2f,%.2f,%.2f",
+			TR_DidHit() ? "hit": "missed", hit[0], hit[1], hit[2]);*/
+		if (TR_DidHit()) continue;
 		//It would have been visible. Cool. Calculate distance (independently).
 		float distsq = GetVectorDistance(pos, flash_targets[i], true);
+		//PrintToChatAll("D2: %.2f", distsq);
 		if (distsq > 3000.0*3000.0) continue;
 		if (distsq > 1500.0*1500.0) ++half;
 		else ++flashed;
