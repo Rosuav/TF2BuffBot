@@ -114,6 +114,7 @@ public void OnPluginStart()
 	HookEvent("round_start", round_started);
 	HookEvent("round_end", uncripple_all);
 	HookEvent("bomb_planted", record_planter);
+	HookEvent("flashbang_detonate", flash_popped);
 	HookEvent("smokegrenade_detonate", smoke_popped);
 	HookEvent("grenade_bounce", smoke_bounce);
 	HookEvent("player_team", player_team);
@@ -470,6 +471,35 @@ public void update_bot_placements(ConVar cvar, const char[] previous, const char
 		damage_lag_immunify(bot, 1.0);
 		place_bot(bot, spots[p++]);
 	}
+}
+
+//Choose the eye position (as shown by cl_showpos) of all viable targets
+float flash_targets[][3] = {
+	{1309.3, 1238.4, 65.03},
+};
+
+public void flash_popped(Event event, const char[] name, bool dontBroadcast)
+{
+	if (!GetConVarInt(learn_smoke)) return;
+	float pos[3];
+	pos[0] = event.GetFloat("x"); pos[1] = event.GetFloat("y"); pos[2] = event.GetFloat("z");
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	//Trace to every possible target. If it doesn't reach it, skip.
+	//If it's more than 3000 HU away, skip (insignificant flash).
+	//If it reaches it after 1500 HU or more, "half flash". Otherwise,
+	//"full flash". We ignore the direction you'd be facing.
+	int flashed = 0, half = 0;
+	for (int i = 0; i < sizeof(flash_targets); ++i) {
+		TR_TraceRay(pos, flash_targets[i], MASK_OPAQUE, RayType_EndPoint);
+		if (TR_DidHit(INVALID_HANDLE)) continue;
+		//It would have been visible. Cool. Calculate distance (independently).
+		float distsq = GetVectorDistance(pos, flash_targets[i], true);
+		if (distsq > 3000.0*3000.0) continue;
+		if (distsq > 1500.0*1500.0) ++half;
+		else ++flashed;
+	}
+	PrintToChat(client, "Your flash popped at (%.2f, %.2f, %.2f) - %d flashed, %d half",
+		pos[0], pos[1], pos[2], flashed, half);
 }
 
 public void SmokeLog(const char[] fmt, any ...)
