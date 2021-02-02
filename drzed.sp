@@ -504,9 +504,14 @@ public void flash_popped(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	int entity = event.GetInt("entityid");
 	//Trace to every possible target. If it doesn't reach it, skip.
-	//If it's more than 3000 HU away, skip (insignificant flash).
-	//If it reaches it after 1500 HU or more, "half flash". Otherwise,
-	//"full flash". We ignore the direction you'd be facing.
+	//If it's more than 1800 HU away, skip (insignificant flash).
+	//If it reaches it after 1300 HU or more, "half flash". Otherwise,
+	//"full flash". We ignore the direction you'd be facing. TODO:
+	//Verify these numbers. I'm using these based on the figures from
+	//3kliksphilip's analysis at https://youtu.be/aTR7Surb80w?t=238
+	//but it'd be better with some realistic testing and a human.
+	//For one thing, tinnitus happens if the flash is within 768-1024
+	//(see 5:25 in that same video); should that be a cutoff?
 	int flashed = 0, half = 0;
 	for (int i = 0; i < sizeof(flash_targets); ++i) {
 		TR_TraceRayFilter(pos, flash_targets[i], MASK_OPAQUE, RayType_EndPoint, filter_notself, entity);
@@ -517,12 +522,14 @@ public void flash_popped(Event event, const char[] name, bool dontBroadcast)
 		//It would have been visible. Cool. Calculate distance (independently).
 		float distsq = GetVectorDistance(pos, flash_targets[i], true);
 		//PrintToChatAll("D2: %.2f", distsq);
-		if (distsq > 3000.0*3000.0) continue;
-		if (distsq > 1500.0*1500.0) ++half;
+		if (distsq > 1800.0*1800.0) continue;
+		if (distsq > 1300.0*1300.0) ++half;
 		else ++flashed;
 	}
 	PrintToChat(client, "Your flash popped at (%.2f, %.2f, %.2f) - %d flashed, %d half",
 		pos[0], pos[1], pos[2], flashed, half);
+	//TODO: For analysis purposes, calculate the distance (not squared) to each
+	//player, and print to that player's chat how far away the flash popped.
 }
 
 public void SmokeLog(const char[] fmt, any ...)
