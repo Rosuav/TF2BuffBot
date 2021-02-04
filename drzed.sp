@@ -528,8 +528,15 @@ public void flash_popped(Event event, const char[] name, bool dontBroadcast)
 	}
 	PrintToChat(client, "Your flash popped at (%.2f, %.2f, %.2f) - %d flashed, %d half",
 		pos[0], pos[1], pos[2], flashed, half);
-	//TODO: For analysis purposes, calculate the distance (not squared) to each
+	//For analysis purposes, calculate the distance (not squared) to each
 	//player, and print to that player's chat how far away the flash popped.
+	for (int cl = 1; cl < MAXPLAYERS; ++cl) {
+		if (!IsClientInGame(cl) || !IsPlayerAlive(cl) || IsFakeClient(cl)) continue;
+		float player[3]; GetClientEyePosition(cl, player);
+		float dist = GetVectorDistance(pos, player, false);
+		PrintToChat(cl, "That flash popped at (%.2f, %.2f, %.2f) - %.2f HU away",
+			pos[0], pos[1], pos[2], dist);
+	}
 }
 
 public void SmokeLog(const char[] fmt, any ...)
