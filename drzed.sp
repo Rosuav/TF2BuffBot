@@ -473,13 +473,7 @@ public void update_bot_placements(ConVar cvar, const char[] previous, const char
 	}
 }
 
-//TODO: Have a target gathering mode where, when you ping, it grabs your
-//current map region (or the one where you pinged??) and your eye location,
-//and prints them out on the server in a particular format. Then have a
-//Python script that turns that into an include file, which can then make
-//the array here.
 #include "flashbang.inc"
-
 public void flash_popped(Event event, const char[] name, bool dontBroadcast)
 {
 	if (!GetConVarInt(learn_smoke)) return;
@@ -504,17 +498,21 @@ public void flash_popped(Event event, const char[] name, bool dontBroadcast)
 			if (TR_DidHit()) {++targetidx; continue;}
 			//It would have been visible. Cool. Calculate distance (independently).
 			float distsq = GetVectorDistance(pos, flash_targets[targetidx++], true);
-			PrintToChatAll("D2: %.2f", distsq);
+			//PrintToChatAll("D2: %.2f", distsq);
 			if (distsq > 1800.0*1800.0) continue;
 			if (distsq > 1250.0*1250.0) ++half;
 			else ++flashed;
 		}
 		if (flashed || half) {
+			char hits[20];
+			if (flashed && half) Format(hits, sizeof(hits), "%d(%d)", flashed, flashed + half);
+			else if (half) Format(hits, sizeof(hits), "(%d)", half);
+			else Format(hits, sizeof(hits), "%d", flashed);
 			if (done_one)
-				PrintToChat(client, "It also caught %s - %d+%d/%d",
-					pos[0], pos[1], pos[2], flash_target_regions[i], flashed, half, flash_region_targets[i]);
-			else PrintToChat(client, "Flashed at (%.2f, %.2f, %.2f) - %s - %d+%d/%d",
-				pos[0], pos[1], pos[2], flash_target_regions[i], flashed, half, flash_region_targets[i]);
+				PrintToChat(client, "It also caught %s - %s/%d",
+					flash_target_regions[i], hits, flash_region_targets[i]);
+			else PrintToChat(client, "Flashed at (%.2f, %.2f, %.2f) - %s - %s/%d",
+				pos[0], pos[1], pos[2], flash_target_regions[i], hits, flash_region_targets[i]);
 			done_one = true;
 		}
 	}
@@ -1768,6 +1766,14 @@ public Action player_pinged(int client, const char[] command, int argc)
 	//PrintToStream("Client %d pinged [ping = %d]", client, entity);
 	//if (entity != -1) CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
 	//report_new_entities = true; CreateTimer(1.0, unreport_new, 0, TIMER_FLAG_NO_MAPCHANGE);
+	if (entity == -13) //Currently disabled
+	{
+		//Add entries to gen_effects_Tables.py :: flashbang_targets
+		char place[64]; GetEntPropString(client, Prop_Send, "m_szLastPlaceName", place, sizeof(place));
+		float pos[3]; GetClientEyePosition(client, pos);
+		PrintToChatAll("Pinging: %.2f %.2f %.2f %s", pos[0], pos[1], pos[2], place);
+		PrintToServer("==\n%.2f %.2f %.2f %s\n==", pos[0], pos[1], pos[2], place);
+	}
 	if (underdome_flg & UF_PHASEPING) //ENABLED by game mode
 	{
 		//If entity isn't -1, you're already phasepinging. This needs to cancel
