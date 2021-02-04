@@ -3,6 +3,7 @@
 import json # Quickest way to get C-like string encoding
 import re
 from enum import IntFlag, auto
+from collections import defaultdict
 
 # These tables define the effects possible from the !roulette command.
 # The "benefits" table is also used by the !gift command. The intention
@@ -286,6 +287,10 @@ underdome_modes = [
 	},
 ]
 
+flashbang_targets = """
+1309.3 1238.4 65.03 Long Corner
+"""
+
 with open("randeffects.inc", "w") as f:
 	for name, options in effects.items():
 		print("TFCond %s[] = {" % name, file=f)
@@ -315,6 +320,24 @@ with open("underdome.inc", "w") as f:
 		for mode in underdome_modes:
 			print("\t%s," % json.dumps(mode[block]), file=f)
 		print("};", file=f);
+
+with open("flashbang.inc", "w") as f:
+	# First, group the targets by description.
+	groups = defaultdict(list)
+	for line in flashbang_targets.split("\n"):
+		if not line: continue
+		x, y, z, desc = line.split(" ", 3)
+		groups[desc].append((x, y, z)) # Keeps the coords as strings for simplicity
+	print("float flash_targets[][3] = {", file=f)
+	regions, counts = [], []
+	for i, (desc, targets) in enumerate(groups.items()):
+		regions.append(desc)
+		counts.append(len(targets))
+		for t in targets:
+			print("\t{%s, %s, %s}," % t, file=f)
+	print("};", file=f)
+	print("char flash_target_regions[][] = {%s};" % json.dumps(regions).strip("[]"), file=f)
+	print("int flash_region_targets[] = {%s};" % json.dumps(counts).strip("[]"), file=f)
 
 def parse_convars(fn, **mappings):
 	"""Parse out cvar definitions and create an include file
