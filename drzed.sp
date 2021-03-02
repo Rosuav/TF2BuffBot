@@ -481,13 +481,21 @@ public void flash_popped(Event event, const char[] name, bool dontBroadcast)
 	pos[0] = event.GetFloat("x"); pos[1] = event.GetFloat("y"); pos[2] = event.GetFloat("z");
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	int entity = event.GetInt("entityid");
+	//For analysis purposes, calculate the distance (not squared) to each
+	//player, and print to that player's chat how far away the flash popped.
+	for (int cl = 1; cl < MAXPLAYERS; ++cl) {
+		if (!IsClientInGame(cl) || !IsPlayerAlive(cl) || IsFakeClient(cl)) continue;
+		float player[3]; GetClientEyePosition(cl, player);
+		float dist = GetVectorDistance(pos, player, false);
+		PrintToChat(cl, "That flash popped at (%.2f, %.2f, %.2f) - %.2f HU away",
+			pos[0], pos[1], pos[2], dist);
+	}
 	//Distance calculations based in part on the figures from
 	//3kliksphilip's analysis at https://youtu.be/aTR7Surb80w?t=238
 	//with additional analysis and subjective estimates of "yeah that
 	//would disrupt my aim". The definition of partial flashing is NOT
 	//the same as the technical lack of full flash (ie max-alpha).
 	int targetidx = 0;
-	bool done_one = false;
 	for (int i = 0; i < sizeof(flash_region_targets); ++i) {
 		int flashed = 0, half = 0;
 		for (int j = 0; j < flash_region_targets[i]; ++j) {
@@ -508,22 +516,9 @@ public void flash_popped(Event event, const char[] name, bool dontBroadcast)
 			if (flashed && half) Format(hits, sizeof(hits), "%d(%d)", flashed, flashed + half);
 			else if (half) Format(hits, sizeof(hits), "(%d)", half);
 			else Format(hits, sizeof(hits), "%d", flashed);
-			if (done_one)
-				PrintToChat(client, "It also caught %s - %s/%d",
-					flash_target_regions[i], hits, flash_region_targets[i]);
-			else PrintToChat(client, "Flashed at (%.2f, %.2f, %.2f) - %s - %s/%d",
-				pos[0], pos[1], pos[2], flash_target_regions[i], hits, flash_region_targets[i]);
-			done_one = true;
+			PrintToChat(client, "It caught %s - %s/%d",
+				flash_target_regions[i], hits, flash_region_targets[i]);
 		}
-	}
-	//For analysis purposes, calculate the distance (not squared) to each
-	//player, and print to that player's chat how far away the flash popped.
-	for (int cl = 1; cl < MAXPLAYERS; ++cl) {
-		if (!IsClientInGame(cl) || !IsPlayerAlive(cl) || IsFakeClient(cl)) continue;
-		float player[3]; GetClientEyePosition(cl, player);
-		float dist = GetVectorDistance(pos, player, false);
-		PrintToChat(cl, "That flash popped at (%.2f, %.2f, %.2f) - %.2f HU away",
-			pos[0], pos[1], pos[2], dist);
 	}
 }
 
