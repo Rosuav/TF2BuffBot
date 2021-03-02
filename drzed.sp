@@ -3099,7 +3099,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 	//in one of your first two slots (no knife etc), flag the user (or maybe gun) as
 	//being anarchy-ready. TODO: De-flag if the gun is changed?
 	//TODO: Test if this would actually short-circuit, and if so, spell it more naturally.
-	if (attacker >= 0 && attacker < MAXPLAYERS) if (weapon == GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon"))
+	if (attacker > 0 && attacker < MAXPLAYERS && weapon == GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon"))
 	{
 		if (weapon == GetPlayerWeaponSlot(attacker, 0)) anarchy_available[attacker] |= 1; //Primary weapon
 		else if (weapon == GetPlayerWeaponSlot(attacker, 1)) anarchy_available[attacker] |= 2; //Secondary weapon
@@ -3114,7 +3114,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 	char atkcls[64]; describe_weapon(weapon > 0 ? weapon : inflictor, atkcls, sizeof(atkcls));
 	char viccls[64]; describe_weapon(vicweap, viccls, sizeof(viccls));
 	int teamdmg = 0;
-	if (attacker >= 0 && attacker < MAXPLAYERS)
+	if (attacker > 0 && attacker < MAXPLAYERS)
 	{
 		teamdmg = GetClientTeam(victim) == GetClientTeam(attacker);
 		if (is_crippled(attacker) && !teamdmg)
@@ -3169,7 +3169,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 
 	//Scale damage according to who's dealing with it (non-hackily)
 	Action ret = Plugin_Continue;
-	if (attacker >= 0 && attacker < MAXPLAYERS)
+	if (attacker > 0 && attacker < MAXPLAYERS)
 	{
 		float proportion;
 		if (IsFakeClient(attacker)) proportion = GetConVarFloat(damage_scale_bots);
@@ -3203,7 +3203,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 
 	//If you just phasewalked, you're immune to damage but also can't shoot.
 	if (phaseping_cookie[victim] < 0) {damage = 0.0; ret = Plugin_Changed;}
-	if (attacker >= 0 && attacker < MAXPLAYERS && phaseping_cookie[attacker] < 0)
+	if (attacker > 0 && attacker < MAXPLAYERS && phaseping_cookie[attacker] < 0)
 	{
 		//Damage from other entities (mainly grenades) is permitted. Knife attacks are permitted.
 		if (attacker == inflictor && strcmp(atkcls, "Knife")) damage = 0.0;
@@ -3219,7 +3219,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 	}
 
 	int hack = GetConVarInt(sm_drzed_hack);
-	if (hack && attacker >= 0 && attacker < MAXPLAYERS)
+	if (hack && attacker > 0 && attacker < MAXPLAYERS)
 	{
 		//Mess with damage based on who's dealing it. This is a total hack, and
 		//can change at any time while I play around with testing stuff.
@@ -3264,7 +3264,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 		return Plugin_Changed;
 	}
 
-	if (attacker >= 0 && attacker < MAXPLAYERS)
+	if (attacker > 0 && attacker < MAXPLAYERS)
 	{
 		int anarchy_bonus = GetConVarInt(sm_drzed_anarchy_bonus) * anarchy[attacker];
 		float newdmg = damage * (100 + anarchy_bonus) / 100.0;
