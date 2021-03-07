@@ -532,7 +532,7 @@ public void SmokeLog(const char[] fmt, any ...)
 }
 
 //Would it be better to have six float cvars to define the box??
-#define SMOKE_TARGETS 5
+#define SMOKE_TARGETS 6
 float smoke_targets[SMOKE_TARGETS][2][3] = { //Unfortunately the size has to be specified :(
 	//Dust II
 	//- Xbox
@@ -545,11 +545,13 @@ float smoke_targets[SMOKE_TARGETS][2][3] = { //Unfortunately the size has to be 
 	{{-251.0, 2090.0, -126.0}, {-115.0, 2175.0, -122.0}},
 	//- A site - protects a Long push from Goose, Site, and nearby areas
 	{{1064.0, 2300.0, 97.0}, {1284.0, 2625.0, 131.0}},
+	//- Bedroom Doors - defensive smoke to slow down a push
+	{{590.0, 640.0, 2.0}, {764.0, 844.0, 3.5}},
 	//Add others as needed - {{x1,y1,z1},{x2,y2,z2}} where the
 	//second coords are all greater than the firsts.
 };
 char smoke_target_desc[][] = {
-	"Xbox smoke! ", "Corner smoke! ", "Window smoke! ", "CT spawn! ", "A site! "
+	"Xbox smoke! ", "Corner smoke! ", "Window smoke! ", "CT spawn! ", "A site! ", "Bedroom doors! "
 };
 /*
 * Blue box: From the passageway from backyard into tuns, standing throw between the rafters (middle of opening).
@@ -570,6 +572,11 @@ char smoke_target_desc[][] = {
   - Jump to under Xbox. An AWPer might take a shot at you but would have to be REALLY fast. Clear Mid-to-Short.
   - Push into the back corner, then step out a bit so you can see the wall behind Mid-to-Short.
   - Left-click throw at the left side of the arch on the far wall. Elevation approx level with dirty patch. Fairly forgiving.
+* Bedroom Doors from Short - slow down a Long push:
+  - Ensure that you won't get jumped. Helps to have a good Mid player who'll call a Short push.
+  - Push backwards into the corner above the stairs - 273,1890,163
+  - Crosshair on the corner of the building with the streetlight on it - -26,-67
+  - Standing jump throw.
 */
 #define SMOKE_BOUNCE_TARGETS 1
 float smoke_first_bounce[SMOKE_BOUNCE_TARGETS][2][3] = {
