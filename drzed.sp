@@ -546,7 +546,8 @@ float smoke_targets[SMOKE_TARGETS][2][3] = { //Unfortunately the size has to be 
 	//- A site - protects a Long push from Goose, Site, and nearby areas
 	{{1064.0, 2300.0, 97.0}, {1284.0, 2625.0, 131.0}},
 	//- Bedroom Doors - defensive smoke to slow down a push
-	{{590.0, 640.0, 2.0}, {764.0, 844.0, 3.5}},
+	//(They'll usually Z btwn 2.0 and 3.5, but there's a little ledge at 7.85 that counts too)
+	{{590.0, 640.0, 2.0}, {764.0, 844.0, 7.86}},
 	//Add others as needed - {{x1,y1,z1},{x2,y2,z2}} where the
 	//second coords are all greater than the firsts.
 };
