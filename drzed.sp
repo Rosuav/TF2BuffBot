@@ -1392,9 +1392,31 @@ void rescale_object() {
 	char hitmsg[64];
 	if (!TR_DidHit(INVALID_HANDLE)) return; //Dunno what to do here - is there no skybox?
 	float entitypos[3]; TR_GetEndPosition(entitypos, INVALID_HANDLE);
+	//This is the *point* at which the ray hits. That's not really very suitable, though,
+	//and the proper way to do this is the weird size-changing hull thing, but as an easy
+	//approximation, we do a hull trace *back* towards the player, see when it stops being
+	//inside a solid object, and use that location.
 	float dist = GetVectorDistance(playerpos, entitypos);
-	Format(hitmsg, sizeof(hitmsg), "Hit %.2f,%.2f,%.2f frac %.3f, dist %.3f",
-		entitypos[0], entitypos[1], entitypos[2], TR_GetFraction(INVALID_HANDLE), dist);
+	float tmpscale = dist / rescale_initial_distance;
+	float mins[3]; GetEntPropVector(rescale_entity, Prop_Data, "m_vecMins", mins); ScaleVector(mins, tmpscale);
+	float maxs[3]; GetEntPropVector(rescale_entity, Prop_Data, "m_vecMaxs", maxs); ScaleVector(maxs, tmpscale);
+	//We now have mins and maxs scaled to the point we're looking at.
+	TR_TraceHullFilter(entitypos, playerpos, mins, maxs, MASK_PLAYERSOLID, rescale_check_entity);
+	if (TR_StartSolid(INVALID_HANDLE)) {
+		//The hull started out in a solid location, so we update our endpoint to the
+		//location where it STOPPED being in something solid.
+		float frac = TR_GetFractionLeftSolid(INVALID_HANDLE);
+		//I don't think there's an equivalent to GetEndPosition here, so we calculate
+		//it as (playerpos - entitypos) * frac + entitypos.
+		float diff[3]; SubtractVectors(playerpos, entitypos, diff);
+		ScaleVector(diff, frac);
+		AddVectors(entitypos, diff, entitypos);
+		//And fix the distance. Should give the same result as recalculating the
+		//vector distance between playerpos and the (newly updated) entitypos.
+		dist *= (1 - frac);
+	}
+	Format(hitmsg, sizeof(hitmsg), "mm (%.2f,%.2f,%.2f)-(%.2f,%.2f,%.2f)",
+		mins[0], mins[1], mins[2], maxs[0], maxs[1], maxs[2]);
 	SetEntPropFloat(rescale_entity, Prop_Send, "m_flModelScale", dist / rescale_initial_distance);
 	float vel[3]; //Match the item's velocity to the player's. In theory, should reduce flicker. In practice, doesn't do much.
 	vel[0] = GetEntPropFloat(rescale_player, Prop_Send, "m_vecVelocity[0]");
