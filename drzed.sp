@@ -1320,6 +1320,13 @@ public void player_death(Event event, const char[] name, bool dontBroadcast)
 	else reset_underdome_config();
 }
 
+int rescale_player = -2, rescale_entity = -1; //Set rescale_player to -2 to disable or -1 to enable
+float rescale_initial_distance, rescale_initial_gravity;
+float rescale_angle_diff[3];
+void rescale_drop_item() {
+	if (rescale_entity >= 0 && IsValidEntity(rescale_entity)) SetEntityGravity(rescale_entity, rescale_initial_gravity);
+	rescale_entity = -1;
+}
 public void player_use(Event event, const char[] name, bool dontBroadcast)
 {
 	if (num_puzzles)
@@ -1336,6 +1343,78 @@ public void player_use(Event event, const char[] name, bool dontBroadcast)
 			break;
 		}
 	}
+	if (rescale_player != -2) { //Superliminal hack!
+		int player = GetClientOfUserId(event.GetInt("userid"));
+		int entity = event.GetInt("entity");
+		if (entity == rescale_entity) {
+			rescale_drop_item();
+			if (player == rescale_player) {
+				//Press E again to drop the item
+				rescale_player = -1;
+				return;
+			}
+			//Or you can grab it off someone else.
+		}
+		char cls[64]; GetEntityClassname(entity, cls, sizeof(cls));
+		if (!strcmp(cls, "weapon_awp")) {
+			rescale_player = player;
+			rescale_entity = entity;
+			float playerpos[3]; GetClientEyePosition(rescale_player, playerpos);
+			float entitypos[3]; GetEntPropVector(entity, Prop_Send, "m_vecOrigin", entitypos);
+			float dist = GetVectorDistance(playerpos, entitypos, false);
+			rescale_initial_distance = dist / GetEntPropFloat(entity, Prop_Send, "m_flModelScale");
+			rescale_initial_gravity = GetEntityGravity(entity);
+			SetEntityGravity(entity, 0.0);
+			float playerang[3]; GetClientEyeAngles(player, playerang);
+			float entityang[3]; GetEntPropVector(entity, Prop_Send, "m_angRotation", entityang);
+			//NOTE: This is subtracting an angle vector from an angle vector. This
+			//doesn't produce correct results, but I can't be bothered changing it yet.
+			SubtractVectors(entityang, playerang, rescale_angle_diff);
+			PrintToChatAll("Distance %.2f, scale factor %.2f", dist, rescale_initial_distance);
+		}
+	}
+}
+
+float rescale_new_size;
+bool rescale_check_entity(int entity) {
+	if (entity < 0 || entity == rescale_player || entity == rescale_entity) return true;
+	float playerpos[3]; GetClientEyePosition(rescale_player, playerpos);
+	float angle[3]; GetClientEyeAngles(rescale_player, angle);
+	float fwd[3]; GetAngleVectors(angle, fwd, NULL_VECTOR, NULL_VECTOR);
+	TR_ClipRayToEntity(playerpos, fwd, MASK_PLAYERSOLID, RayType_Infinite, entity);
+	if (!TR_DidHit(INVALID_HANDLE)) return true;
+	float hitpos[3]; TR_GetEndPosition(hitpos, INVALID_HANDLE);
+	SubtractVectors(hitpos, playerpos, hitpos);
+	rescale_new_size = GetVectorLength(hitpos);
+	return false;
+}
+
+void rescale_object() {
+	if (!IsClientInGame(rescale_player) || !IsPlayerAlive(rescale_player) || !IsValidEntity(rescale_entity)) {
+		rescale_drop_item();
+		return;
+	}
+	float playerpos[3]; GetClientEyePosition(rescale_player, playerpos);
+	float angle[3]; GetClientEyeAngles(rescale_player, angle);
+	float fwd[3]; GetAngleVectors(angle, fwd, NULL_VECTOR, NULL_VECTOR);
+	rescale_new_size = rescale_initial_distance;
+	//Superliminal-style rescale. The one thing that doesn't work here is
+	//the hull trace with a changing-size hull, which - as the Superliminal
+	//devs also noted - is the hard part here. I'm cheating and using a ray.
+	//Disable this for a simple grab (leaving new_size at initial_distance)
+	TR_EnumerateEntities(playerpos, fwd, MASK_PLAYERSOLID, RayType_Infinite, rescale_check_entity);
+	ScaleVector(fwd, rescale_new_size);
+	float entitypos[3]; AddVectors(playerpos, fwd, entitypos);
+	float vel[3]; //Match the item's velocity to the player's. In theory, should reduce flicker. In practice, doesn't.
+	vel[0] = GetEntPropFloat(rescale_player, Prop_Send, "m_vecVelocity[0]");
+	vel[1] = GetEntPropFloat(rescale_player, Prop_Send, "m_vecVelocity[1]");
+	vel[2] = GetEntPropFloat(rescale_player, Prop_Send, "m_vecVelocity[2]");
+	float newang[3]; AddVectors(rescale_angle_diff, angle, newang); //Broken, see above
+	TeleportEntity(rescale_entity, entitypos, newang, vel);
+	PrintCenterText(rescale_player, "(%.0f,%.0f,%.0f) + (%.2f,%.2f,%.2f) (sc %.2f) = (%.0f,%.0f,%.0f)",
+		playerpos[0], playerpos[1], playerpos[2],
+		entitypos[0], entitypos[1], entitypos[2], rescale_new_size,
+		entitypos[0], entitypos[1], entitypos[2]);
 }
 
 char weapon_attribute_question[][] = {
@@ -1663,6 +1742,8 @@ public void OnGameFrame()
 			if (penalty < min_penalty) SetEntPropFloat(weap, Prop_Send, "m_fAccuracyPenalty", min_penalty);
 		}
 	}
+
+	if (rescale_entity > 0) rescale_object();
 }
 
 //Create a cloud of smoke, visible to this client, at this pos
@@ -3358,6 +3439,7 @@ Action weaponusecheck(int client, int weapon)
 	ignore(weapon);
 	//When we're doing puzzle games, you don't use weapons normally.
 	if (num_puzzles) return Plugin_Stop;
+	if (rescale_player != -2) return Plugin_Stop;
 	return Plugin_Continue;
 }
 void getweaponstats(int client, int weap)
