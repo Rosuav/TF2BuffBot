@@ -1375,20 +1375,7 @@ public void player_use(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
-float rescale_new_size;
-bool rescale_check_entity(int entity) {
-	if (entity < 0 || entity == rescale_player || entity == rescale_entity) return true;
-	float playerpos[3]; GetClientEyePosition(rescale_player, playerpos);
-	float angle[3]; GetClientEyeAngles(rescale_player, angle);
-	float fwd[3]; GetAngleVectors(angle, fwd, NULL_VECTOR, NULL_VECTOR);
-	TR_ClipRayToEntity(playerpos, fwd, MASK_PLAYERSOLID, RayType_Infinite, entity);
-	if (!TR_DidHit(INVALID_HANDLE)) return true;
-	float hitpos[3]; TR_GetEndPosition(hitpos, INVALID_HANDLE);
-	SubtractVectors(hitpos, playerpos, hitpos);
-	rescale_new_size = GetVectorLength(hitpos);
-	return false;
-}
-
+bool rescale_check_entity(int entity, any data) {return entity != rescale_player && entity != rescale_entity;}
 void rescale_object() {
 	if (!IsClientInGame(rescale_player) || !IsPlayerAlive(rescale_player) || !IsValidEntity(rescale_entity)) {
 		rescale_drop_item();
@@ -1397,24 +1384,29 @@ void rescale_object() {
 	float playerpos[3]; GetClientEyePosition(rescale_player, playerpos);
 	float angle[3]; GetClientEyeAngles(rescale_player, angle);
 	float fwd[3]; GetAngleVectors(angle, fwd, NULL_VECTOR, NULL_VECTOR);
-	rescale_new_size = rescale_initial_distance;
+	float rescale_new_size = rescale_initial_distance;
 	//Superliminal-style rescale. The one thing that doesn't work here is
 	//the hull trace with a changing-size hull, which - as the Superliminal
 	//devs also noted - is the hard part here. I'm cheating and using a ray.
-	//Disable this for a simple grab (leaving new_size at initial_distance)
-	TR_EnumerateEntities(playerpos, fwd, MASK_PLAYERSOLID, RayType_Infinite, rescale_check_entity);
-	ScaleVector(fwd, rescale_new_size);
-	float entitypos[3]; AddVectors(playerpos, fwd, entitypos);
-	float vel[3]; //Match the item's velocity to the player's. In theory, should reduce flicker. In practice, doesn't.
+	TR_TraceRayFilter(playerpos, angle, MASK_PLAYERSOLID, RayType_Infinite, rescale_check_entity);
+	char hitmsg[64];
+	if (!TR_DidHit(INVALID_HANDLE)) return; //Dunno what to do here - is there no skybox?
+	float entitypos[3]; TR_GetEndPosition(entitypos, INVALID_HANDLE);
+	float dist = GetVectorDistance(playerpos, entitypos);
+	Format(hitmsg, sizeof(hitmsg), "Hit %.2f,%.2f,%.2f frac %.3f, dist %.3f",
+		entitypos[0], entitypos[1], entitypos[2], TR_GetFraction(INVALID_HANDLE), dist);
+	SetEntPropFloat(rescale_entity, Prop_Send, "m_flModelScale", dist / rescale_initial_distance);
+	float vel[3]; //Match the item's velocity to the player's. In theory, should reduce flicker. In practice, doesn't do much.
 	vel[0] = GetEntPropFloat(rescale_player, Prop_Send, "m_vecVelocity[0]");
 	vel[1] = GetEntPropFloat(rescale_player, Prop_Send, "m_vecVelocity[1]");
 	vel[2] = GetEntPropFloat(rescale_player, Prop_Send, "m_vecVelocity[2]");
 	float newang[3]; AddVectors(rescale_angle_diff, angle, newang); //Broken, see above
 	TeleportEntity(rescale_entity, entitypos, newang, vel);
-	PrintCenterText(rescale_player, "(%.0f,%.0f,%.0f) + (%.2f,%.2f,%.2f) (sc %.2f) = (%.0f,%.0f,%.0f)",
+	PrintCenterText(rescale_player, "(%.0f,%.0f,%.0f) + (%.2f,%.2f,%.2f) (sc %.2f) = (%.0f,%.0f,%.0f) -- %s",
 		playerpos[0], playerpos[1], playerpos[2],
 		entitypos[0], entitypos[1], entitypos[2], rescale_new_size,
-		entitypos[0], entitypos[1], entitypos[2]);
+		entitypos[0], entitypos[1], entitypos[2],
+		hitmsg);
 }
 
 char weapon_attribute_question[][] = {
