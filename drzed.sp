@@ -1327,6 +1327,34 @@ void rescale_drop_item() {
 	if (rescale_entity >= 0 && IsValidEntity(rescale_entity)) SetEntityGravity(rescale_entity, rescale_initial_gravity);
 	rescale_entity = -1;
 }
+void rescale_grab_item(int player, int entity) {
+	if (entity == rescale_entity) {
+		rescale_drop_item();
+		if (player == rescale_player) {
+			//Press E again to drop the item
+			rescale_player = -1;
+			return;
+		}
+		//Or you can grab it off someone else. Not tested yet but theoretically should work.
+	}
+	char cls[64]; GetEntityClassname(entity, cls, sizeof(cls));
+	if (!strncmp(cls, "weapon_", 7)) { //TODO: Need a better way to decide what's grabbable.
+		rescale_player = player;
+		rescale_entity = entity;
+		float playerpos[3]; GetClientEyePosition(rescale_player, playerpos);
+		float entitypos[3]; GetEntPropVector(entity, Prop_Send, "m_vecOrigin", entitypos);
+		float dist = GetVectorDistance(playerpos, entitypos, false);
+		rescale_initial_distance = dist / GetEntPropFloat(entity, Prop_Send, "m_flModelScale");
+		rescale_initial_gravity = GetEntityGravity(entity);
+		SetEntityGravity(entity, 0.0);
+		float playerang[3]; GetClientEyeAngles(player, playerang);
+		float entityang[3]; GetEntPropVector(entity, Prop_Send, "m_angRotation", entityang);
+		//NOTE: This is subtracting an angle vector from an angle vector. This
+		//doesn't produce correct results, but I can't be bothered changing it yet.
+		SubtractVectors(entityang, playerang, rescale_angle_diff);
+	}
+}
+
 public void player_use(Event event, const char[] name, bool dontBroadcast)
 {
 	if (num_puzzles)
@@ -1343,36 +1371,7 @@ public void player_use(Event event, const char[] name, bool dontBroadcast)
 			break;
 		}
 	}
-	if (rescale_player != -2) { //Superliminal hack!
-		int player = GetClientOfUserId(event.GetInt("userid"));
-		int entity = event.GetInt("entity");
-		if (entity == rescale_entity) {
-			rescale_drop_item();
-			if (player == rescale_player) {
-				//Press E again to drop the item
-				rescale_player = -1;
-				return;
-			}
-			//Or you can grab it off someone else.
-		}
-		char cls[64]; GetEntityClassname(entity, cls, sizeof(cls));
-		if (!strcmp(cls, "weapon_awp")) {
-			rescale_player = player;
-			rescale_entity = entity;
-			float playerpos[3]; GetClientEyePosition(rescale_player, playerpos);
-			float entitypos[3]; GetEntPropVector(entity, Prop_Send, "m_vecOrigin", entitypos);
-			float dist = GetVectorDistance(playerpos, entitypos, false);
-			rescale_initial_distance = dist / GetEntPropFloat(entity, Prop_Send, "m_flModelScale");
-			rescale_initial_gravity = GetEntityGravity(entity);
-			SetEntityGravity(entity, 0.0);
-			float playerang[3]; GetClientEyeAngles(player, playerang);
-			float entityang[3]; GetEntPropVector(entity, Prop_Send, "m_angRotation", entityang);
-			//NOTE: This is subtracting an angle vector from an angle vector. This
-			//doesn't produce correct results, but I can't be bothered changing it yet.
-			SubtractVectors(entityang, playerang, rescale_angle_diff);
-			PrintToChatAll("Distance %.2f, scale factor %.2f", dist, rescale_initial_distance);
-		}
-	}
+	if (rescale_player != -2) rescale_grab_item(GetClientOfUserId(event.GetInt("userid")), event.GetInt("entity"));
 }
 
 bool rescale_check_entity(int entity, any data) {return entity != rescale_player && entity != rescale_entity;}
@@ -1384,12 +1383,10 @@ void rescale_object() {
 	float playerpos[3]; GetClientEyePosition(rescale_player, playerpos);
 	float angle[3]; GetClientEyeAngles(rescale_player, angle);
 	float fwd[3]; GetAngleVectors(angle, fwd, NULL_VECTOR, NULL_VECTOR);
-	float rescale_new_size = rescale_initial_distance;
 	//Superliminal-style rescale. The one thing that doesn't work here is
 	//the hull trace with a changing-size hull, which - as the Superliminal
 	//devs also noted - is the hard part here. I'm cheating and using a ray.
 	TR_TraceRayFilter(playerpos, angle, MASK_PLAYERSOLID, RayType_Infinite, rescale_check_entity);
-	char hitmsg[64];
 	if (!TR_DidHit(INVALID_HANDLE)) return; //Dunno what to do here - is there no skybox?
 	float entitypos[3]; TR_GetEndPosition(entitypos, INVALID_HANDLE);
 	//This is the *point* at which the ray hits. That's not really very suitable, though,
@@ -1415,8 +1412,6 @@ void rescale_object() {
 		//vector distance between playerpos and the (newly updated) entitypos.
 		dist *= (1 - frac);
 	}
-	Format(hitmsg, sizeof(hitmsg), "mm (%.2f,%.2f,%.2f)-(%.2f,%.2f,%.2f)",
-		mins[0], mins[1], mins[2], maxs[0], maxs[1], maxs[2]);
 	SetEntPropFloat(rescale_entity, Prop_Send, "m_flModelScale", dist / rescale_initial_distance);
 	float vel[3]; //Match the item's velocity to the player's. In theory, should reduce flicker. In practice, doesn't do much.
 	vel[0] = GetEntPropFloat(rescale_player, Prop_Send, "m_vecVelocity[0]");
@@ -1424,11 +1419,6 @@ void rescale_object() {
 	vel[2] = GetEntPropFloat(rescale_player, Prop_Send, "m_vecVelocity[2]");
 	float newang[3]; AddVectors(rescale_angle_diff, angle, newang); //Broken, see above
 	TeleportEntity(rescale_entity, entitypos, newang, vel);
-	PrintCenterText(rescale_player, "(%.0f,%.0f,%.0f) + (%.2f,%.2f,%.2f) (sc %.2f) = (%.0f,%.0f,%.0f) -- %s",
-		playerpos[0], playerpos[1], playerpos[2],
-		entitypos[0], entitypos[1], entitypos[2], rescale_new_size,
-		entitypos[0], entitypos[1], entitypos[2],
-		hitmsg);
 }
 
 char weapon_attribute_question[][] = {
@@ -2022,6 +2012,7 @@ void uncripple(int client)
 }
 
 bool was_jumping[MAXPLAYERS + 1];
+bool was_alt1ing[MAXPLAYERS + 1];
 int strafing_max[MAXPLAYERS + 1]; //Number of ticks strafing at max speed (for that weapon)
 int strafing_fast[MAXPLAYERS + 1]; //Number of ticks strafing above 34% but not at max
 int strafing_slow[MAXPLAYERS + 1]; //Below 34% but not zero
@@ -2282,6 +2273,28 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 		//them from moving. We'll also stop them from attacking.
 		buttons &= ~(IN_ATTACK | IN_ATTACK2 | IN_ATTACK3);
 		return Plugin_Changed;
+	}
+	//Pressing Alt1 grabs or drops an item regardless of distance.
+	//Simulate edge triggering via level triggering.
+	if (rescale_player != -2) {
+		bool now = (buttons & IN_ALT1) != 0;
+		if (now != was_alt1ing[client]) {
+			was_alt1ing[client] = now;
+			if (now) {
+				if (rescale_entity > 0) rescale_drop_item();
+				else {
+					//Figure out which entity is under the mouse.
+					float playerpos[3]; GetClientEyePosition(client, playerpos);
+					float angle[3]; GetClientEyeAngles(client, angle);
+					//For some reason, I keep getting back entity 0 from this :(
+					TR_TraceRayFilter(playerpos, angle, MASK_PLAYERSOLID, RayType_Infinite, filter_notself, client);
+					if (TR_DidHit(INVALID_HANDLE)) {
+						int entity = TR_GetEntityIndex(INVALID_HANDLE);
+						if (entity > 0) rescale_grab_item(client, entity);
+					}
+				}
+			}
+		}
 	}
 	return Plugin_Continue;
 }
