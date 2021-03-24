@@ -21,7 +21,7 @@ These are the specific groups of weapons and which weapons count:
 * Snipers - Scout (SSG-08), AWP, G3SG1, SCAR-20
 * LMGs - M249, Negev
 * Grenades - HE, Smoke, Flash, Molotov (and Incendiary), Decoy
-* Equipment - Zeus (taser), Defusal Kit, Kevlar, Helmet (which may be together)m
+* Equipment - Zeus (taser), Defusal Kit, Kevlar, Helmet (which may be together),
   Health Shot
 * Full-Auto - AK-47, AUG, FAMAS, Galil, M4A4, M4A1, SG553, M249, Negev, SCAR-20,
   G3SG1, CZ75a, Bizon, MP5, P90, MP7, MP9, UMP-45, Mac-10, XM1014
