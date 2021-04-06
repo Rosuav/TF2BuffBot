@@ -1227,11 +1227,13 @@ bool puzzle_highlight(int entity, int state)
 	{
 		SetEntityRenderColor(entity, 255, 255, 255, 255);
 		SetEntityRenderFx(entity, RENDERFX_NONE);
+		SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 1.0);
 		return false;
 	}
 	if (state == 2) SetEntityRenderColor(entity, 128, 255, 255, 224); //Bubblegum
 	else SetEntityRenderColor(entity, 255, 192, 255, 224); //Blackcurrant
 	SetEntityRenderFx(entity, RENDERFX_EXPLODE);
+	SetEntPropFloat(entity, Prop_Send, "m_flModelScale", 1.25);
 	CreateTimer(0.6, stabilize_weapon, entity, TIMER_FLAG_NO_MAPCHANGE);
 	return true;
 }
