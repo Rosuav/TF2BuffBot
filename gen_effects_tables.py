@@ -140,7 +140,8 @@ class UF(IntFlag):
 	# These flags give free items to all CTs and are handled with a single block of code.
 	FREEBIES = FREE_HEGRENADE | FREE_FLASHBANG | FREE_MOLLY | FREE_TAGRENADE
 	# These flags require the ticking timer. As soon as one is seen, the timer will be started.
-	NEED_TIMER = FREEBIES | VAMPIRIC # Note: has to be different from FREEBIES (add a shim if necessary)
+	NEED_TIMER = FREEBIES | VAMPIRIC
+UF.all = [*UF, UF.FREEBIES, UF.NEED_TIMER] # List all aliases here since they don't seem to come up in iteration
 
 # Tautology for "always true" because other methods failed. Used for warmup, and for
 # any wave where the actual conditions are defined by flags.
@@ -330,7 +331,7 @@ with open("randeffects.inc", "w") as f:
 		print("};\n", file=f)
 
 with open("underdome.inc", "w") as f:
-	for flag in UF:
+	for flag in UF.all:
 		print("#define UF_%s %d" % (flag.name, int(flag)), file=f)
 	for block, example in underdome_modes[0].items():
 		# For each key in the dict, create a dedicated data block
