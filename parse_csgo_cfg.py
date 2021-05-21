@@ -23,6 +23,10 @@ print("Building %s from %s" % (out, fn))
 # it contain zero?) key+value pairs, and ends with an open brace.
 # Between any two values, any amount of whitespace is found, possibly
 # including comments, which start with "//" and end at EOL.
+# 20210521: People call it "VDF", I guess that works. And yes, a mapping
+# can contain zero kv pairs, which should be fine for this code. Still
+# don't know about strings containing quotes. Other notes on parsing this
+# format can be seen in my shed - parsevdf.pike and its grammar.
 
 # Skip whitespace and comments
 RE_SKIP = re.compile(r'(\s*//[^\n]*\n)*\s*')
