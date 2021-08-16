@@ -3449,7 +3449,7 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 		//manually tracking all damage, which would be stupid, since the game
 		//already tracks it. But I can't find that info anywhere.
 		//TODO: Figure out when and why these stats get reset.
-		if (attacker >= 0 && attacker < MAXPLAYERS)
+		if (attacker > 0 && attacker < MAXPLAYERS)
 			SetEntProp(attacker, Prop_Data, "m_iFrags", GetClientFrags(attacker) + 1);
 		SetEntProp(victim, Prop_Data, "m_iDeaths", GetClientDeaths(victim) + 1);
 		damage = 0.0;
