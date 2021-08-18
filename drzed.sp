@@ -53,7 +53,7 @@ ConVar autosmoke_pitch_delta = null; //(0.0) Hold +alt1 to autothrow smokes
 ConVar autosmoke_yaw_min = null; //("0.0") Hold +alt1 to autothrow smokes
 ConVar autosmoke_yaw_max = null; //("0.0") Hold +alt1 to autothrow smokes
 ConVar autosmoke_yaw_delta = null; //(0.0) Hold +alt1 to autothrow smokes
-ConVar bot_placement = null; //("") Place bots at these exact positions, on map/round start or cvar change
+ConVar bot_placement = null; //("") Place bots at these exact positions, on map/round start or cvar change. TODO: If set, report when a bot gets flashed
 ConVar disable_warmup_arenas = null; //(0) If 1, will disable the 1v1 warmup scripts
 
 ConVar default_weapons[4];
