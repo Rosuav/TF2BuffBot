@@ -578,6 +578,10 @@ char smoke_target_desc[][] = {
   - Push backwards into the corner above the stairs - 273,1890,163
   - Crosshair on the corner of the building with the streetlight on it - -26,-67
   - Standing jump throw.
+* B Window to block a mid push:
+  - From Tuns, jump past the blue box AWPer, get to the pillar (mid side, not far side)
+  - Aim at the angled shadow just where it meets the shadow of the beam (above the archway)
+  - Standing jump throw.
 */
 #define SMOKE_BOUNCE_TARGETS 1
 float smoke_first_bounce[SMOKE_BOUNCE_TARGETS][2][3] = {
