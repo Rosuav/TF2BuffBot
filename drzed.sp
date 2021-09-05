@@ -589,8 +589,11 @@ float smoke_first_bounce[SMOKE_BOUNCE_TARGETS][2][3] = {
 	//NOTE: If the bounce is extremely close to the wall (-265 to -257), the
 	//smoke will bounce off the wall and miss. The actual boundary is somewhere
 	//between -260 and -265.
-	//(-309.23, 1135.53, -84.53) failed. Might be necessary to adjust the boundary.
-	{{-321.0, 1130.0, -120.0}, {-265.0, 1275.0, -80.0}},
+	//The boundary isn't perfectly rectangular. There are a few points near the
+	//edges of this region which are promising but don't work, or not promising
+	//and do, and I haven't figured out exactly what the region should be. It is
+	//advisory and not completely accurate.
+	{{-322.0, 1135.0, -120.0}, {-265.0, 1275.0, -80.0}},
 };
 
 public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
