@@ -531,7 +531,6 @@ public void SmokeLog(const char[] fmt, any ...)
 	CloseHandle(fp);
 }
 
-//Would it be better to have six float cvars to define the box??
 #define SMOKE_TARGETS 6
 float smoke_targets[SMOKE_TARGETS][2][3] = { //Unfortunately the size has to be specified :(
 	//Dust II
