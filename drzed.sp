@@ -3312,7 +3312,13 @@ public Action healthgate(int victim, int &atk, int &inflictor, float &damage, in
 		if (IsFakeClient(attacker)) proportion = GetConVarFloat(damage_scale_bots);
 		else proportion = GetConVarFloat(damage_scale_humans);
 		//PrintToServer("Damage proportion: %.2f", proportion);
-		if (proportion != 1.0) {ret = Plugin_Changed; damage *= proportion;}
+		if (proportion != 1.0) {
+			ret = Plugin_Changed;
+			damage *= proportion;
+			//Ideally, give back the armor that would be taken away. For simplicity, just reset armor if
+			//we're nearly or completely removing damage.
+			if (proportion <= 0.25) SetEntProp(victim, Prop_Send, "m_ArmorValue", 100);
+		}
 		if ((underdome_flg & UF_MORE_RANGE_PENALTY) && weapon > 0)
 		{
 			float atkpos[3]; GetClientAbsOrigin(attacker, atkpos);
