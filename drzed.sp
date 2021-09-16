@@ -55,6 +55,7 @@ ConVar autosmoke_yaw_max = null; //("0.0") Hold +alt1 to autothrow smokes
 ConVar autosmoke_yaw_delta = null; //(0.0) Hold +alt1 to autothrow smokes
 ConVar bot_placement = null; //("") Place bots at these exact positions, on map/round start or cvar change. TODO: If set, report when a bot gets flashed
 ConVar disable_warmup_arenas = null; //(0) If 1, will disable the 1v1 warmup scripts
+ConVar allow_weapon_cycling = null; //(0) Controls the '!weap' cheat command
 
 ConVar default_weapons[4];
 ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
@@ -2631,13 +2632,26 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		CloseHandle(entcount);
 		return;
 	}
-	if (0 && !strcmp(msg, "!hack"))
+	if (!strcmp(msg, "!weap") && GetConVarInt(allow_weapon_cycling))
 	{
+		char weapons[][] = {
+			"weapon_sg556",
+			"weapon_aug",
+			"weapon_galilar",
+			"weapon_m4a1_silencer"
+		};
+		int which = 0;
+		int weap = GetPlayerWeaponSlot(self, 0);
+		if (weap > 0) {
+			char current[64]; GetEntityClassname(weap, current, sizeof(current));
+			for (int i = 0; i < sizeof(weapons) - 1; ++i)
+				if (!strcmp(current, weapons[i])) which = i + 1;
+		}
 		int ent = CreateEntityByName("game_player_equip");
 		DispatchKeyValue(ent, "spawnflags", "5"); //or 3 to strip ALL weapons away - even the knife (unless explicitly granted)
-		DispatchKeyValue(ent, "weapon_mac10", "0"); //You'll get skinned weapons (only) if they're equipped for the team you're on
-		DispatchKeyValue(ent, "weapon_tagrenade", "0"); //Grenades can be given too
-		DispatchKeyValue(ent, "item_kevlar", "0"); //Armor w/o helmet
+		DispatchKeyValue(ent, weapons[which], "0"); //You'll get skinned weapons (only) if they're equipped for the team you're on
+		//DispatchKeyValue(ent, "weapon_tagrenade", "0"); //Grenades can be given too
+		//DispatchKeyValue(ent, "item_kevlar", "0"); //Armor w/o helmet
 		//DispatchKeyValue(ent, "weapon_fists", "0"); //Doesn't seem to work though. Oh well.
 		AcceptEntityInput(ent, "Use", self, -1, 0);
 		PrintToChatAll("Equipment delivered.");
