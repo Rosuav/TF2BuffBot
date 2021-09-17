@@ -2638,7 +2638,10 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 			"weapon_sg556",
 			"weapon_aug",
 			"weapon_galilar",
-			"weapon_m4a1_silencer"
+			"weapon_famas",
+			"weapon_ak47",
+			"weapon_m4a1_silencer",
+			"weapon_m4a1",
 		};
 		int which = 0;
 		int weap = GetPlayerWeaponSlot(self, 0);
