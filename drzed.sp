@@ -843,11 +843,10 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		PrintToChatAll("Pinging at (%.2f,%.2f,%.2f)", pos[0], pos[1], pos[2]);
 		int ping = CreateEntityByName("info_player_ping");
 		DispatchSpawn(ping);
-		//SetEntPropEnt(ping, Prop_Send, "m_hOwnerEntity", client);
-		//SetEntProp(ping, Prop_Send, "m_hPlayer", client);
+		SetEntPropEnt(ping, Prop_Send, "m_hPlayer", client);
 		SetEntPropEnt(client, Prop_Send, "m_hPlayerPing", ping);
-		SetEntProp(ping, Prop_Send, "m_iTeamNum", 3);
-		//SetEntProp(ping, Prop_Send, "m_iType", 0);
+		SetEntProp(ping, Prop_Send, "m_iTeamNum", GetClientTeam(client));
+		//SetEntProp(ping, Prop_Send, "m_iType", 0); //Type 18 is an "urgent" ping
 		TeleportEntity(ping, pos, NULL_VECTOR, NULL_VECTOR);
 	}
 	if (GetConVarInt(learn_smoke) && !strcmp(weapon, "weapon_smokegrenade"))
@@ -2631,6 +2630,17 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		CloseHandle(snap);
 		CloseHandle(entcount);
 		return;
+	}
+	if (!strcmp(msg, "!pingmark") && GetConVarInt(sm_drzed_allow_recall))
+	{
+		PrintToChatAll("Pinging at (%.2f,%.2f,%.2f)", marked_pos[0], marked_pos[1], marked_pos[2]);
+		int ping = CreateEntityByName("info_player_ping");
+		DispatchSpawn(ping);
+		SetEntPropEnt(ping, Prop_Send, "m_hPlayer", self);
+		SetEntPropEnt(self, Prop_Send, "m_hPlayerPing", ping);
+		SetEntProp(ping, Prop_Send, "m_iTeamNum", GetClientTeam(self));
+		//SetEntProp(ping, Prop_Send, "m_iType", 0); //Type 18 is an "urgent" ping
+		TeleportEntity(ping, marked_pos, NULL_VECTOR, NULL_VECTOR);
 	}
 	if (!strcmp(msg, "!weap") && GetConVarInt(allow_weapon_cycling))
 	{
