@@ -715,16 +715,25 @@ Action report_entity(Handle timer, any entity)
 	{
 		PrintToStream("New ping: %d", entity);
 		int target = GetEntPropEnt(entity, Prop_Send, "m_hPingedEntity");
-		PrintToStream("Pinged %d Player %d Type %d",
-			target,
-			GetEntPropEnt(entity, Prop_Send, "m_hPlayer"),
-			GetEntProp(entity, Prop_Send, "m_iType")
-		);
-		PrintToStream("Ent %d render FX %d mode %d",
-			target,
-			GetEntProp(target, Prop_Send, "m_nRenderFX"),
-			GetEntProp(target, Prop_Send, "m_nRenderMode")
-		);
+		if (target > 0) {
+			PrintToStream("Pinged %d Player %d Type %d",
+				target,
+				GetEntPropEnt(entity, Prop_Send, "m_hPlayer"),
+				GetEntProp(entity, Prop_Send, "m_iType")
+			);
+			PrintToStream("Ent %d render FX %d mode %d",
+				target,
+				GetEntProp(target, Prop_Send, "m_nRenderFX"),
+				GetEntProp(target, Prop_Send, "m_nRenderMode")
+			);
+		}
+		int pingclient = GetEntPropEnt(entity, Prop_Send, "m_hPlayer");
+		int playerping = pingclient == -1 ? -1 : GetEntPropEnt(pingclient, Prop_Send, "m_hPlayerPing");
+		int team = pingclient == -1 ? -1 : GetClientTeam(pingclient);
+		int pingteam = GetEntProp(entity, Prop_Send, "m_iTeamNum");
+		int pingtype = GetEntProp(entity, Prop_Send, "m_iType");
+		PrintToStream("Client %d (team %d), ping %d, team %d, type %d",
+			pingclient, team, playerping, pingteam, pingtype);
 	}
 }
 
