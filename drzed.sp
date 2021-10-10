@@ -840,6 +840,8 @@ void show_stutterstep_stats(int client)
 void spawn_ping(int client, float[3] pos)
 {
 	PrintToChatAll("Pinging at (%.2f,%.2f,%.2f)", pos[0], pos[1], pos[2]);
+	int prevping = GetEntPropEnt(client, Prop_Send, "m_hPlayerPing");
+	if (prevping > 0) AcceptEntityInput(prevping, "Kill");
 	int ping = CreateEntityByName("info_player_ping");
 	DispatchSpawn(ping);
 	SetEntPropEnt(ping, Prop_Send, "m_hPlayer", client);
