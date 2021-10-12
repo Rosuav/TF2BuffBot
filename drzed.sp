@@ -630,7 +630,7 @@ public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
 	if (target >= 0 && GetConVarInt(smoke_success_wins_round) && !GameRules_GetProp("m_bWarmupPeriod")) {
 		int winner = GetClientTeam(client);
 		for (int p = 1; p < MAXPLAYERS; ++p)
-			if (IsClientInGame(p) && IsPlayerAlive(p) && GetClientTeam(p) != winner)
+			if (IsClientInGame(p) && IsPlayerAlive(p) && IsFakeClient(p) && GetClientTeam(p) != winner)
 				SDKHooks_TakeDamage(p, p, p, 1000.0);
 	}
 }
