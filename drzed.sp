@@ -56,6 +56,7 @@ ConVar autosmoke_yaw_delta = null; //(0.0) Hold +alt1 to autothrow smokes
 ConVar bot_placement = null; //("") Place bots at these exact positions, on map/round start or cvar change. TODO: If set, report when a bot gets flashed
 ConVar disable_warmup_arenas = null; //(0) If 1, will disable the 1v1 warmup scripts
 ConVar allow_weapon_cycling = null; //(0) Controls the '!weap' cheat command
+ConVar smoke_success_wins_round = null; //(0) Any smoke that lands in a recognized area immediately wins the round for the thrower
 
 ConVar default_weapons[4];
 ConVar ammo_grenade_limit_total, mp_guardian_special_weapon_needed, mp_guardian_special_kills_needed;
@@ -623,9 +624,15 @@ public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
 	PrintToChat(client, "%sSmoke popped (%.2f, %.2f, %.2f)%s, flight %.2fs",
 		target >= 0 ? smoke_target_desc[target] : "",
 		x, y, z, roundtime, flighttime);
-	SmokeLog("[%d-E-%d] Pop (%.2f, %.2f, %.2f) - %s - %.2fs", client,
+	SmokeLog("[%d-E-%d] Pop (%.2f, %.2f, %.2f) - %s%s - %.2fs", client,
 		event.GetInt("entityid"),
-		x, y, z, target >= 0 ? "GOOD" : "FAIL", flighttime);
+		x, y, z, target >= 0 ? "GOOD" : "FAIL", roundtime, flighttime);
+	if (target >= 0 && GetConVarInt(smoke_success_wins_round) && !GameRules_GetProp("m_bWarmupPeriod")) {
+		int winner = GetClientTeam(client);
+		for (int p = 1; p < MAXPLAYERS; ++p)
+			if (IsClientInGame(p) && IsPlayerAlive(p) && GetClientTeam(p) != winner)
+				SDKHooks_TakeDamage(p, p, p, 1000.0);
+	}
 }
 
 /*
