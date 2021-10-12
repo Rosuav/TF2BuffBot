@@ -2900,6 +2900,20 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		PrintToChat(self, "Marked position #2: %f, %f, %f", marked_pos2[0], marked_pos2[1], marked_pos2[2]);
 		return;
 	}
+	if (!strcmp(msg, "!unmark"))
+	{
+		marked_pos[0] = marked_pos[1] = marked_pos[2] = 0.0;
+		marked_angle[0] = marked_angle[1] = marked_angle[2] = 0.0;
+		PrintToChat(self, "Unmarked position");
+		return;
+	}
+	if (!strcmp(msg, "!unmark2"))
+	{
+		marked_pos2[0] = marked_pos2[1] = marked_pos2[2] = 0.0;
+		marked_angle2[0] = marked_angle2[1] = marked_angle2[2] = 0.0;
+		PrintToChat(self, "Unmarked position #2");
+		return;
+	}
 	if (!strcmp(msg, "!recall") && GetConVarInt(sm_drzed_allow_recall))
 	{
 		PrintToChat(self, "Returning to %f, %f, %f", marked_pos[0], marked_pos[1], marked_pos[2]);
