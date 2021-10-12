@@ -1522,6 +1522,22 @@ public void OnGameFrame()
 		//one full second of freeze in order to do this reliably.
 		if (GetConVarInt(bot_autobuy_nades)) CreateTimer(0.5, buy_nades, 0, TIMER_FLAG_NO_MAPCHANGE);
 		num_puzzle_clues = 0; //TODO: Instead of doing it here, do it when those clue items get destroyed.
+		if (GetConVarInt(smoke_success_wins_round) && !GameRules_GetProp("m_bWarmupPeriod")) {
+			int p = 1;
+			float not_moving[3] = {0.0, 0.0, 0.0};
+			if (marked_pos[0] != 0.0) //It's highly unlikely that you'll mark at PRECISELY x = 0.0
+				for (; p < MAXPLAYERS; ++p)
+					if (IsClientInGame(p) && IsPlayerAlive(p) && !IsFakeClient(p)) {
+						TeleportEntity(p, marked_pos, marked_angle, not_moving);
+						break;
+					}
+			if (marked_pos2[0] != 0.0)
+				for (++p; p < MAXPLAYERS; ++p)
+					if (IsClientInGame(p) && IsPlayerAlive(p) && !IsFakeClient(p)) {
+						TeleportEntity(p, marked_pos2, marked_angle2, not_moving);
+						break;
+					}
+		}
 	}
 	if (!freeze && last_freeze)
 	{
