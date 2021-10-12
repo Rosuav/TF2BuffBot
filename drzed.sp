@@ -595,6 +595,7 @@ float smoke_first_bounce[SMOKE_BOUNCE_TARGETS][2][3] = {
 	//advisory and not completely accurate.
 	{{-322.0, 1135.0, -120.0}, {-265.0, 1275.0, -80.0}},
 };
+float smoke_launch_time[4096]; //Map entity ID to the game time it was released
 
 public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
 {
@@ -613,12 +614,18 @@ public void smoke_popped(Event event, const char[] name, bool dontBroadcast)
 			smoke_targets[i][0][2] < z && z < smoke_targets[i][1][2])
 				target = i;
 	}
-	PrintToChat(client, "%sYour smoke popped at (%.2f, %.2f, %.2f)",
+	//Mostly, we'll do smoke tests in infinite warmup. If we're doing them in actual rounds, it's
+	//probably to test timings, so show the bloom time.
+	char roundtime[64] = "";
+	if (!GameRules_GetProp("m_bWarmupPeriod"))
+		Format(roundtime, sizeof(roundtime), " - at %.2f sec", GetGameTime() - GameRules_GetPropFloat("m_fRoundStartTime"));
+	float flighttime = GetGameTime() - smoke_launch_time[event.GetInt("entityid")];
+	PrintToChat(client, "%sSmoke popped (%.2f, %.2f, %.2f)%s, flight %.2fs",
 		target >= 0 ? smoke_target_desc[target] : "",
-		x, y, z);
-	SmokeLog("[%d-E-%d] Pop (%.2f, %.2f, %.2f) - %s", client,
+		x, y, z, roundtime, flighttime);
+	SmokeLog("[%d-E-%d] Pop (%.2f, %.2f, %.2f) - %s - %.2fs", client,
 		event.GetInt("entityid"),
-		x, y, z, target >= 0 ? "GOOD" : "FAIL");
+		x, y, z, target >= 0 ? "GOOD" : "FAIL", flighttime);
 }
 
 /*
@@ -660,9 +667,9 @@ public void smoke_bounce(Event event, const char[] name, bool dontBroadcast)
 						smoke_first_bounce[i][0][1] < y && y < smoke_first_bounce[i][1][1] &&
 						smoke_first_bounce[i][0][2] < z && z < smoke_first_bounce[i][1][2])
 							on_target = true;
-				PrintToChat(client, "%sgrenade_bounce: (%.2f, %.2f, %.2f)",
+				PrintToChat(client, "%sgrenade_bounce: (%.2f, %.2f, %.2f), flight %.2fs",
 					on_target ? "Promising! " : "",
-					x, y, z);
+					x, y, z, GetGameTime() - smoke_launch_time[ent]);
 				SmokeLog("[%d-D-%d] Bounce (%.2f, %.2f, %.2f) - %s", client, ent,
 					x, y, z, on_target ? "PROMISING" : "MISSED");
 			}
@@ -681,6 +688,7 @@ public void OnEntityCreated(int entity, const char[] cls)
 		//It's a newly-thrown smoke grenade. Mark it so we'll report its
 		//first bounce (if we're reporting grenade bounces).
 		smoke_not_bounced[entity] = true;
+		smoke_launch_time[entity] = GetGameTime();
 		CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
 		/*
 		//These numbers are good for testing B Window; bind a key to "exec next_throw" and
@@ -871,7 +879,10 @@ public void Event_weapon_fire(Event event, const char[] name, bool dontBroadcast
 		int now = GetGameTickCount();
 		float pos[3]; GetClientEyePosition(client, pos);
 		float angle[3]; GetClientEyeAngles(client, angle);
-		PrintToChat(client, "Smoked looking (%.2f, %.2f)", angle[0], angle[1]);
+		char roundtime[64] = "";
+		if (!GameRules_GetProp("m_bWarmupPeriod"))
+			Format(roundtime, sizeof(roundtime), " - at %.2f sec", GetGameTime() - GameRules_GetPropFloat("m_fRoundStartTime"));
+		PrintToChat(client, "Smoked looking (%.2f, %.2f)%s", angle[0], angle[1], roundtime);
 		SmokeLog("[%d-A] Smoke (%.2f, %.2f, %.2f) - (%.2f, %.2f)", client,
 			pos[0], pos[1], pos[2], angle[0], angle[1]);
 		if (now < last_jump[client] + 32 && now >= last_jump[client])
