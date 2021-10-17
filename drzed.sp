@@ -533,7 +533,7 @@ public void SmokeLog(const char[] fmt, any ...)
 	CloseHandle(fp);
 }
 
-#define SMOKE_TARGETS 6
+#define SMOKE_TARGETS 7
 float smoke_targets[SMOKE_TARGETS][2][3] = { //Unfortunately the size has to be specified :(
 	//Dust II
 	//- Xbox
@@ -549,11 +549,14 @@ float smoke_targets[SMOKE_TARGETS][2][3] = { //Unfortunately the size has to be 
 	//- Bedroom Doors - defensive smoke to slow down a push
 	//(They'll usually Z btwn 2.0 and 3.5, but there's a little ledge at 7.85 that counts too)
 	{{590.0, 640.0, 2.0}, {764.0, 844.0, 7.86}},
+	//- A site Crossing smoke
+	{{1024.0, 2125.0, -5.0}, {1277.0, 2180.0, 5.0}}
 	//Add others as needed - {{x1,y1,z1},{x2,y2,z2}} where the
 	//second coords are all greater than the firsts.
 };
 char smoke_target_desc[][] = {
-	"Xbox smoke! ", "Corner smoke! ", "Window smoke! ", "CT spawn! ", "A site! ", "Bedroom doors! "
+	"Xbox smoke! ", "Corner smoke! ", "Window smoke! ", "CT spawn! ", "A site! ",
+	"Bedroom doors! ", "Crossing smoke! ",
 };
 /*
 * Blue box: From the passageway from backyard into tuns, standing throw between the rafters (middle of opening).
