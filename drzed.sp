@@ -79,6 +79,7 @@ public void PrintToStream(const char[] fmt, any ...)
 StringMap weapon_names;
 StringMap weapon_is_primary;
 StringMap weapondata_index; //weapondata_item_name[index] mapped to index
+//StringMap entity_sizes_seen;
 #include "cs_weapons.inc"
 Handle switch_weapon_call = null;
 
@@ -136,6 +137,7 @@ public void OnPluginStart()
 	CreateConVars();
 	HookConVarChange(bot_placement, update_bot_placements);
 
+	//entity_sizes_seen = CreateTrie();
 	weapon_names = CreateTrie();
 	//Weapons not mentioned will be shown by their class names.
 	//NOTE: Weapons that have alternates (P2000/USP-S, Deagle/R8) may be
@@ -714,6 +716,7 @@ public void OnEntityCreated(int entity, const char[] cls)
 		CloseHandle(fp);
 		// */
 	}
+	//else if (entity_sizes_seen) CreateTimer(0.01, report_entity, entity, TIMER_FLAG_NO_MAPCHANGE);
 	if (!strcmp(cls, "entityflame")) SetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity", assign_flame_owner);
 	if (report_new_entities)
 		PrintToChatAll("New: %s [%d]", cls, entity);
@@ -724,6 +727,17 @@ Action report_entity(Handle timer, any entity)
 	ignore(timer);
 	if (!IsValidEntity(entity)) return;
 	char cls[64]; GetEdictClassname(entity, cls, sizeof(cls));
+	/*
+	int seen;
+	if (!GetTrieValue(entity_sizes_seen, cls, seen)) {
+		SetTrieValue(entity_sizes_seen, cls, 1);
+		float mins[3]; GetEntPropVector(entity, Prop_Data, "m_vecMins", mins);
+		float maxs[3]; GetEntPropVector(entity, Prop_Data, "m_vecMaxs", maxs);
+		PrintToStream("%s: (%.3f,%.3f,%.3f)-(%.3f,%.3f,%.3f)", cls,
+			mins[0], mins[1], mins[2],
+			maxs[0], maxs[1], maxs[2]);
+	}
+	*/
 	if (!strcmp(cls, "smokegrenade_projectile"))
 	{
 		int client = GetEntPropEnt(entity, Prop_Send, "m_hThrower");
