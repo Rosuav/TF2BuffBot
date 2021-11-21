@@ -2381,6 +2381,26 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 			}
 		}
 	}
+	//HACK: Allow bullet time by pressing ALT1
+	if (!IsFakeClient(client)) {
+		bool now = (buttons & IN_ALT1) != 0;
+		if (now != was_alt1ing[client]) {
+			was_alt1ing[client] = now;
+			if (now) {
+				ServerCommand("host_timescale 0.2");
+				PrintToChatAll("Bullet time engaged!");
+			} else {
+				ServerCommand("host_timescale 1.0");
+				PrintToChatAll("Back to normal.");
+			}
+		}
+		/*
+		float vel[3]; //Velocity seems to be three floats, NOT a vector. Why? No clue.
+		vel[0] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[0]");
+		vel[1] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[1]");
+		vel[2] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[2]");
+		*/
+	}
 	return Plugin_Continue;
 }
 public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
