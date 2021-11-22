@@ -2381,8 +2381,8 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 			}
 		}
 	}
-	//HACK: Allow bullet time by pressing ALT1
-	if (!IsFakeClient(client)) {
+	//Allow bullet time by pressing Alt1
+	if (GetConVarInt(sm_drzed_hack) == 6) {
 		bool now = (buttons & IN_ALT1) != 0;
 		if (now != was_alt1ing[client]) {
 			was_alt1ing[client] = now;
