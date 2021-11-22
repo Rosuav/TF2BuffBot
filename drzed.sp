@@ -2387,19 +2387,18 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 		if (now != was_alt1ing[client]) {
 			was_alt1ing[client] = now;
 			if (now) {
-				ServerCommand("host_timescale 0.2");
-				PrintToChatAll("Bullet time engaged!");
+				//Not quite bullet time, but you get to speed faster, stop faster,
+				//and can aim in slowmo. It's pretty OP.
+				ServerCommand("host_timescale .5");
+				ServerCommand("sv_accelerate 16.5");
+				ServerCommand("sv_friction 15.6");
 			} else {
+				//Back to normal
 				ServerCommand("host_timescale 1.0");
-				PrintToChatAll("Back to normal.");
+				ServerCommand("sv_accelerate 5.5");
+				ServerCommand("sv_friction 5.2");
 			}
 		}
-		/*
-		float vel[3]; //Velocity seems to be three floats, NOT a vector. Why? No clue.
-		vel[0] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[0]");
-		vel[1] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[1]");
-		vel[2] = GetEntPropFloat(client, Prop_Send, "m_vecVelocity[2]");
-		*/
 	}
 	return Plugin_Continue;
 }
