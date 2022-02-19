@@ -1400,6 +1400,7 @@ public void player_death(Event event, const char[] name, bool dontBroadcast)
 float recording_pos[8192][3];
 float recording_ang[8192][3];
 float recording_vel[8192][3];
+int recording_btn[8192];
 int record_start_tick = 0, recording_client = 0, recording_length = 0, recording_team = 2;
 
 int rescale_player = -2, rescale_entity = -1; //Set rescale_player to -2 to disable or -1 to enable
@@ -1847,29 +1848,34 @@ public void OnGameFrame()
 
 	if (rescale_entity > 0) rescale_object();
 
-	if (recording_client > 0) {
-		int tick = GetGameTickCount() - record_start_tick;
-		if (tick >= 8192) tick = 0; //Yeah this'll overwrite the first entry. Whatever.
-		GetClientAbsOrigin(recording_client, recording_pos[tick]);
-		GetClientEyeAngles(recording_client, recording_ang[tick]);
-		//Note that recording the velocity doesn't seem to make walking animations work,
-		//but it does cause footstep noises.
-		GetEntPropVector(recording_client, Prop_Data, "m_vecAbsVelocity", recording_vel[tick]);
-		PrintCenterText(recording_client, "Recording!");
-		if (tick == 8191) {recording_length = tick; record_start_tick = 0; recording_client = 0;}
-	}
-	if (recording_client < 0) {
-		int bot = -recording_client;
-		int tick = GetGameTickCount() - record_start_tick;
-		TeleportEntity(bot, recording_pos[tick], recording_ang[tick], recording_vel[tick]);
-		if (tick >= recording_length) {
-			//Remove the bot's equipment so it doesn't get dropped
-			int ent = CreateEntityByName("game_player_equip");
-			DispatchKeyValue(ent, "spawnflags", "3");
-			AcceptEntityInput(ent, "Use", bot, -1, 0);
-			KickClient(bot, "Your work here is done.");
-			PrintToChatAll("Playback complete.");
-			recording_client = record_start_tick = 0;
+	if (recording_client) {
+		//If you engage recording or playback during freeze time, retain it till the round begins.
+		if (freeze) ++record_start_tick;
+		else {
+			int tick = GetGameTickCount() - record_start_tick;
+			if (tick >= 8192) tick = 0; //TODO: Automatically cancel the record/playback
+			else if (recording_client > 0) {
+				GetClientAbsOrigin(recording_client, recording_pos[tick]);
+				GetClientEyeAngles(recording_client, recording_ang[tick]);
+				//Note that recording the velocity doesn't seem to make walking animations work,
+				//but it does cause footstep noises.
+				GetEntPropVector(recording_client, Prop_Data, "m_vecAbsVelocity", recording_vel[tick]);
+				PrintCenterText(recording_client, "Recording!");
+				if (tick == 8191) {recording_length = tick; record_start_tick = 0; recording_client = 0;}
+			}
+			else if (recording_client < 0) {
+				int bot = -recording_client;
+				TeleportEntity(bot, recording_pos[tick], recording_ang[tick], recording_vel[tick]);
+				if (tick >= recording_length) {
+					//Remove the bot's equipment so it doesn't get dropped
+					int ent = CreateEntityByName("game_player_equip");
+					DispatchKeyValue(ent, "spawnflags", "3");
+					AcceptEntityInput(ent, "Use", bot, -1, 0);
+					KickClient(bot, "Your work here is done.");
+					PrintToChatAll("Playback complete.");
+					recording_client = record_start_tick = 0;
+				}
+			}
 		}
 	}
 }
@@ -2431,6 +2437,18 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 			}
 		}
 	}
+	//Record/playback. Note that we don't get called if buttons would be zero, so
+	//for playback, the fake client is hacked into +alt2 mode, and for recording,
+	//we assume a sea of zeroes before we start.
+	if (client == recording_client && !GameRules_GetProp("m_bFreezePeriod"))
+		recording_btn[tickcount - record_start_tick] = buttons;
+	else if (client == -recording_client && !GameRules_GetProp("m_bFreezePeriod")) {
+		buttons = recording_btn[tickcount - record_start_tick];
+		static int last_buttons = 0;
+		if (buttons != last_buttons) PrintToChatAll("Setting buttons to %d", last_buttons = buttons);
+		//TODO: Change desiredVelocity to synchronize animations?
+		return Plugin_Changed;
+	}
 	return Plugin_Continue;
 }
 public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
@@ -2745,6 +2763,9 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		if (!record_start_tick) {
 			record_start_tick = GetGameTickCount() + 1; //We start recording on the next tick
 			recording_team = GetClientTeam(recording_client = self);
+			//Since the RunCmd hook isn't called if no buttons are pressed, we wipe any
+			//previous recording before starting a new one.
+			for (int i = 0; i < recording_length; ++i) recording_btn[i] = 0;
 		}
 		else if (recording_client == self) {
 			PrintCenterText(self, "Recording ended.");
@@ -2757,8 +2778,8 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		PrintToChatAll("Playback started.");
 		record_start_tick = GetGameTickCount() + 1; //We start playback on the next tick
 		int bot = CreateFakeClient("Replay");
-		SetEntityFlags(bot, GetEntityFlags(bot) | FL_ATCONTROLS);
 		ChangeClientTeam(bot, recording_team);
+		FakeClientCommandEx(bot, "+alt2");
 		recording_client = -bot;
 	}
 	if (!strcmp(msg, "!pingmark") && GetConVarInt(sm_drzed_allow_recall))
