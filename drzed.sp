@@ -1397,6 +1397,11 @@ public void player_death(Event event, const char[] name, bool dontBroadcast)
 	else reset_underdome_config();
 }
 
+float recording_pos[8192][3];
+float recording_ang[8192][3];
+float recording_vel[8192][3];
+int record_start_tick = 0, recording_client = 0, recording_length = 0, recording_team = 2;
+
 int rescale_player = -2, rescale_entity = -1; //Set rescale_player to -2 to disable or -1 to enable
 float rescale_initial_distance, rescale_initial_gravity;
 float rescale_angle_diff[3];
@@ -1841,6 +1846,32 @@ public void OnGameFrame()
 	}
 
 	if (rescale_entity > 0) rescale_object();
+
+	if (recording_client > 0) {
+		int tick = GetGameTickCount() - record_start_tick;
+		if (tick >= 8192) tick = 0; //Yeah this'll overwrite the first entry. Whatever.
+		GetClientAbsOrigin(recording_client, recording_pos[tick]);
+		GetClientEyeAngles(recording_client, recording_ang[tick]);
+		//Note that recording the velocity doesn't seem to make walking animations work,
+		//but it does cause footstep noises.
+		GetEntPropVector(recording_client, Prop_Data, "m_vecAbsVelocity", recording_vel[tick]);
+		PrintCenterText(recording_client, "Recording!");
+		if (tick == 8191) {recording_length = tick; record_start_tick = 0; recording_client = 0;}
+	}
+	if (recording_client < 0) {
+		int bot = -recording_client;
+		int tick = GetGameTickCount() - record_start_tick;
+		TeleportEntity(bot, recording_pos[tick], recording_ang[tick], recording_vel[tick]);
+		if (tick >= recording_length) {
+			//Remove the bot's equipment so it doesn't get dropped
+			int ent = CreateEntityByName("game_player_equip");
+			DispatchKeyValue(ent, "spawnflags", "3");
+			AcceptEntityInput(ent, "Use", bot, -1, 0);
+			KickClient(bot, "Your work here is done.");
+			PrintToChatAll("Playback complete.");
+			recording_client = record_start_tick = 0;
+		}
+	}
 }
 
 //Create a cloud of smoke, visible to this client, at this pos
@@ -2708,6 +2739,27 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		CloseHandle(snap);
 		CloseHandle(entcount);
 		return;
+	}
+	if (!strcmp(msg, "!record") && GetConVarInt(sm_drzed_allow_recall))
+	{
+		if (!record_start_tick) {
+			record_start_tick = GetGameTickCount() + 1; //We start recording on the next tick
+			recording_team = GetClientTeam(recording_client = self);
+		}
+		else if (recording_client == self) {
+			PrintCenterText(self, "Recording ended.");
+			recording_length = GetGameTickCount() - record_start_tick;
+			record_start_tick = recording_client = 0;
+		}
+	}
+	if (!strcmp(msg, "!playback") && GetConVarInt(sm_drzed_allow_recall) && !record_start_tick && recording_length)
+	{
+		PrintToChatAll("Playback started.");
+		record_start_tick = GetGameTickCount() + 1; //We start playback on the next tick
+		int bot = CreateFakeClient("Replay");
+		SetEntityFlags(bot, GetEntityFlags(bot) | FL_ATCONTROLS);
+		ChangeClientTeam(bot, recording_team);
+		recording_client = -bot;
 	}
 	if (!strcmp(msg, "!pingmark") && GetConVarInt(sm_drzed_allow_recall))
 	{
