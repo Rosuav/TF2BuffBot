@@ -2437,18 +2437,30 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 			}
 		}
 	}
-	//Record/playback. Note that we don't get called if buttons would be zero, so
-	//for playback, the fake client is hacked into +alt2 mode, and for recording,
-	//we assume a sea of zeroes before we start.
-	if (client == recording_client && !GameRules_GetProp("m_bFreezePeriod"))
-		recording_btn[tickcount - record_start_tick] = buttons;
-	else if (client == -recording_client && !GameRules_GetProp("m_bFreezePeriod")) {
-		buttons = recording_btn[tickcount - record_start_tick];
-		static int last_buttons = 0;
-		if (buttons != last_buttons) PrintToChatAll("Setting buttons to %d", last_buttons = buttons);
-		//TODO: Change desiredVelocity to synchronize animations?
-		return Plugin_Changed;
+	//Record/playback. Save the buttons every tick.
+	if (record_start_tick) {
+		if (client == recording_client && !GameRules_GetProp("m_bFreezePeriod"))
+			recording_btn[tickcount - record_start_tick] = buttons;
+		else if (client == -recording_client && !GameRules_GetProp("m_bFreezePeriod")) {
+			buttons = recording_btn[tickcount - record_start_tick];
+			static int last_buttons = 0;
+			if (buttons != last_buttons) PrintToChatAll("Setting buttons to %d", last_buttons = buttons);
+			//TODO: Change desiredVelocity to synchronize animations?
+			return Plugin_Changed;
+		}
 	}
+	/* This works. The above doesn't.
+	static int magic_alt1 = -1;
+	if (buttons & IN_ALT1) {
+		magic_alt1 = client;
+	}
+	else if (client == magic_alt1) {
+		magic_alt1 = -1;
+	}
+	else if (magic_alt1 != -1) {
+		buttons |= IN_ATTACK;
+		return Plugin_Changed;
+	}// */
 	return Plugin_Continue;
 }
 public void uncripple_all(Event event, const char[] name, bool dontBroadcast)
@@ -2779,7 +2791,17 @@ public void Event_PlayerChat(Event event, const char[] name, bool dontBroadcast)
 		record_start_tick = GetGameTickCount() + 1; //We start playback on the next tick
 		int bot = CreateFakeClient("Replay");
 		ChangeClientTeam(bot, recording_team);
-		FakeClientCommandEx(bot, "+alt2");
+		int ent = CreateEntityByName("game_player_equip");
+		DispatchKeyValue(ent, "spawnflags", "3");
+		//TODO: Iterate all slots, and check grenades too.
+		//TODO: Clone the equipment as of the start of the recording, not playback.
+		int weap = GetPlayerWeaponSlot(self, 0);
+		if (weap > 0) {
+			char w[64]; GetEntityClassname(weap, w, sizeof(w));
+			DispatchKeyValue(ent, w, "0");
+		}
+		AcceptEntityInput(ent, "Use", bot, -1, 0);
+		FakeClientCommandEx(bot, "slot1"); //TODO: Select slots any time they change
 		recording_client = -bot;
 	}
 	if (!strcmp(msg, "!pingmark") && GetConVarInt(sm_drzed_allow_recall))
