@@ -2344,7 +2344,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 		}
 	}
 	#endif
-	if ((buttons & IN_ALT1) && GetConVarInt(learn_smoke))
+	if (false && (buttons & IN_ALT1) && GetConVarInt(learn_smoke))
 	{
 		//Autofire smokes while +alt1 is active
 		//Go somewhere and !mark. Set the six cvars to define a box.
