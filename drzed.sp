@@ -2438,7 +2438,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 		}
 	}
 	//Record/playback. Save the buttons every tick.
-	if (record_start_tick) {
+	if (record_start_tick && tickcount >= record_start_tick) {
 		if (client == recording_client && !GameRules_GetProp("m_bFreezePeriod"))
 			recording_btn[tickcount - record_start_tick] = buttons;
 		else if (client == -recording_client && !GameRules_GetProp("m_bFreezePeriod")) {
