@@ -2444,12 +2444,22 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 		else if (client == -recording_client && !GameRules_GetProp("m_bFreezePeriod")) {
 			buttons = recording_btn[tickcount - record_start_tick];
 			static int last_buttons = 0;
-			if (buttons != last_buttons) PrintToChatAll("Setting buttons to %d", last_buttons = buttons);
+			if (buttons != last_buttons) {
+				PrintToChatAll("Setting buttons to %d", last_buttons = buttons);
+				if (buttons & IN_ATTACK) {
+					int weap = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+					if (weap > 0) {
+						char w[64]; describe_weapon(weap, w, sizeof(w));
+						PrintToChatAll("Active weapon: %s", w);
+					}
+				}
+			}
 			//TODO: Change desiredVelocity to synchronize animations?
-			return Plugin_Changed;
+			//return Plugin_Changed;
 		}
 	}
-	/* This works. The above doesn't.
+	/* This works. The above doesn't. Or more specifically: The bot added for the replay
+	//never fires a gun, but bots added normally are fully capable of it.
 	static int magic_alt1 = -1;
 	if (buttons & IN_ALT1) {
 		magic_alt1 = client;
@@ -2459,7 +2469,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float desir
 	}
 	else if (magic_alt1 != -1) {
 		buttons |= IN_ATTACK;
-		return Plugin_Changed;
+		//return Plugin_Changed;
 	}// */
 	return Plugin_Continue;
 }
