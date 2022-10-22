@@ -869,7 +869,7 @@ void show_stutterstep_stats(int client)
 	stutterstep_lastshottime[client] = stutterstep_widthcnt[client] = 0;
 }
 
-void spawn_ping(int client, float[3] pos)
+void spawn_ping(int client, float pos[3])
 {
 	PrintToChatAll("Pinging at (%.2f,%.2f,%.2f)", pos[0], pos[1], pos[2]);
 	int prevping = GetEntPropEnt(client, Prop_Send, "m_hPlayerPing");
