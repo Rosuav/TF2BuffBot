@@ -3742,48 +3742,6 @@ void getweaponstats(int client, int weap)
 		}
 	}
 }
-/*
-Revival of Teammates mode:
-* Everyone starts with 200 hp.
-* If you have > 100 hp, any damage that would reduce you below 100 sets you to 100.
-* While you have <= 100 hp, you are crippled, and lose 1hp every 0.1 seconds.
-* Teammates can heal crippled players by knifing them. Once > 100 hp, no longer crippled.
-* A crippled player is unable to fire any weapons, and is reduced to crawling speed.
-
-TODO: Is it okay for a crippled person to revive another crippled person?
-
-TODO: When you pick up a bot, you get set to primary weapon for some reason.
-Why? Weird. May be able to use bot_takeover event to detect, and then force to
-knife again. Or just disallow taking over a crippled bot.
-
-TODO: Make sure you can't !heal while crippled
-
-TODO: Use Plugin_Handled rather than Plugin_Stop to disable damage??
-
-m_iBlockingUseActionInProgress -- can that be used to manage crippledness??
-*/
-
-
-/*
-Gaige-inspired deathmatch
-* sv_infinite_ammo 2 (so you don't run out awkwardly)
-* If you reload your weapon that isn't completely empty, you lose all Anarchy
-* Dealing damage to an enemy with a gun flags that gun as bonus-worthy
-* Reloading a bonus-worthy empty gun adds one Anarchy
-* Each Anarchy you have grants an additive percentage bonus to your damage
-
-Differences from the BL2 inspiration:
-* Killing an enemy doesn't give you the bonus. This is subject to review, but I worry that it'd create a "win-more" situation.
-* Engaging in battle, then backing off, and emptying your gun into the air DOES get you the bonus.
-* Emptying your gun into static targets does NOT get you the bonus.
-* Dying doesn't lose ALL your Anarchy. Controlled by cvar.
-
-A bonus-worthy gun remains so only while it's equipped. So if you draw blood, then toss that gun down and get
-another, it's been reset. So effectively, it can be seen as two flags on the player (primary and secondary),
-which get cleared if you change what's in that slot. (Selecting a different weapon changes nothing; if you
-draw blood with an AWP, then switch to your pistol, empty the clip at nothing, then switch back, and empty
-the AWP, you get the bonus for the AWP but not the pistol.)
-*/
 
 /*
 Will bots ever upgrade weapons?
@@ -3852,13 +3810,6 @@ the counter; possibly have a separate cap for if you have an exojump equipped. W
 
 Hmm. Would be incompatible with a parachute, but that's probably not a critical problem. Or maybe this can take over the parachute's hook
 somehow? Call it an "Aperture Science Active Parachute" or something?
-*/
-
-/*
-Phylactery mode - Danger Zone
-* For every new human, add a bot (can I do that? test)
-* Team them up
-* Have to kill human and phylactery at once
 */
 
 /*
@@ -3936,75 +3887,74 @@ enemy. You can't see if something's contested.
 Team scores increase according to the number of points that they have better than 66% control of.
 */
 
+/* What's changing in Source 2?
 
-/*
-TODO: CS:GO Guardian with every wave having a different attribute, from Moxxi's Underdome
-* Can we get an event on wave end? Worst case, try to use death status and see if any fake clients are alive
-* Change the mp_guardian_special_weapon_needed cvar on the fly
-* Would be awesome to actually lift Moxxi's voice lines, but that's beyond me
-* Disable bomb planting. Yes, this theoretically means players can cheese it by hiding until the bots suicide. Just don't do that.
-* Maybe provide an armory as well. Provide a small number of cheap weapons eg USP-S and MP5. These would be available for people who don't have them equipped.
-  - Possibly have 4-5 locations, and randomly select 1-2 of them to have the weapons spawn.
-* First round is a warmup - any weapon, any kill, bots maybe only get pistols. Then pick one from this list, and after X rounds, pick two:
-  - Headshot kills only. If the death blow wasn't a HS, it doesn't tick up the counter.
-  - No headshots. If you shoot someone in the head, it does same as a chest shot.
-  - Shotguns only; SMGs only; Snipers and LMGs only. Counter only increments if the right weapon class used.
-    - Other weapons DO still deal damage. It just won't count to the goal unless the killing blow is correct.
-  - Pocket AWP. Your sidearm deals double damage.
-  - Low gravity??
-  - Low accuracy??
-  - Enemies get 150 HP (or in a later round, 200 HP)
-  - Players have no armor ("naked")
-  - Enemies and players all move faster??
-  - Enemies and players all move slower??
-  - Horde wave! Spawn 2-3 times as many bots but they only have knives.
-  - Vampiric weapons
-  - Suppressed weapons
-* Can we permit bomb plants and defuses? If the bots plant, then the objective is disabled until it's defused (upon which the bots spawn a new bomb).
-  - Spawn infinite enemies while the bomb is lit. Defuse under pressure!
+There will definitely be changes, and quite probably, a completely new mod will have to
+be written. These are the important features which need to be reimplemented, the less
+important ones that can be copied in if easy, and the ones to just drop.
 
-
-act_kill_human
-act_kill_chicken
-act_win_match
-act_flashbang_enemy
-act_pick_up_hostage
-act_rescue_hostage
-act_defuse_bomb
-act_plant_bomb
-act_damage
-act_win_round
-act_dm_bonus_points
-act_income
-act_cash
-act_spend
-cond_damage_headshot
-cond_damage_burn
-cond_match_unique_weapon
-cond_roundstate_pistolround
-cond_roundstate_finalround
-cond_roundstate_matchpoint
-cond_roundstate_bomb_planted
-cond_item_own
-cond_item_borrowed
-cond_item_borrowed_enemy
-cond_item_borrowed_teammate
-cond_item_borrowed_victim
-cond_item_nondefault
-cond_bullet_since_spawn
-cond_player_rescuing
-cond_player_zoomed
-cond_player_blind
-cond_player_terrorist
-cond_player_ct
-cond_life_killstreak_human
-cond_life_killstreak_chicken
-cond_match_rounds_won
-cond_match_rounds_played
-cond_victim_blind
-cond_victim_zoomed
-cond_victim_rescuing
-cond_victim_terrorist
-cond_victim_ct
-cond_victim_reloading
+CS S2. Go through the CS:GO mod and enumerate every feature it has.
+* Experiments
+  - Failed
+    - Changing m_nGuardianModeSpecialWeaponNeeded
+    - Adding DZ spawn entities
+    - TF2 Equalizer
+  - Yielded useful data but do not need to be reimplemented
+    - Superliminal mode
+    - Show pos only when money changes
+    - Changing player speed (!slow, !normal, !fast)
+  - Interesting, might be worth attempting in the new engine
+    - Double jump???
+* Training tools
+  - Outmoded, replaced by core features
+    - autosmoke
+  - Great idea, terrible implementation, revisit if opportunity arises
+    - Record movements then have a bot replay them
+    - Create smoke in places
+  - Keep, use, refresh skills with
+    - !mark/!recall/!showpos and spawn at marker (as freeze time starts)
+    - Stutterstep logging (primarily velocity on gunshot)
+    - insta_respawn_damage_lag and related "you are dead" handling
+    - bot_placement
+    - Flash pop locations and number of people flashed
+    - Smoke reporting on land ("Xbox smoke!" etc)
+    - Smoke bounce tracking - see if it's needed
+    - Smoke pop timings (time since round started, time since thrown)
+    - Jump-throw timings
+    - Timing an AWP through smoke shot - ping the location if in smoke throw mode
+    - Ping to log coordinates
+    - Replace damage with messages
+* Game modes/minigames
+  - Discard
+    - Healing (in all its forms). Yes, this means the name DrZed is orphanned. Like Dr Zed is.
+    - Crippling
+    - Anarchy
+    - Underdome
+    - Bonuses for heavy assault suit
+  - Maybe consider reimplementing
+    - Health gating
+    - Bullet time
+    - The non-planted bomb is ticking (ie the C4 timer starts at round start) and CTs can defuse it if it's on the ground
+  - Keep/reimplement
+    - sm_drzed_max_hitpoints - we MUST maintain flashbean mode!!
+    - damage_scale_humans/bots
+    - Puzzle mode (KTANE)
+    - smoke_success_wins_round
+* Bot management, bug fixes, and other information
+  - Unnecessary (eg bots just do that now)
+  - Fun but not crucial
+    - Give money to all
+    - Credit bomb kills to the planter
+    - Bots buy more nades, also autobuy nades
+    - !drop to ask a bot to drop a gun
+  - Definitely want this
+    - admin chat name and the ability to chat from the server
+    - Bots get empty weapon (bugfix for DZ and inability to change weapons from nothing)
+    - limit_fire_rate, allow_weapon_cycling
+    - disable_warmup_arenas
+    - Bots announce weapon drops
+    - If only one nade, unselect
+    - No defusers during warmup
+    - Some way of buying TA grenades
+    - !entities to do Danger Zone analysis
 */
