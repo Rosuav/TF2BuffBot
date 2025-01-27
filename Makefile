@@ -13,6 +13,9 @@ drzed.smx: drzed.sp cs_weapons.inc underdome.inc gen_effects_tables.py
 	python3 gen_effects_tables.py
 	~/tf2server/steamcmd_linux/tf2/tf/addons/sourcemod/scripting/spcomp drzed.sp
 
+DrZed.dll: DrZed.cs
+	mcs -target:library -r:../tf2server/steamcmd_linux/csgo/game/csgo/addons/counterstrikesharp/api/CounterStrikeSharp.API.dll -r:../tf2server/steamcmd_linux/csgo/game/csgo/addons/counterstrikesharp/dotnet/shared/Microsoft.NETCore.App/8.0.3/System.Runtime.dll -r:../tf2server/steamcmd_linux/csgo/game/csgo/addons/counterstrikesharp/dotnet/shared/Microsoft.NETCore.App/8.0.3/System.Private.CoreLib.dll DrZed.cs
+
 mvm_coaltown.pop: gen_mvm_waves.py
 	python3 gen_mvm_waves.py
 
@@ -21,5 +24,6 @@ cs_weapons.inc: parse_csgo_cfg.py ~/tf2server/steamcmd_linux/csgo/csgo/scripts/i
 
 install: all
 	cp carnage.smx botcontrol.smx ~/tf2server/steamcmd_linux/tf2/tf/addons/sourcemod/plugins
-	cp drzed.smx ~/tf2server/steamcmd_linux/csgo/game/csgo/addons/sourcemod/plugins
+	mkdir -p ~/tf2server/steamcmd_linux/csgo/game/csgo/addons/counterstrikesharp/plugins/DrZed
+	cp DrZed.dll ~/tf2server/steamcmd_linux/csgo/game/csgo/addons/counterstrikesharp/plugins/DrZed
 	cp *.pop ~/tf2server/steamcmd_linux/tf2/tf/custom/pop/scripts/population

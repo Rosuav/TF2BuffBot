@@ -1,4 +1,5 @@
 *.smx
+*.dll
 *.pop
 randeffects.inc
 convars*.inc
