@@ -142,6 +142,7 @@ demo_items = dict(
 
 arrays = defaultdict(list)
 arrays["categories"] = [c.name for c in Cat]
+# FIXME: Does not work on modern Pythons, find a better way to do this (pref not w/ annotations at all)
 arrays["category_descr"] = [c.__annotations__.get(c.name, c.name) for c in Cat]
 for weapon, data in info["prefabs"].items():
 	if data.get("prefab") == "grenade":

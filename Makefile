@@ -17,8 +17,9 @@ mvm_coaltown.pop: gen_mvm_waves.py
 	python3 gen_mvm_waves.py
 
 cs_weapons.inc: parse_csgo_cfg.py ~/tf2server/steamcmd_linux/csgo/csgo/scripts/items/items_game.txt
-	python3 $^ $@
+	python3.11 $^ $@
 
 install: all
-	cp *.smx ~/tf2server/steamcmd_linux/tf2/tf/addons/sourcemod/plugins
+	cp carnage.smx botcontrol.smx ~/tf2server/steamcmd_linux/tf2/tf/addons/sourcemod/plugins
+	cp drzed.smx ~/tf2server/steamcmd_linux/csgo/game/csgo/addons/sourcemod/plugins
 	cp *.pop ~/tf2server/steamcmd_linux/tf2/tf/custom/pop/scripts/population
