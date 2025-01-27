@@ -13,3 +13,10 @@ namespace DrZed {
 	    }
 	}
 }
+//Stuff to port in:
+//zed_money (s/be a nice easy test of chat commands)
+//sm_drzed_max_hitpoints
+//The two-flashes-no-knife bug, see if it's still there
+//Disable kits in warmup
+//!mark/!showpos
+//!drop
